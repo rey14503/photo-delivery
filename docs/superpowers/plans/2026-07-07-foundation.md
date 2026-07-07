@@ -95,26 +95,26 @@ photo-delivery/
     "test:watch": "vitest"
   },
   "dependencies": {
-    "next": "15.1.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "next-auth": "4.24.10",
+    "next": "15.5.20",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "next-auth": "4.24.14",
     "@prisma/client": "5.22.0",
-    "googleapis": "144.0.0"
+    "googleapis": "173.0.0"
   },
   "devDependencies": {
     "typescript": "5.6.3",
-    "@types/node": "22.9.0",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.2",
+    "@types/node": "22.20.0",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
     "prisma": "5.22.0",
-    "vitest": "2.1.4",
-    "@vitejs/plugin-react": "4.3.3",
+    "vitest": "4.1.10",
+    "@vitejs/plugin-react": "6.0.3",
     "jsdom": "25.0.1",
     "@testing-library/react": "16.0.1",
     "@testing-library/jest-dom": "6.6.3",
     "eslint": "8.57.1",
-    "eslint-config-next": "15.1.0"
+    "eslint-config-next": "15.5.20"
   }
 }
 ```
