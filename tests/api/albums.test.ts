@@ -51,6 +51,35 @@ describe('POST /api/albums', () => {
     expect(res.status).toBe(400)
   })
 
+  it('returns 404 when the session user is not found in the database', async () => {
+    vi.mocked(getServerSession).mockResolvedValue({
+      user: { id: 'user_1', role: 'PHOTOGRAPHER' },
+    } as never)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(null)
+
+    const res = await POST(jsonRequest({ name: 'Album', clientName: 'Client' }))
+
+    expect(res.status).toBe(404)
+  })
+
+  it('returns a generic 500 when Drive folder creation fails', async () => {
+    vi.mocked(getServerSession).mockResolvedValue({
+      user: { id: 'user_1', role: 'PHOTOGRAPHER' },
+    } as never)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: 'user_1',
+      encryptedRefreshToken: 'cipher',
+    } as never)
+    vi.mocked(createAlbumFolders).mockRejectedValue(new Error('Drive API error'))
+
+    const res = await POST(jsonRequest({ name: 'Wedding', clientName: 'Jane' }))
+    const data = await res.json()
+
+    expect(res.status).toBe(500)
+    expect(data.error).toBe('Failed to create album')
+    expect(JSON.stringify(data)).not.toContain('Drive API error')
+  })
+
   it('creates Drive folders and an Album row for a signed-in user', async () => {
     vi.mocked(getServerSession).mockResolvedValue({
       user: { id: 'user_1', role: 'PHOTOGRAPHER' },

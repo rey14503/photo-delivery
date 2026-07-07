@@ -49,7 +49,8 @@ photo-delivery/
 │   │   ├── crypto.ts
 │   │   ├── auth-callbacks.ts
 │   │   ├── auth.ts
-│   │   └── drive.ts
+│   │   ├── drive.ts
+│   │   └── album-scope.ts
 │   └── types/
 │       └── next-auth.d.ts
 └── tests/
@@ -58,7 +59,8 @@ photo-delivery/
     │   ├── env.test.ts
     │   ├── crypto.test.ts
     │   ├── auth-callbacks.test.ts
-    │   └── drive.test.ts
+    │   ├── drive.test.ts
+    │   └── album-scope.test.ts
     ├── api/
     │   └── albums.test.ts
     └── components/

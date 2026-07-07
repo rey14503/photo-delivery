@@ -23,22 +23,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
-  const drive = getDriveClientForUser(user)
-  const { albumFolderId, selectedFolderId } = await createAlbumFolders(drive, name)
-  const shareToken = randomBytes(16).toString('hex')
+  try {
+    const drive = getDriveClientForUser(user)
+    const { albumFolderId, selectedFolderId } = await createAlbumFolders(drive, name)
+    const shareToken = randomBytes(16).toString('hex')
 
-  const album = await prisma.album.create({
-    data: {
-      name,
-      clientName,
-      ownerId: user.id,
-      driveFolderId: albumFolderId,
-      selectedFolderId,
-      shareToken,
-    },
-  })
+    const album = await prisma.album.create({
+      data: {
+        name,
+        clientName,
+        ownerId: user.id,
+        driveFolderId: albumFolderId,
+        selectedFolderId,
+        shareToken,
+      },
+    })
 
-  return NextResponse.json(album, { status: 201 })
+    return NextResponse.json(album, { status: 201 })
+  } catch (error) {
+    console.error('Failed to create album:', error)
+    return NextResponse.json({ error: 'Failed to create album' }, { status: 500 })
+  }
 }
 
 export async function GET() {
