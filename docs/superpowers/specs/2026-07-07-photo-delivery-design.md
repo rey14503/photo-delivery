@@ -18,7 +18,7 @@ Single-tenant: this is built for one studio/team only. No multi-tenant/billing c
 ## 3. Data Model
 
 - **User** (admin/photographer): id, email, role, encrypted Google OAuth refresh token, Drive root folder id.
-- **Album**: id, name, owner_user_id, client_name, drive_folder_id, share_token, password_hash (nullable), download_enabled (bool), created_at.
+- **Album**: id, name, owner_user_id, client_name, drive_folder_id, selected_folder_id (the `Selected` subfolder from §7), share_token, password_hash (nullable), download_enabled (bool), created_at.
 - **Photo**: id, album_id, drive_file_id, version (int, starts at 1, incremented on replace), display_order, thumbnail_url (cached), preview_url (cached), created_at, updated_at.
 - **Like**: id, photo_id, actor_type (`client` | `photographer`), actor_name (client) or user_id (photographer), created_at. Unique on (photo_id, actor_type, actor_name/user_id) — toggling re-clicks unlikes.
 - **Comment**: id, photo_id, actor_type, actor_name or user_id, text, created_at. Single shared thread per photo for both client and photographer.
