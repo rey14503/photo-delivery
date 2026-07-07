@@ -14,19 +14,24 @@ export function CreateAlbumForm() {
     e.preventDefault()
     setSubmitting(true)
     setError(null)
-    const res = await fetch('/api/albums', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, clientName }),
-    })
-    setSubmitting(false)
-    if (!res.ok) {
-      const data = await res.json()
-      setError(data.error ?? 'Something went wrong')
-      return
+    try {
+      const res = await fetch('/api/albums', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, clientName }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error ?? 'Something went wrong')
+        return
+      }
+      router.push('/albums')
+      router.refresh()
+    } catch {
+      setError('Network error — please try again.')
+    } finally {
+      setSubmitting(false)
     }
-    router.push('/albums')
-    router.refresh()
   }
 
   return (

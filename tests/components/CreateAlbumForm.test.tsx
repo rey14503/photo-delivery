@@ -50,4 +50,16 @@ describe('CreateAlbumForm', () => {
       'name and clientName are required'
     )
   })
+
+  it('shows a network error and re-enables the button when fetch rejects', async () => {
+    vi.mocked(global.fetch).mockRejectedValue(new Error('network down'))
+
+    render(<CreateAlbumForm />)
+    fireEvent.click(screen.getByRole('button', { name: /create album/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Network error — please try again.'
+    )
+    expect(screen.getByRole('button', { name: /create album/i })).toBeInTheDocument()
+  })
 })

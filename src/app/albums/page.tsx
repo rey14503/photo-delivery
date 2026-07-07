@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { albumScopeFor } from '@/lib/album-scope'
 
 export default async function AlbumsPage() {
   const session = await getServerSession(authOptions)
@@ -11,7 +12,7 @@ export default async function AlbumsPage() {
   }
 
   const albums = await prisma.album.findMany({
-    where: session.user.role === 'ADMIN' ? {} : { ownerId: session.user.id },
+    where: albumScopeFor(session.user),
     orderBy: { createdAt: 'desc' },
   })
 

@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getDriveClientForUser, createAlbumFolders } from '@/lib/drive'
+import { albumScopeFor } from '@/lib/album-scope'
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -47,7 +48,7 @@ export async function GET() {
   }
 
   const albums = await prisma.album.findMany({
-    where: session.user.role === 'ADMIN' ? {} : { ownerId: session.user.id },
+    where: albumScopeFor(session.user),
     orderBy: { createdAt: 'desc' },
   })
 
