@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PHOTOGRAPHER
+}
+
+model User {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  name                  String?
+  role                  Role     @default(PHOTOGRAPHER)
+  encryptedRefreshToken String?
+  driveRootFolderId     String?
+  createdAt             DateTime @default(now())
+  albums                Album[]
+}
+
+model Album {
+  id               String   @id @default(cuid())
+  name             String
+  clientName       String
+  ownerId          String
+  owner            User     @relation(fields: [ownerId], references: [id])
+  driveFolderId    String
+  selectedFolderId String
+  shareToken       String   @unique
+  passwordHash     String?
+  downloadEnabled  Boolean  @default(false)
+  createdAt        DateTime @default(now())
+}
