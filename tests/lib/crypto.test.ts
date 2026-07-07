@@ -20,4 +20,14 @@ describe('crypto', () => {
     expect(decrypt(a)).toBe(plain)
     expect(decrypt(b)).toBe(plain)
   })
+
+  it('throws clear error for non-hex characters in ENCRYPTION_KEY', () => {
+    const originalKey = process.env.ENCRYPTION_KEY
+    try {
+      process.env.ENCRYPTION_KEY = 'z' + '0'.repeat(63)
+      expect(() => encrypt('anything')).toThrow('ENCRYPTION_KEY must be a 64-character hex string (32 bytes)')
+    } finally {
+      process.env.ENCRYPTION_KEY = originalKey
+    }
+  })
 })
