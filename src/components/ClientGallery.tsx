@@ -14,11 +14,22 @@ interface GalleryPhoto {
   comments: ThreadComment[]
 }
 
-export function ClientGallery({ photos }: { photos: GalleryPhoto[] }) {
+export function ClientGallery({
+  photos,
+  canDownload,
+  albumId,
+}: {
+  photos: GalleryPhoto[]
+  canDownload: boolean
+  albumId?: string
+}) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
     <div>
+      {canDownload && albumId && (
+        <a href={`/api/albums/${albumId}/download-all`}>Download all</a>
+      )}
       <ul>
         {photos.map((photo, index) => (
           <li key={photo.id}>
@@ -43,6 +54,9 @@ export function ClientGallery({ photos }: { photos: GalleryPhoto[] }) {
             <button type="button" onClick={() => setOpenIndex(openIndex + 1)}>
               Next
             </button>
+          )}
+          {canDownload && (
+            <a href={`/api/photos/${photos[openIndex].id}/download`}>Download</a>
           )}
           <LikeButton
             photoId={photos[openIndex].id}

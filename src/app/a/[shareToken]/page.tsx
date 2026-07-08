@@ -49,6 +49,9 @@ export default async function SharePage({
 
   const actor = await resolveActor(album)
   const myActorKey = actor ? actorKeyFor(actor) : null
+  const canDownload = actor
+    ? actor.type === 'PHOTOGRAPHER' || album.downloadEnabled
+    : false
 
   const photos = album.photos.map((photo) => ({
     id: photo.id,
@@ -68,7 +71,7 @@ export default async function SharePage({
   return (
     <main>
       <h1>{album.name}</h1>
-      <ClientGallery photos={photos} />
+      <ClientGallery photos={photos} canDownload={canDownload} albumId={album.id} />
     </main>
   )
 }
