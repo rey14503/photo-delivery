@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 
 const filesCreate = vi.fn()
+const filesUpdate = vi.fn()
 
 vi.mock('googleapis', () => ({
   google: {
@@ -10,7 +11,7 @@ vi.mock('googleapis', () => ({
       }),
     },
     drive: vi.fn().mockImplementation(() => ({
-      files: { create: filesCreate },
+      files: { create: filesCreate, update: filesUpdate },
     })),
   },
 }))
@@ -19,15 +20,19 @@ vi.mock('@/lib/crypto', () => ({
   decrypt: vi.fn().mockReturnValue('decrypted-refresh-token'),
 }))
 
-import { getDriveClientForUser, createFolder, createAlbumFolders } from '@/lib/drive'
+import {
+  getDriveClientForUser,
+  createFolder,
+  createAlbumFolders,
+  uploadFile,
+  replaceFile,
+} from '@/lib/drive'
 import { google } from 'googleapis'
 
 beforeAll(() => {
   process.env.GOOGLE_CLIENT_ID = 'client-id'
   process.env.GOOGLE_CLIENT_SECRET = 'client-secret'
 })
-
-import { beforeEach } from 'vitest'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -96,5 +101,46 @@ describe('createAlbumFolders', () => {
       },
       fields: 'id',
     })
+  })
+})
+
+describe('uploadFile', () => {
+  it('uploads a buffer into the given parent folder and returns the new file id', async () => {
+    filesCreate.mockResolvedValue({ data: { id: 'photo_file_1' } })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+    const buffer = Buffer.from('fake-image-bytes')
+
+    const id = await uploadFile(drive, 'album_folder', 'IMG_0001.jpg', 'image/jpeg', buffer)
+
+    expect(id).toBe('photo_file_1')
+    expect(filesCreate).toHaveBeenCalledTimes(1)
+    const callArgs = filesCreate.mock.calls[0][0]
+    expect(callArgs.requestBody).toEqual({ name: 'IMG_0001.jpg', parents: ['album_folder'] })
+    expect(callArgs.media.mimeType).toBe('image/jpeg')
+    expect(callArgs.fields).toBe('id')
+  })
+
+  it('throws when Drive does not return a file id', async () => {
+    filesCreate.mockResolvedValue({ data: {} })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    await expect(
+      uploadFile(drive, 'album_folder', 'IMG_0001.jpg', 'image/jpeg', Buffer.from('x'))
+    ).rejects.toThrow('Drive did not return a file id')
+  })
+})
+
+describe('replaceFile', () => {
+  it('replaces the content of an existing file', async () => {
+    filesUpdate.mockResolvedValue({ data: { id: 'photo_file_1' } })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+    const buffer = Buffer.from('new-fake-image-bytes')
+
+    await replaceFile(drive, 'photo_file_1', 'image/png', buffer)
+
+    expect(filesUpdate).toHaveBeenCalledTimes(1)
+    const callArgs = filesUpdate.mock.calls[0][0]
+    expect(callArgs.fileId).toBe('photo_file_1')
+    expect(callArgs.media.mimeType).toBe('image/png')
   })
 })

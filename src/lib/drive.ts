@@ -1,6 +1,7 @@
 import { google, drive_v3 } from 'googleapis'
 import { decrypt } from './crypto'
 import { requireEnv } from './env'
+import { Readable } from 'stream'
 
 export interface DriveUser {
   encryptedRefreshToken: string | null
@@ -49,4 +50,34 @@ export async function createAlbumFolders(
   const albumFolderId = await createFolder(drive, albumName)
   const selectedFolderId = await createFolder(drive, 'Selected', albumFolderId)
   return { albumFolderId, selectedFolderId }
+}
+
+export async function uploadFile(
+  drive: drive_v3.Drive,
+  parentId: string,
+  name: string,
+  mimeType: string,
+  buffer: Buffer
+): Promise<string> {
+  const res = await drive.files.create({
+    requestBody: { name, parents: [parentId] },
+    media: { mimeType, body: Readable.from(buffer) },
+    fields: 'id',
+  })
+  if (!res.data.id) {
+    throw new Error('Drive did not return a file id')
+  }
+  return res.data.id
+}
+
+export async function replaceFile(
+  drive: drive_v3.Drive,
+  fileId: string,
+  mimeType: string,
+  buffer: Buffer
+): Promise<void> {
+  await drive.files.update({
+    fileId,
+    media: { mimeType, body: Readable.from(buffer) },
+  })
 }
