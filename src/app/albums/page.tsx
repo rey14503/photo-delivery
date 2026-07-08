@@ -23,7 +23,9 @@ export default async function AlbumsPage() {
       <ul>
         {albums.map((album) => (
           <li key={album.id}>
-            {album.name} — {album.clientName}
+            <Link href={`/albums/${album.id}`}>
+              {album.name} — {album.clientName}
+            </Link>
           </li>
         ))}
       </ul>
