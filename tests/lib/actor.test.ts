@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+vi.hoisted(() => {
+  process.env.GOOGLE_CLIENT_ID = 'client-id'
+  process.env.GOOGLE_CLIENT_SECRET = 'client-secret'
+})
+
 vi.mock('next-auth/next', () => ({
   getServerSession: vi.fn(),
 }))
