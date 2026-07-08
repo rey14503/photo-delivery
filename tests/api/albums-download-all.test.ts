@@ -9,10 +9,14 @@ vi.mock('@/lib/prisma', () => ({
 vi.mock('@/lib/actor', () => ({
   resolveActor: vi.fn(),
 }))
-vi.mock('@/lib/drive', () => ({
-  getDriveClientForUser: vi.fn().mockReturnValue({ mockDrive: true }),
-  downloadOriginal: vi.fn(),
-}))
+vi.mock('@/lib/drive', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/drive')>('@/lib/drive')
+  return {
+    ...actual,
+    getDriveClientForUser: vi.fn().mockReturnValue({ mockDrive: true }),
+    downloadOriginal: vi.fn(),
+  }
+})
 
 import { prisma } from '@/lib/prisma'
 import { resolveActor } from '@/lib/actor'
@@ -86,6 +90,24 @@ describe('GET /api/albums/[albumId]/download-all', () => {
     expect(Object.keys(zip.files).sort()).toEqual(['one.jpg', 'two.jpg'])
     expect(await zip.file('one.jpg')!.async('string')).toBe('photo-one')
     expect(await zip.file('two.jpg')!.async('string')).toBe('photo-two')
+  })
+
+  it('disambiguates two photos that share the same original filename', async () => {
+    vi.mocked(prisma.album.findUnique).mockResolvedValue(albumRow({ downloadEnabled: true }) as never)
+    vi.mocked(resolveActor).mockResolvedValue({ type: 'CLIENT', name: 'Jane Doe' })
+    vi.mocked(downloadOriginal)
+      .mockResolvedValueOnce({ buffer: Buffer.from('photo-one'), mimeType: 'image/jpeg', name: 'IMG_0001.jpg' })
+      .mockResolvedValueOnce({ buffer: Buffer.from('photo-two'), mimeType: 'image/jpeg', name: 'IMG_0001.jpg' })
+
+    const res = await GET({} as never, routeParams('album_1'))
+
+    expect(res.status).toBe(200)
+
+    const zipBuffer = Buffer.from(await res.arrayBuffer())
+    const zip = await JSZip.loadAsync(zipBuffer)
+    expect(Object.keys(zip.files).sort()).toEqual(['IMG_0001 (1).jpg', 'IMG_0001.jpg'])
+    expect(await zip.file('IMG_0001.jpg')!.async('string')).toBe('photo-one')
+    expect(await zip.file('IMG_0001 (1).jpg')!.async('string')).toBe('photo-two')
   })
 
   it('builds the zip for the photographer even when downloads are disabled', async () => {

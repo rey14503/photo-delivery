@@ -121,3 +121,16 @@ export async function downloadOriginal(
     name: metadata.data.name ?? 'photo',
   }
 }
+
+export function dedupeFilename(name: string, seen: Map<string, number>): string {
+  const count = seen.get(name) ?? 0
+  seen.set(name, count + 1)
+  if (count === 0) {
+    return name
+  }
+  const lastDot = name.lastIndexOf('.')
+  if (lastDot <= 0) {
+    return `${name} (${count})`
+  }
+  return `${name.slice(0, lastDot)} (${count})${name.slice(lastDot)}`
+}

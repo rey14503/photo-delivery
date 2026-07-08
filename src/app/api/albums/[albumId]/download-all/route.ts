@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import JSZip from 'jszip'
 import { prisma } from '@/lib/prisma'
 import { resolveActor } from '@/lib/actor'
-import { getDriveClientForUser, downloadOriginal } from '@/lib/drive'
+import { getDriveClientForUser, downloadOriginal, dedupeFilename } from '@/lib/drive'
 
 export async function GET(
   _request: NextRequest,
@@ -31,9 +31,11 @@ export async function GET(
   try {
     const drive = getDriveClientForUser(album.owner)
     const zip = new JSZip()
+    const usedNames = new Map<string, number>()
     for (const photo of album.photos) {
       const { buffer, name } = await downloadOriginal(drive, photo.driveFileId)
-      zip.file(name, buffer)
+      const uniqueName = dedupeFilename(name, usedNames)
+      zip.file(uniqueName, buffer)
     }
     const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })
 

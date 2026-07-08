@@ -31,6 +31,7 @@ import {
   createShortcut,
   deleteFile,
   downloadOriginal,
+  dedupeFilename,
 } from '@/lib/drive'
 import { google } from 'googleapis'
 
@@ -220,5 +221,51 @@ describe('downloadOriginal', () => {
 
     expect(result.mimeType).toBe('application/octet-stream')
     expect(result.name).toBe('photo')
+  })
+})
+
+describe('dedupeFilename', () => {
+  it('returns the name unchanged on first occurrence', () => {
+    const seen = new Map<string, number>()
+
+    expect(dedupeFilename('IMG_0001.jpg', seen)).toBe('IMG_0001.jpg')
+  })
+
+  it('inserts " (1)" before the extension on the second occurrence', () => {
+    const seen = new Map<string, number>()
+
+    dedupeFilename('IMG_0001.jpg', seen)
+    expect(dedupeFilename('IMG_0001.jpg', seen)).toBe('IMG_0001 (1).jpg')
+  })
+
+  it('inserts " (2)" before the extension on the third occurrence', () => {
+    const seen = new Map<string, number>()
+
+    dedupeFilename('IMG_0001.jpg', seen)
+    dedupeFilename('IMG_0001.jpg', seen)
+    expect(dedupeFilename('IMG_0001.jpg', seen)).toBe('IMG_0001 (2).jpg')
+  })
+
+  it('appends the suffix directly when the name has no extension', () => {
+    const seen = new Map<string, number>()
+
+    dedupeFilename('IMG_0001', seen)
+    expect(dedupeFilename('IMG_0001', seen)).toBe('IMG_0001 (1)')
+  })
+
+  it('appends the suffix directly for a leading-dot name with no meaningful extension', () => {
+    const seen = new Map<string, number>()
+
+    dedupeFilename('.gitignore', seen)
+    expect(dedupeFilename('.gitignore', seen)).toBe('.gitignore (1)')
+  })
+
+  it('keeps independent counters for different names', () => {
+    const seen = new Map<string, number>()
+
+    dedupeFilename('one.jpg', seen)
+    expect(dedupeFilename('two.jpg', seen)).toBe('two.jpg')
+    expect(dedupeFilename('one.jpg', seen)).toBe('one (1).jpg')
+    expect(dedupeFilename('two.jpg', seen)).toBe('two (1).jpg')
   })
 })
