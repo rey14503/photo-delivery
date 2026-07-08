@@ -15,6 +15,11 @@ describe('uploadToBlob', () => {
   it('uploads the buffer to the given path and returns the resulting URL', async () => {
     putMock.mockResolvedValue({
       url: 'https://blob.vercel-storage.com/albums/a1/photos/p1/v1/thumb.jpg',
+      downloadUrl: 'https://blob.vercel-storage.com/albums/a1/photos/p1/v1/thumb.jpg?download=1',
+      pathname: 'albums/a1/photos/p1/v1/thumb.jpg',
+      contentType: 'image/jpeg',
+      contentDisposition: 'inline; filename="thumb.jpg"',
+      etag: '"test-etag"',
     })
 
     const buffer = Buffer.from('fake-image-bytes')
