@@ -35,20 +35,4 @@ model Album {
   passwordHash     String?
   downloadEnabled  Boolean  @default(false)
   createdAt        DateTime @default(now())
-  photos           Photo[]
-}
-
-model Photo {
-  id           String   @id @default(cuid())
-  albumId      String
-  album        Album    @relation(fields: [albumId], references: [id])
-  driveFileId  String
-  version      Int      @default(1)
-  displayOrder Int
-  thumbnailUrl String
-  previewUrl   String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([albumId])
 }
