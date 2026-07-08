@@ -22,6 +22,9 @@ describe('POST /api/share/identify', () => {
 
     expect(res.status).toBe(200)
     expect(data).toEqual({ success: true })
-    expect(res.cookies.get('client_name')?.value).toBe('Jane Doe')
+    const cookie = res.cookies.get('client_name')
+    expect(cookie?.value).toBe('Jane Doe')
+    expect(cookie?.secure).toBe(false)
+    expect(cookie?.sameSite).toBe('lax')
   })
 })

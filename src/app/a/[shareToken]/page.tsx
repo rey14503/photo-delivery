@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { isUnlocked } from '@/lib/album-unlock'
+import { albumUnlockCookieName, isUnlocked } from '@/lib/album-unlock'
 import { CLIENT_NAME_COOKIE } from '@/lib/client-identity'
 import { PasswordGate } from '@/components/PasswordGate'
 import { NameGate } from '@/components/NameGate'
@@ -24,7 +24,7 @@ export default async function SharePage({
   const cookieStore = await cookies()
 
   if (album.passwordHash) {
-    const unlockCookie = cookieStore.get(`album_unlock_${album.id}`)?.value
+    const unlockCookie = cookieStore.get(albumUnlockCookieName(album.id))?.value
     if (!isUnlocked(album.id, unlockCookie)) {
       return <PasswordGate shareToken={shareToken} />
     }

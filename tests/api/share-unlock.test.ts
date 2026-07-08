@@ -76,5 +76,7 @@ describe('POST /api/share/[shareToken]/unlock', () => {
     expect(data).toEqual({ success: true })
     const cookie = res.cookies.get('album_unlock_album_1')
     expect(cookie?.value).toBe(unlockToken('album_1'))
+    expect(cookie?.secure).toBe(false)
+    expect(cookie?.sameSite).toBe('lax')
   })
 })

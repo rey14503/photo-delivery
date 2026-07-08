@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyPassword } from '@/lib/password'
-import { unlockToken } from '@/lib/album-unlock'
+import { albumUnlockCookieName, unlockToken } from '@/lib/album-unlock'
 
 export async function POST(
   request: NextRequest,
@@ -23,10 +23,12 @@ export async function POST(
   }
 
   const response = NextResponse.json({ success: true })
-  response.cookies.set(`album_unlock_${album.id}`, unlockToken(album.id), {
+  response.cookies.set(albumUnlockCookieName(album.id), unlockToken(album.id), {
     httpOnly: true,
     path: '/',
     maxAge: 60 * 60 * 24 * 30,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
   })
   return response
 }

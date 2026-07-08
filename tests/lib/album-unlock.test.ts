@@ -1,8 +1,14 @@
 import { describe, it, expect, beforeAll } from 'vitest'
-import { unlockToken, isUnlocked } from '@/lib/album-unlock'
+import { unlockToken, isUnlocked, albumUnlockCookieName } from '@/lib/album-unlock'
 
 beforeAll(() => {
   process.env.NEXTAUTH_SECRET = 'test-secret'
+})
+
+describe('albumUnlockCookieName', () => {
+  it('builds the cookie name for an album id', () => {
+    expect(albumUnlockCookieName('album_1')).toBe('album_unlock_album_1')
+  })
 })
 
 describe('unlockToken', () => {
