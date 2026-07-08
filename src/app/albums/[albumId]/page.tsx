@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { canManageAlbum } from '@/lib/album-permissions'
 import { UploadPhotos } from '@/components/UploadPhotos'
 import { ReplacePhotoButton } from '@/components/ReplacePhotoButton'
+import { SetAlbumPassword } from '@/components/SetAlbumPassword'
 
 export default async function AlbumDetailPage({
   params,
@@ -30,6 +31,10 @@ export default async function AlbumDetailPage({
       <h1>
         {album.name} — {album.clientName}
       </h1>
+      <p>
+        Share link: <code>/a/{album.shareToken}</code>
+      </p>
+      <SetAlbumPassword albumId={album.id} hasPassword={Boolean(album.passwordHash)} />
       <UploadPhotos albumId={album.id} />
       <ul>
         {album.photos.map((photo) => (
