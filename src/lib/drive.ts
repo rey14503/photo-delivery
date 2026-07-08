@@ -81,3 +81,27 @@ export async function replaceFile(
     media: { mimeType, body: Readable.from(buffer) },
   })
 }
+
+export async function createShortcut(
+  drive: drive_v3.Drive,
+  targetFileId: string,
+  parentId: string
+): Promise<string> {
+  const res = await drive.files.create({
+    requestBody: {
+      name: 'shortcut',
+      mimeType: 'application/vnd.google-apps.shortcut',
+      parents: [parentId],
+      shortcutDetails: { targetId: targetFileId },
+    },
+    fields: 'id',
+  })
+  if (!res.data.id) {
+    throw new Error('Drive did not return a shortcut id')
+  }
+  return res.data.id
+}
+
+export async function deleteFile(drive: drive_v3.Drive, fileId: string): Promise<void> {
+  await drive.files.delete({ fileId })
+}

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 
 const filesCreate = vi.fn()
 const filesUpdate = vi.fn()
+const filesDelete = vi.fn()
 
 vi.mock('googleapis', () => ({
   google: {
@@ -11,7 +12,7 @@ vi.mock('googleapis', () => ({
       }),
     },
     drive: vi.fn().mockImplementation(() => ({
-      files: { create: filesCreate, update: filesUpdate },
+      files: { create: filesCreate, update: filesUpdate, delete: filesDelete },
     })),
   },
 }))
@@ -26,6 +27,8 @@ import {
   createAlbumFolders,
   uploadFile,
   replaceFile,
+  createShortcut,
+  deleteFile,
 } from '@/lib/drive'
 import { google } from 'googleapis'
 
@@ -142,5 +145,45 @@ describe('replaceFile', () => {
     const callArgs = filesUpdate.mock.calls[0][0]
     expect(callArgs.fileId).toBe('photo_file_1')
     expect(callArgs.media.mimeType).toBe('image/png')
+  })
+})
+
+describe('createShortcut', () => {
+  it('creates a shortcut pointing at the target file inside the given parent folder', async () => {
+    filesCreate.mockResolvedValue({ data: { id: 'shortcut_1' } })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    const id = await createShortcut(drive, 'photo_file_1', 'selected_folder')
+
+    expect(id).toBe('shortcut_1')
+    expect(filesCreate).toHaveBeenCalledWith({
+      requestBody: {
+        name: 'shortcut',
+        mimeType: 'application/vnd.google-apps.shortcut',
+        parents: ['selected_folder'],
+        shortcutDetails: { targetId: 'photo_file_1' },
+      },
+      fields: 'id',
+    })
+  })
+
+  it('throws when Drive does not return a shortcut id', async () => {
+    filesCreate.mockResolvedValue({ data: {} })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    await expect(createShortcut(drive, 'photo_file_1', 'selected_folder')).rejects.toThrow(
+      'Drive did not return a shortcut id'
+    )
+  })
+})
+
+describe('deleteFile', () => {
+  it('deletes the given file id', async () => {
+    filesDelete.mockResolvedValue({})
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    await deleteFile(drive, 'shortcut_1')
+
+    expect(filesDelete).toHaveBeenCalledWith({ fileId: 'shortcut_1' })
   })
 })
