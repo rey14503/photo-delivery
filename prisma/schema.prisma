@@ -21,6 +21,8 @@ model User {
   driveRootFolderId     String?
   createdAt             DateTime @default(now())
   albums                Album[]
+  likes                 Like[]
+  comments              Comment[]
 }
 
 model Album {
@@ -39,16 +41,53 @@ model Album {
 }
 
 model Photo {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   albumId      String
-  album        Album    @relation(fields: [albumId], references: [id])
+  album        Album     @relation(fields: [albumId], references: [id])
   driveFileId  String
-  version      Int      @default(1)
+  version      Int       @default(1)
   displayOrder Int
   thumbnailUrl String
   previewUrl   String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  likes        Like[]
+  comments     Comment[]
 
   @@index([albumId])
+}
+
+enum ActorType {
+  CLIENT
+  PHOTOGRAPHER
+}
+
+model Like {
+  id              String    @id @default(cuid())
+  photoId         String
+  photo           Photo     @relation(fields: [photoId], references: [id])
+  actorType       ActorType
+  actorName       String?
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id])
+  actorKey        String
+  driveShortcutId String?
+  createdAt       DateTime  @default(now())
+
+  @@unique([photoId, actorKey])
+  @@index([photoId])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  photoId   String
+  photo     Photo     @relation(fields: [photoId], references: [id])
+  actorType ActorType
+  actorName String?
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id])
+  text      String
+  createdAt DateTime  @default(now())
+
+  @@index([photoId])
 }
