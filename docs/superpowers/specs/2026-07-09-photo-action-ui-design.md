@@ -1,0 +1,85 @@
+# Photo Action UI Redesign — Design Spec
+
+## Overview
+
+Plans 1-5 shipped every per-photo interaction (select/suggest like, comment, download, replace/version-bump) as raw, always-visible buttons and text links stacked underneath each thumbnail. This spec redesigns how those same interactions are *presented*, on both the client-facing gallery (`/a/[shareToken]`) and the photographer's album detail page (`/albums/[albumId]`), to match the Google Photos / Google Drive interaction model: quick-access icons that appear on hover, plus a "..." menu that lists every available action for that photo.
+
+**This is a frontend-only redesign.** No new Prisma models, no new API routes, no changes to access control (`resolveActor`, `canManageAlbum`, `Album.downloadEnabled`) — every action already has a working, tested backend endpoint from Plans 1-5. The only thing changing is which React components render those actions and how they're triggered.
+
+## Goals
+
+- Replace always-visible action buttons/links with a Google Photos-style interaction model: hover reveals quick icons on grid thumbnails, a "..." menu lists every action.
+- Add a lightbox (full-photo view) to the photographer's album page — it currently has none; only the client-facing gallery has one (from Plan 3/4).
+- Keep status indicators (version badge, "selected by" client names) always visible — these are state, not actions, and hiding them behind hover/menu would make them easy to miss.
+- Reuse every existing API route and fetch/error-handling pattern (`role="alert"` on failure) — no behavior changes, only presentation changes.
+
+## User-Facing Behavior
+
+### Grid thumbnails (both pages)
+
+Each thumbnail shows, always visible (no hover needed): the version badge (`v2`, `v3`, ...) if the photo has been replaced, and — on the photographer's page only — the list of client names who selected that photo.
+
+On hover (or always, on touch devices — see Touch Devices below), a semi-transparent overlay reveals exactly two icons:
+- **❤️ / ⭐** (top-left) — the select/suggest toggle. One click toggles it immediately, no menu needed. Heart for a CLIENT actor ("select this photo"), star for a PHOTOGRAPHER actor ("suggest to client").
+- **••• (top-right)** — opens the action menu (see below).
+
+Clicking anywhere else on the tile opens the lightbox for that photo.
+
+### Lightbox (both pages — new on the photographer's page)
+
+Full-size photo view with prev/next/close navigation (existing behavior from `ClientGallery`, extended to the photographer's page). Adds a row of three quick-access icons over the image:
+- **❤️ / ⭐** — same toggle as the grid tile.
+- **⬇️ Download** — triggers the original-file download immediately. On the client page, only rendered when `canDownload` is true (unchanged existing logic). On the photographer's page, always rendered (photographer always allowed to download their own content, per Plan 5).
+- **💬 Comment** — toggles a comment panel that slides in beside the photo (not over it). The panel hosts the existing comment list + input form.
+- **•••** — opens the same action menu as the grid tile.
+
+### Action menu ("...")
+
+A dropdown list anchored to the "..." button (click to open, click outside or Escape to close) — same interaction model as Google Drive's "More actions" menu. Lists **every** action for that photo, not just the ones without a dedicated quick icon:
+
+| Actor | Menu items |
+|---|---|
+| CLIENT | Select / Unselect this photo · Download (only if `canDownload`) · View comments |
+| PHOTOGRAPHER | Suggest / Unsuggest to client · Download · View comments · Replace / update version |
+
+"Replace / update version" opens the same file picker as today's `ReplacePhotoButton`, uploads via the existing replace API, and bumps the version badge on success — no change to that flow, only to how it's triggered.
+
+### Touch devices
+
+Devices with no hover capability (`@media (hover: none)`) show the grid tile's two icons and the lightbox's icon row permanently rather than gating them behind a hover event, since there is no hover event to gate on.
+
+## Component Architecture
+
+New components:
+- **`PhotoTile`** — one grid thumbnail: image, always-visible status badges, hover overlay with the heart/star icon and the "..." trigger.
+- **`PhotoActionMenu`** — the dropdown's contents. Takes the actor role and the photo's current state as props and renders the role-appropriate item list from the table above; each item invokes the same toggle/download/comment-open/replace trigger used by the quick icons, so there is exactly one code path per action regardless of whether it was triggered from a quick icon or from the menu.
+- **`PhotoLightbox`** — full-photo view + navigation + the three quick icons + the slide-in comment panel + the "..." trigger. Replaces the dialog currently built inline inside `ClientGallery`.
+- **`PhotographerGallery`** — orchestrates a grid of `PhotoTile` + `PhotoLightbox` for the photographer's album page, mirroring what `ClientGallery` already does for the client page.
+
+Changed components:
+- **`ClientGallery`** — slims down to orchestrating `PhotoTile` (grid) + `PhotoLightbox`, instead of building its own inline thumbnail grid and dialog. The album-level "Download all" link/button is untouched — it's not a per-photo action, so it stays outside this menu system.
+- **`src/app/albums/[albumId]/page.tsx`** — the current inline `<ul>` of photos (each row manually wiring `ReplacePhotoButton` + `LikeButton` + `CommentThread` + a plain-text client-likers list) is replaced by a single `PhotographerGallery` render, fed the same data the page already queries.
+- **`LikeButton`, `CommentThread`, `ReplacePhotoButton`** — their fetch/error-handling logic is preserved and reused (not reimplemented), extracted into shared logic that both quick icons and menu items call into, so there's no duplicated fetch/toggle/error code between the two trigger points.
+
+## Data Flow
+
+No new data is fetched. `PhotoTile`/`PhotoLightbox`/`PhotoActionMenu` receive the same per-photo fields already computed server-side today: `id`, `thumbnailUrl`, `previewUrl`, `version`, `likedByMe`/`suggestedByMe`, `suggestedByPhotographer`/`clientLikers`, `comments`, plus the page-level `canDownload`/`albumId` (client page) or an implicit always-true download permission (photographer page).
+
+## Error Handling
+
+Unchanged from the existing convention: each action (toggle, replace, comment submit) shows a `role="alert"` error message on failure, scoped to where the action was triggered (inside the open menu or lightbox), never a full-page error. No new error states are introduced by this redesign.
+
+## Testing
+
+Component tests via Testing Library, following the existing project conventions:
+- `PhotoTile`: badges render regardless of hover state; hover (or `hover: none` media) reveals exactly the heart/star + "..." icons; clicking the tile body opens the lightbox; clicking an icon does not also open the lightbox.
+- `PhotoActionMenu`: renders the correct item list per actor role; each item invokes the correct existing endpoint with the correct method/body; the Download item is absent for a CLIENT actor when `canDownload` is false; "Replace / update version" is absent for a CLIENT actor entirely.
+- `PhotoLightbox`: the three quick icons render with correct hrefs/handlers; the comment panel toggles open/closed without navigating away from the photo; prev/next/close behavior is preserved from the current `ClientGallery` dialog tests.
+- `ClientGallery` / `PhotographerGallery`: integration-level tests confirming the grid + lightbox wire together correctly, mirroring the existing `ClientGallery.test.tsx` structure.
+
+## Out of Scope
+
+- Any change to access control, API routes, or the data model — this is purely a presentation change.
+- The album-level "Download all" button/link and the album-level `DownloadToggle` control — neither is a per-photo action, both stay as visible controls outside this menu system.
+- Bulk/multi-select across multiple photos at once — not part of this request.
+- Any change to the password-gate, name-gate, or share-link flows.
