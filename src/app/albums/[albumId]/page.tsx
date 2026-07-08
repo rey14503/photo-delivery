@@ -8,6 +8,7 @@ import { ReplacePhotoButton } from '@/components/ReplacePhotoButton'
 import { SetAlbumPassword } from '@/components/SetAlbumPassword'
 import { LikeButton } from '@/components/LikeButton'
 import { CommentThread } from '@/components/CommentThread'
+import { DownloadToggle } from '@/components/DownloadToggle'
 
 export default async function AlbumDetailPage({
   params,
@@ -48,6 +49,7 @@ export default async function AlbumDetailPage({
         Share link: <code>/a/{album.shareToken}</code>
       </p>
       <SetAlbumPassword albumId={album.id} hasPassword={Boolean(album.passwordHash)} />
+      <DownloadToggle albumId={album.id} downloadEnabled={album.downloadEnabled} />
       <UploadPhotos albumId={album.id} />
       <ul>
         {album.photos.map((photo) => {
