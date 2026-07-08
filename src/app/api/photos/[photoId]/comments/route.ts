@@ -23,8 +23,8 @@ export async function POST(
   }
 
   const body = await request.json()
-  const { text } = body as { text?: string }
-  const trimmed = text?.trim()
+  const { text } = body as { text?: unknown }
+  const trimmed = typeof text === 'string' ? text.trim() : ''
   if (!trimmed || trimmed.length > MAX_COMMENT_LENGTH) {
     return NextResponse.json(
       { error: 'A comment between 1 and 2000 characters is required' },

@@ -124,6 +124,26 @@ describe('POST /api/photos/[photoId]/like', () => {
     expect(prisma.like.delete).toHaveBeenCalledWith({ where: { id: 'like_1' } })
   })
 
+  it('still removes the like row when deleting the Drive shortcut fails', async () => {
+    vi.mocked(prisma.photo.findUnique).mockResolvedValue(photoRow() as never)
+    vi.mocked(resolveActor).mockResolvedValue({ type: 'CLIENT', name: 'Jane Doe' })
+    vi.mocked(actorKeyFor).mockReturnValue('client:Jane Doe')
+    vi.mocked(prisma.like.findUnique).mockResolvedValue({
+      id: 'like_1',
+      driveShortcutId: 'shortcut_1',
+    } as never)
+    vi.mocked(deleteFile).mockRejectedValue(new Error('shortcut already deleted'))
+    vi.mocked(prisma.like.delete).mockResolvedValue({} as never)
+
+    const res = await POST({} as never, routeParams('photo_1'))
+    const data = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(data).toEqual({ liked: false })
+    expect(deleteFile).toHaveBeenCalledWith({ mockDrive: true }, 'shortcut_1')
+    expect(prisma.like.delete).toHaveBeenCalledWith({ where: { id: 'like_1' } })
+  })
+
   it('removes an existing photographer like without touching Drive', async () => {
     vi.mocked(prisma.photo.findUnique).mockResolvedValue(photoRow() as never)
     vi.mocked(resolveActor).mockResolvedValue({ type: 'PHOTOGRAPHER', userId: 'user_1' })

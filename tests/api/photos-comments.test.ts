@@ -69,6 +69,15 @@ describe('POST /api/photos/[photoId]/comments', () => {
     expect(res.status).toBe(400)
   })
 
+  it('returns 400 for a non-string text value', async () => {
+    vi.mocked(prisma.photo.findUnique).mockResolvedValue(photoRow() as never)
+    vi.mocked(resolveActor).mockResolvedValue({ type: 'CLIENT', name: 'Jane Doe' })
+
+    const res = await POST(jsonRequest({ text: 123 }), routeParams('photo_1'))
+
+    expect(res.status).toBe(400)
+  })
+
   it('creates a client comment', async () => {
     vi.mocked(prisma.photo.findUnique).mockResolvedValue(photoRow() as never)
     vi.mocked(resolveActor).mockResolvedValue({ type: 'CLIENT', name: 'Jane Doe' })

@@ -30,8 +30,12 @@ export async function POST(
 
     if (existing) {
       if (existing.driveShortcutId) {
-        const drive = getDriveClientForUser(photo.album.owner)
-        await deleteFile(drive, existing.driveShortcutId)
+        try {
+          const drive = getDriveClientForUser(photo.album.owner)
+          await deleteFile(drive, existing.driveShortcutId)
+        } catch (error) {
+          console.error('Failed to delete Drive shortcut (continuing to remove the Like row):', error)
+        }
       }
       await prisma.like.delete({ where: { id: existing.id } })
       return NextResponse.json({ liked: false })
