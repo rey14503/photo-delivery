@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { albumUnlockCookieName, isUnlocked } from '@/lib/album-unlock'
 import { CLIENT_NAME_COOKIE } from '@/lib/client-identity'
+import { resolveActor, actorKeyFor } from '@/lib/actor'
 import { PasswordGate } from '@/components/PasswordGate'
 import { NameGate } from '@/components/NameGate'
 import { ClientGallery } from '@/components/ClientGallery'
@@ -15,7 +16,18 @@ export default async function SharePage({
   const { shareToken } = await params
   const album = await prisma.album.findUnique({
     where: { shareToken },
-    include: { photos: { orderBy: { displayOrder: 'asc' } } },
+    include: {
+      photos: {
+        orderBy: { displayOrder: 'asc' },
+        include: {
+          likes: true,
+          comments: {
+            orderBy: { createdAt: 'asc' },
+            include: { user: { select: { name: true, email: true } } },
+          },
+        },
+      },
+    },
   })
   if (!album) {
     notFound()
@@ -35,10 +47,28 @@ export default async function SharePage({
     return <NameGate />
   }
 
+  const actor = await resolveActor(album)
+  const myActorKey = actor ? actorKeyFor(actor) : null
+
+  const photos = album.photos.map((photo) => ({
+    id: photo.id,
+    thumbnailUrl: photo.thumbnailUrl,
+    previewUrl: photo.previewUrl,
+    version: photo.version,
+    likedByMe: myActorKey ? photo.likes.some((like) => like.actorKey === myActorKey) : false,
+    suggestedByPhotographer: photo.likes.some((like) => like.actorType === 'PHOTOGRAPHER'),
+    comments: photo.comments.map((comment) => ({
+      id: comment.id,
+      text: comment.text,
+      authorLabel:
+        comment.actorName ?? comment.user?.name ?? comment.user?.email ?? 'Photographer',
+    })),
+  }))
+
   return (
     <main>
       <h1>{album.name}</h1>
-      <ClientGallery photos={album.photos} />
+      <ClientGallery photos={photos} />
     </main>
   )
 }

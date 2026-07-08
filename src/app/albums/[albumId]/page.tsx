@@ -6,6 +6,8 @@ import { canManageAlbum } from '@/lib/album-permissions'
 import { UploadPhotos } from '@/components/UploadPhotos'
 import { ReplacePhotoButton } from '@/components/ReplacePhotoButton'
 import { SetAlbumPassword } from '@/components/SetAlbumPassword'
+import { LikeButton } from '@/components/LikeButton'
+import { CommentThread } from '@/components/CommentThread'
 
 export default async function AlbumDetailPage({
   params,
@@ -20,7 +22,18 @@ export default async function AlbumDetailPage({
   const { albumId } = await params
   const album = await prisma.album.findUnique({
     where: { id: albumId },
-    include: { photos: { orderBy: { displayOrder: 'asc' } } },
+    include: {
+      photos: {
+        orderBy: { displayOrder: 'asc' },
+        include: {
+          likes: true,
+          comments: {
+            orderBy: { createdAt: 'asc' },
+            include: { user: { select: { name: true, email: true } } },
+          },
+        },
+      },
+    },
   })
   if (!album || !canManageAlbum(session.user, album)) {
     notFound()
@@ -37,13 +50,36 @@ export default async function AlbumDetailPage({
       <SetAlbumPassword albumId={album.id} hasPassword={Boolean(album.passwordHash)} />
       <UploadPhotos albumId={album.id} />
       <ul>
-        {album.photos.map((photo) => (
-          <li key={photo.id}>
-            <img src={photo.thumbnailUrl} alt="" width={200} />
-            {photo.version > 1 && <span> v{photo.version}</span>}
-            <ReplacePhotoButton photoId={photo.id} />
-          </li>
-        ))}
+        {album.photos.map((photo) => {
+          const suggestedByMe = photo.likes.some(
+            (like) => like.actorType === 'PHOTOGRAPHER' && like.userId === session.user.id
+          )
+          const clientLikers = photo.likes
+            .filter((like) => like.actorType === 'CLIENT')
+            .map((like) => like.actorName)
+            .filter((name): name is string => Boolean(name))
+          const comments = photo.comments.map((comment) => ({
+            id: comment.id,
+            text: comment.text,
+            authorLabel:
+              comment.actorName ?? comment.user?.name ?? comment.user?.email ?? 'Photographer',
+          }))
+
+          return (
+            <li key={photo.id}>
+              <img src={photo.thumbnailUrl} alt="" width={200} />
+              {photo.version > 1 && <span> v{photo.version}</span>}
+              <ReplacePhotoButton photoId={photo.id} />
+              <LikeButton
+                photoId={photo.id}
+                liked={suggestedByMe}
+                label="⭐ Suggest to client"
+              />
+              {clientLikers.length > 0 && <p>❤ Selected by: {clientLikers.join(', ')}</p>}
+              <CommentThread photoId={photo.id} comments={comments} />
+            </li>
+          )
+        })}
       </ul>
     </main>
   )

@@ -1,12 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import { LikeButton } from './LikeButton'
+import { CommentThread, type ThreadComment } from './CommentThread'
 
 interface GalleryPhoto {
   id: string
   thumbnailUrl: string
   previewUrl: string
   version: number
+  likedByMe: boolean
+  suggestedByPhotographer: boolean
+  comments: ThreadComment[]
 }
 
 export function ClientGallery({ photos }: { photos: GalleryPhoto[] }) {
@@ -39,6 +44,13 @@ export function ClientGallery({ photos }: { photos: GalleryPhoto[] }) {
               Next
             </button>
           )}
+          <LikeButton
+            photoId={photos[openIndex].id}
+            liked={photos[openIndex].likedByMe}
+            label="❤ Select this photo"
+          />
+          {photos[openIndex].suggestedByPhotographer && <p>⭐ Suggested by photographer</p>}
+          <CommentThread photoId={photos[openIndex].id} comments={photos[openIndex].comments} />
         </div>
       )}
     </div>
