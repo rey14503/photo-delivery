@@ -349,7 +349,7 @@ export async function replaceFile(
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run tests/lib/drive.test.ts`
-Expected: PASS (9 tests: the 5 pre-existing plus 4 new).
+Expected: PASS (8 tests: the 5 pre-existing plus 3 new).
 
 - [ ] **Step 5: Commit**
 
