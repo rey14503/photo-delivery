@@ -105,3 +105,19 @@ export async function createShortcut(
 export async function deleteFile(drive: drive_v3.Drive, fileId: string): Promise<void> {
   await drive.files.delete({ fileId })
 }
+
+export async function downloadOriginal(
+  drive: drive_v3.Drive,
+  fileId: string
+): Promise<{ buffer: Buffer; mimeType: string; name: string }> {
+  const metadata = await drive.files.get({ fileId, fields: 'name,mimeType' })
+  const content = await drive.files.get(
+    { fileId, alt: 'media' },
+    { responseType: 'arraybuffer' }
+  )
+  return {
+    buffer: Buffer.from(content.data as ArrayBuffer),
+    mimeType: metadata.data.mimeType ?? 'application/octet-stream',
+    name: metadata.data.name ?? 'photo',
+  }
+}

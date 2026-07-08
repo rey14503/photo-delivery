@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 const filesCreate = vi.fn()
 const filesUpdate = vi.fn()
 const filesDelete = vi.fn()
+const filesGet = vi.fn()
 
 vi.mock('googleapis', () => ({
   google: {
@@ -12,7 +13,7 @@ vi.mock('googleapis', () => ({
       }),
     },
     drive: vi.fn().mockImplementation(() => ({
-      files: { create: filesCreate, update: filesUpdate, delete: filesDelete },
+      files: { create: filesCreate, update: filesUpdate, delete: filesDelete, get: filesGet },
     })),
   },
 }))
@@ -29,6 +30,7 @@ import {
   replaceFile,
   createShortcut,
   deleteFile,
+  downloadOriginal,
 } from '@/lib/drive'
 import { google } from 'googleapis'
 
@@ -185,5 +187,38 @@ describe('deleteFile', () => {
     await deleteFile(drive, 'shortcut_1')
 
     expect(filesDelete).toHaveBeenCalledWith({ fileId: 'shortcut_1' })
+  })
+})
+
+describe('downloadOriginal', () => {
+  it('fetches metadata then content, returning a buffer with mimeType and name', async () => {
+    filesGet
+      .mockResolvedValueOnce({ data: { name: 'IMG_0001.jpg', mimeType: 'image/jpeg' } })
+      .mockResolvedValueOnce({ data: new TextEncoder().encode('fake-bytes').buffer })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    const result = await downloadOriginal(drive, 'drive_file_1')
+
+    expect(result.mimeType).toBe('image/jpeg')
+    expect(result.name).toBe('IMG_0001.jpg')
+    expect(Buffer.from(result.buffer).toString()).toBe('fake-bytes')
+    expect(filesGet).toHaveBeenNthCalledWith(1, { fileId: 'drive_file_1', fields: 'name,mimeType' })
+    expect(filesGet).toHaveBeenNthCalledWith(
+      2,
+      { fileId: 'drive_file_1', alt: 'media' },
+      { responseType: 'arraybuffer' }
+    )
+  })
+
+  it('falls back to sensible defaults when Drive omits mimeType/name', async () => {
+    filesGet
+      .mockResolvedValueOnce({ data: {} })
+      .mockResolvedValueOnce({ data: new TextEncoder().encode('bytes').buffer })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    const result = await downloadOriginal(drive, 'drive_file_1')
+
+    expect(result.mimeType).toBe('application/octet-stream')
+    expect(result.name).toBe('photo')
   })
 })
