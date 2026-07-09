@@ -1021,7 +1021,7 @@ export async function GET() {
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run tests/api/albums.test.ts`
-Expected: PASS (9 tests: 7 in the `POST` block, 2 unchanged in the `GET` block).
+Expected: PASS (10 tests: 8 in the `POST` block, 2 unchanged in the `GET` block).
 
 - [ ] **Step 5: Run the full suite and verify the build**
 
