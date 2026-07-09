@@ -77,6 +77,27 @@ Component tests via Testing Library, following the existing project conventions:
 - `PhotoLightbox`: the three quick icons render with correct hrefs/handlers; the comment panel toggles open/closed without navigating away from the photo; prev/next/close behavior is preserved from the current `ClientGallery` dialog tests.
 - `ClientGallery` / `PhotographerGallery`: integration-level tests confirming the grid + lightbox wire together correctly, mirroring the existing `ClientGallery.test.tsx` structure.
 
+## Visual & Interaction Correctness Requirements (added after the first implementation shipped broken)
+
+The first build of this spec (by an external UI tool) shipped with real, user-visible bugs: the "..." menu rendered as a bare, transparent, bulleted list stacked directly on top of the photo (default `<ul>`/`<li>` markers visible, no card background, text unreadable against the image), and the lightbox's bottom action-bar icons overlapped each other illegibly ("Download" and "Comments (0)" rendering at the same position). The original spec left visual treatment entirely to the implementer — that was the mistake. The rules below are now binding, not optional, for whoever rebuilds this UI next.
+
+**The "..." action menu:**
+- Renders as an opaque, self-contained card — a solid background color (not transparent, not the photo showing through), `border-radius`, and a drop shadow, so it reads as a distinct floating panel regardless of what's behind it (dark photo, light photo, either theme).
+- Is anchored to the "..." trigger button as a proper dropdown — appears directly below/beside the button, never as a vertical stack of items overlaid down the middle of the photo.
+- The item list has **zero default list-marker bullets** (`list-style: none` on any `<ul>`) — every menu item is a full-width row with its own padding (12-16px vertical, 16px horizontal) and a hover/focus background state, exactly like Google Drive's or Google Photos' "More actions" menu.
+- Each item may pair a small icon with its text label (optional), but the text itself must always be legible — never rely on the photo behind the menu for contrast, since the card background already guarantees this if the above rules are followed.
+
+**The lightbox's action bar (like/download/comments/menu row) and grid-tile quick icons:**
+- Laid out with `display: flex` and an explicit `gap` (8-12px) between every icon — two icons must never be able to render at the same coordinates. If icons visually overlap at any viewport width, that's a bug, not a tradeoff.
+- Every icon is its own fixed-size circular button (minimum 36x36px tap target) with a semi-opaque background chip of its own (e.g. `rgba(0,0,0,0.6)` in a dark theme) — icons must never sit directly on bare photo pixels with no background, since photo content varies from all-white to all-black and unbacked icons become invisible against matching backgrounds.
+- Quick-action icons show an icon glyph, not a full text label, as the visible content (the text becomes the `aria-label`/tooltip, not rendered inline) — this is what actually makes them "quick icons" rather than the text-pill buttons ("Suggest to client", "Download") seen in the first broken build, which is closer to the "..." menu's presentation than to a Google Photos quick-action icon.
+
+**Lightbox chrome (Close / Previous / Next):**
+- Each renders as its own circular icon button with a semi-opaque background chip (same treatment as the action-bar icons above) — never as bare unstyled text floating directly on the image, which is illegible against light photo content and has no discoverable tap target boundary.
+- Close sits top-right, Previous/Next sit vertically centered at the left/right edges — standard Google Photos placement.
+
+**Stacking:** every menu, action bar, and chrome button must render above the photo in stacking order with an explicit `z-index` — never interleaved with image content such that a later-painted image element could cover an earlier control.
+
 ## Out of Scope
 
 - Any change to access control, API routes, or the data model — this is purely a presentation change.
