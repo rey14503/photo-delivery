@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
     const skipped = files.length - imageFiles.length
 
     let displayOrder = await prisma.photo.count({ where: { albumId: album.id } })
+    let firstPhotoId: string | null = null
     for (const file of imageFiles) {
       const { buffer } = await downloadOriginal(drive, file.id)
       const { thumbnail, preview } = await processImage(buffer)
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
         uploadToBlob(`drive-files/${file.id}/v1/preview.jpg`, preview, 'image/jpeg'),
       ])
 
-      await prisma.photo.create({
+      const createdPhoto = await prisma.photo.create({
         data: {
           albumId: album.id,
           driveFileId: file.id,
@@ -96,7 +97,16 @@ export async function POST(request: NextRequest) {
           previewUrl,
         },
       })
+      if (!firstPhotoId) firstPhotoId = createdPhoto.id
       displayOrder += 1
+    }
+
+    if (firstPhotoId) {
+      await prisma.album.update({
+        where: { id: album.id },
+        data: { coverPhotoId: firstPhotoId },
+      })
+      album.coverPhotoId = firstPhotoId
     }
 
     return NextResponse.json({ ...album, imported: imageFiles.length, skipped }, { status: 201 })

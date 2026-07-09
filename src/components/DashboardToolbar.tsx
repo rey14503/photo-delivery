@@ -10,10 +10,10 @@ export interface DashboardToolbarProps {
 export function DashboardToolbar({ albumCount, photoCount }: DashboardToolbarProps) {
   return (
     <div className={styles.toolbar}>
-      <h1 className={styles.title}>Bảng điều khiển</h1>
+      <h1 className={styles.title}>Dashboard</h1>
       <div className={styles.metrics}>
-        <span className={styles.pill}>Tổng số album: {albumCount}</span>
-        <span className={styles.pill}>Tổng số ảnh: {photoCount}</span>
+        <span className={styles.pill}>Total albums: {albumCount}</span>
+        <span className={styles.pill}>Total photos: {photoCount}</span>
       </div>
     </div>
   )

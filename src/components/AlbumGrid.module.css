@@ -1,45 +1,70 @@
 .container {
-  max-width: 1300px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 12px 24px 48px;
+  padding: 16px 28px 56px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 28px;
   align-items: stretch;
 }
 
 .createTile {
-  background-color: transparent;
-  border: 2px dashed var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 24px;
+  background-color: var(--bg-surface, #1c1c1f);
+  border: 2px dashed var(--success, #10b981);
+  border-radius: 24px;
+  padding: 36px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  color: var(--text-muted);
+  gap: 16px;
+  color: var(--text-main, #f4f4f5);
   cursor: pointer;
-  min-height: 200px;
-  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  min-height: 440px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm, 0 4px 16px rgba(16, 185, 129, 0.05));
 }
 
 .createTile:hover {
-  border-color: var(--accent);
-  color: var(--text-main);
-  background-color: var(--accent-subtle);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md, 0 16px 36px rgba(16, 185, 129, 0.15));
+  background-color: var(--bg-surface-hover, #24242a);
+  border-color: #059669;
 }
 
-.iconPlus {
-  font-size: 2.2rem;
+.iconPlusWrap {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background-color: var(--success-subtle, rgba(16, 185, 129, 0.15));
+  color: var(--success, #10b981);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
   font-weight: 300;
-  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.createTile:hover .iconPlusWrap {
+  transform: scale(1.08);
 }
 
 .labelCreate {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main, #ffffff);
+  margin: 4px 0 0;
+}
+
+.descCreate {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--success, #10b981);
+  text-align: center;
+  max-width: 240px;
+  line-height: 1.45;
 }

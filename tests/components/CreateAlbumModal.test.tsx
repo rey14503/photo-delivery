@@ -15,7 +15,7 @@ describe('CreateAlbumModal', () => {
   it('renders modal content and form when isOpen is true', () => {
     render(<CreateAlbumModal isOpen={true} onClose={vi.fn()} />)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('Tạo album')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Create album' })).toBeInTheDocument()
     expect(screen.getByLabelText('Album name')).toBeInTheDocument()
   })
 
@@ -23,7 +23,7 @@ describe('CreateAlbumModal', () => {
     const onClose = vi.fn()
     render(<CreateAlbumModal isOpen={true} onClose={onClose} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /đóng/i }))
+    fireEvent.click(screen.getByRole('button', { name: /close/i }))
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

@@ -53,7 +53,9 @@ describe('PhotoTile', () => {
       <PhotoTile {...baseProps({ likeIcon: 'heart', liked: true, likeLabel: 'Unselect this photo' })} />
     )
 
-    expect(screen.getByRole('button', { name: 'Unselect this photo' }).textContent).toBe('♥')
+    const icon = screen.getByTestId('like-icon')
+    expect(icon).toHaveAttribute('data-icon', 'heart')
+    expect(icon).toHaveAttribute('data-filled', 'true')
   })
 
   it('renders a star glyph when likeIcon is "star" and liked is true', () => {
@@ -61,7 +63,9 @@ describe('PhotoTile', () => {
       <PhotoTile {...baseProps({ likeIcon: 'star', liked: true, likeLabel: 'Unsuggest to client' })} />
     )
 
-    expect(screen.getByRole('button', { name: 'Unsuggest to client' }).textContent).toBe('⭐')
+    const icon = screen.getByTestId('like-icon')
+    expect(icon).toHaveAttribute('data-icon', 'star')
+    expect(icon).toHaveAttribute('data-filled', 'true')
   })
 
   it('calls onToggleLike when the quick like icon is clicked', () => {

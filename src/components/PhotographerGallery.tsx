@@ -1,12 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
 import { PhotoTile } from './PhotoTile'
 import { PhotoLightbox } from './PhotoLightbox'
 import { useLikeToggle } from '@/lib/hooks/useLikeToggle'
 import { useReplacePhoto } from '@/lib/hooks/useReplacePhoto'
 import type { ThreadComment } from './CommentThread'
+import {
+  MoreActionsIcon,
+  EditOutlineIcon,
+  CopyOutlineIcon,
+  CheckOutlineIcon,
+  DeleteOutlineIcon,
+  CalendarOutlineIcon,
+  FolderOutlineIcon,
+  LockOutlineIcon,
+  SearchOutlineIcon,
+  CloseOutlineIcon,
+  WarningOutlineIcon,
+  PhoneOutlineIcon,
+} from './PhotoIcons'
+import { AlbumActionMenu } from './AlbumActionMenu'
 import styles from './PhotographerGallery.module.css'
 
 export interface PhotographerGalleryPhoto {
@@ -27,6 +44,9 @@ export interface PhotographerGalleryAlbumInfo {
   photographerName?: string
   shareToken?: string
   date?: string
+  downloadEnabled?: boolean
+  hasPassword?: boolean
+  coverPhotoId?: string | null
 }
 
 function statusNoteFor(photo: PhotographerGalleryPhoto): string | undefined {
@@ -40,6 +60,7 @@ export function PhotographerGallery({
   photos: PhotographerGalleryPhoto[]
   albumInfo?: PhotographerGalleryAlbumInfo
 }) {
+  const router = useRouter()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'suggested' | 'selected' | 'comments'>('all')
@@ -48,11 +69,204 @@ export function PhotographerGallery({
   const [copied, setCopied] = useState(false)
   const [showQr, setShowQr] = useState(false)
 
+  const [showAlbumMenu, setShowAlbumMenu] = useState(false)
+  const [isEditingInfo, setIsEditingInfo] = useState(false)
+  const [editName, setEditName] = useState(albumInfo?.name || '')
+  const [editClientName, setEditClientName] = useState(albumInfo?.clientName || '')
+  const [editCoverPhotoId, setEditCoverPhotoId] = useState<string | null>(albumInfo?.coverPhotoId ?? null)
+  const [savingInfo, setSavingInfo] = useState(false)
+  const [infoError, setInfoError] = useState<string | null>(null)
+  const [displayName, setDisplayName] = useState(albumInfo?.name || '')
+  const [displayClientName, setDisplayClientName] = useState(albumInfo?.clientName || '')
+
+  const [downloadsOn, setDownloadsOn] = useState(albumInfo?.downloadEnabled ?? true)
+  const [togglingDownloads, setTogglingDownloads] = useState(false)
+
+  const [hasPass, setHasPass] = useState(albumInfo?.hasPassword ?? false)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [passwordInput, setPasswordInput] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  const [isDeletingAlbum, setIsDeletingAlbum] = useState(false)
+  const [deletingAlbum, setDeletingAlbum] = useState(false)
+  const [deleteAlbumError, setDeleteAlbumError] = useState<string | null>(null)
+
+  const [uploadingPhotos, setUploadingPhotos] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setOrigin(window.location.origin)
     }
   }, [])
+
+  useEffect(() => {
+    if (albumInfo) {
+      setEditName(albumInfo.name || '')
+      setEditClientName(albumInfo.clientName || '')
+      setDisplayName(albumInfo.name || '')
+      setDisplayClientName(albumInfo.clientName || '')
+      setEditCoverPhotoId(albumInfo.coverPhotoId ?? null)
+      if (albumInfo.downloadEnabled !== undefined) {
+        setDownloadsOn(albumInfo.downloadEnabled)
+      }
+      if (albumInfo.hasPassword !== undefined) {
+        setHasPass(albumInfo.hasPassword)
+      }
+    }
+  }, [albumInfo])
+
+  async function handleToggleDownloads() {
+    if (!albumInfo?.id) return
+    const targetState = !downloadsOn
+    setDownloadsOn(targetState)
+    setTogglingDownloads(true)
+    try {
+      const res = await fetch(`/api/albums/${albumInfo.id}/download-toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: targetState }),
+      })
+      if (!res.ok) {
+        setDownloadsOn(!targetState)
+      } else {
+        router.refresh()
+      }
+    } catch {
+      setDownloadsOn(!targetState)
+    } finally {
+      setTogglingDownloads(false)
+    }
+  }
+
+  async function handleSavePassword(passValue: string | null) {
+    if (!albumInfo?.id) return
+    setPasswordLoading(true)
+    setPasswordError(null)
+    try {
+      const res = await fetch(`/api/albums/${albumInfo.id}/password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passValue }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setPasswordError(data.error ?? 'Failed to update password')
+        return
+      }
+      setHasPass(Boolean(passValue))
+      setPasswordInput('')
+      setShowPasswordModal(false)
+      router.refresh()
+    } catch {
+      setPasswordError('Network error — please try again.')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  async function handleQuickUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!albumInfo?.id) return
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setUploadingPhotos(true)
+    setUploadError(null)
+    try {
+      for (const file of Array.from(files)) {
+        const formData = new FormData()
+        formData.set('file', file)
+        const res = await fetch(`/api/albums/${albumInfo.id}/photos`, {
+          method: 'POST',
+          body: formData,
+        })
+        if (!res.ok) {
+          const data = await res.json()
+          setUploadError(data.error ?? 'Something went wrong while uploading.')
+          setUploadingPhotos(false)
+          return
+        }
+      }
+      router.refresh()
+    } catch {
+      setUploadError('Network error — please check your connection.')
+    } finally {
+      setUploadingPhotos(false)
+    }
+  }
+
+  async function handleSaveInfo(e: React.FormEvent) {
+    e.preventDefault()
+    if (!albumInfo?.id) return
+    setSavingInfo(true)
+    setInfoError(null)
+    try {
+      const payload: { name: string; clientName: string; coverPhotoId?: string | null } = {
+        name: editName,
+        clientName: editClientName,
+      }
+      if (editCoverPhotoId !== (albumInfo.coverPhotoId ?? null)) {
+        payload.coverPhotoId = editCoverPhotoId
+      }
+      const res = await fetch(`/api/albums/${albumInfo.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        let errorMsg = 'Failed to update album info'
+        try {
+          const data = await res.json()
+          if (data.error) errorMsg = data.error
+        } catch {
+          try {
+            const text = await res.text()
+            if (text) errorMsg = text.slice(0, 100)
+          } catch {}
+        }
+        setInfoError(errorMsg)
+        return
+      }
+      const updated = await res.json()
+      setDisplayName(updated.name ?? editName)
+      setDisplayClientName(updated.clientName ?? editClientName)
+      if (updated.coverPhotoId !== undefined) {
+        setEditCoverPhotoId(updated.coverPhotoId)
+      }
+      setIsEditingInfo(false)
+      router.refresh()
+    } catch {
+      setInfoError('Network error — please try again.')
+    } finally {
+      setSavingInfo(false)
+    }
+  }
+
+  async function handleDeleteAlbum() {
+    if (!albumInfo?.id) return
+    setDeletingAlbum(true)
+    setDeleteAlbumError(null)
+    try {
+      const res = await fetch(`/api/albums/${albumInfo.id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        setIsDeletingAlbum(false)
+        router.push('/albums')
+      } else {
+        let err = 'Could not delete album.'
+        try {
+          const d = await res.json()
+          if (d.error) err = d.error
+        } catch {}
+        setDeleteAlbumError(err)
+        setDeletingAlbum(false)
+      }
+    } catch {
+      setDeleteAlbumError('Network error while deleting album.')
+      setDeletingAlbum(false)
+    }
+  }
 
   function handleCopyShareLink() {
     if (!albumInfo?.shareToken) return
@@ -94,80 +308,441 @@ export function PhotographerGallery({
       {albumInfo && (
         <div className={styles.banner}>
           <div className={styles.bannerLeft}>
+            <Link href="/albums" className={styles.backToMenuBtn} aria-label="Back to main menu">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+              </svg>
+              <span>Back to Main Menu</span>
+            </Link>
             <div className={styles.modeBadgeRow}>
               <span className={styles.modeBadge}>Photographer Mode</span>
               {albumInfo.photographerName && (
                 <span className={styles.idText}>• by {albumInfo.photographerName}</span>
               )}
             </div>
-            <div className={styles.albumTitleGroup}>
-              <div className={styles.titleLine}>
-                <span className={styles.titleLabel}>Album:</span> {albumInfo.name || 'Untitled Album'}
+            {isEditingInfo ? (
+              <form onSubmit={handleSaveInfo} className={styles.editInfoForm}>
+                <div className={styles.editFieldRow}>
+                  <label className={styles.titleLabel}>Album:</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                    className={styles.editInput}
+                    placeholder="Album title"
+                  />
+                </div>
+                <div className={styles.editFieldRow}>
+                  <label className={styles.titleLabel}>Client:</label>
+                  <input
+                    type="text"
+                    value={editClientName}
+                    onChange={(e) => setEditClientName(e.target.value)}
+                    className={styles.editInput}
+                    placeholder="Client name"
+                  />
+                </div>
+                <div className={styles.editFieldRow}>
+                  <label className={styles.titleLabel}>Cover:</label>
+                  <div className={styles.editCoverPicker}>
+                    <select
+                      value={editCoverPhotoId ?? ''}
+                      onChange={(e) => setEditCoverPhotoId(e.target.value ? e.target.value : null)}
+                      className={styles.editSelect}
+                    >
+                      <option value="">-- No Cover Photo --</option>
+                      {photos.map((photo, idx) => (
+                        <option key={photo.id} value={photo.id}>
+                          {photo.name ? `${photo.name} (#${idx + 1})` : `Photo #${idx + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                {infoError && <div role="alert" className={styles.editError}>{infoError}</div>}
+                <div className={styles.editBtnRow}>
+                  <button type="submit" disabled={savingInfo} className={styles.saveInfoBtn}>
+                    {savingInfo ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditingInfo(false)
+                      setInfoError(null)
+                      setEditName(displayName)
+                      setEditClientName(displayClientName)
+                      setEditCoverPhotoId(albumInfo.coverPhotoId ?? null)
+                    }}
+                    disabled={savingInfo}
+                    className={styles.cancelInfoBtn}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className={styles.albumTitleGroup}>
+                <div className={styles.titleLineHeader}>
+                  <div>
+                    <div className={styles.titleLine}>
+                      <span className={styles.titleLabel}>Album:</span> {displayName || 'Untitled Album'}
+                    </div>
+                    <div className={styles.titleLine}>
+                      <span className={styles.titleLabel}>Client:</span> {displayClientName || 'None'}
+                    </div>
+                  </div>
+                  {albumInfo.id && (
+                    <div style={{ position: 'relative', display: 'inline-flex', marginLeft: 12 }}>
+                      <AlbumActionMenu
+                        onEdit={() => {
+                          setIsDeletingAlbum(false)
+                          setIsEditingInfo(true)
+                        }}
+                        onCopyLink={handleCopyShareLink}
+                        copied={copied}
+                        onDelete={() => {
+                          setIsEditingInfo(false)
+                          setIsDeletingAlbum(true)
+                        }}
+                        direction="down"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className={styles.titleLine}>
-                <span className={styles.titleLabel}>Client:</span> {albumInfo.clientName || 'None'}
-              </div>
-            </div>
+            )}
             <div className={styles.bannerMeta}>
-              <div>📅 <span>{albumInfo.date || 'Gần đây'}</span></div>
-              <div>📂 <span>{photos.length}</span></div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <CalendarOutlineIcon size={15} />
+                <span>{albumInfo.date || 'Recent'}</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <FolderOutlineIcon size={15} />
+                <span>{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
+              </div>
             </div>
           </div>
           {albumInfo.shareToken && (
             <div className={styles.bannerRight}>
-              <div className={styles.shareCard}>
-                <div className={styles.shareHeader}>Client Access Link</div>
-                <div className={styles.shareRow}>
-                  <a
-                    href={shareUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.shareLink}
-                    title={shareUrl}
-                  >
-                    {shareUrl.length > 36 ? `${shareUrl.slice(0, 22)}...${shareUrl.slice(-10)}` : shareUrl}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={handleCopyShareLink}
-                    className={styles.copyBtn}
-                    aria-label="Copy link"
-                  >
-                    {copied ? '✓ Copied' : 'Copy link'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowQr((prev) => !prev)}
-                    className={`${styles.qrBtn} ${showQr ? styles.qrBtnActive : ''}`}
-                    aria-label="Toggle QR code"
-                    aria-expanded={showQr}
-                  >
-                    QR Code
-                  </button>
-                </div>
-                {copied && (
-                  <div role="alert" className={styles.copiedFeedback}>
-                    Copied to clipboard!
+              <div className={styles.topActionBar}>
+                {/* 1. Quick Upload Icon Button */}
+                <label className={styles.topActionBtn} title="Quick upload delivery photos" style={{ cursor: uploadingPhotos ? 'not-allowed' : 'pointer' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span>{uploadingPhotos ? 'Uploading...' : 'Upload'}</span>
+                  <input
+                    aria-label="Quick upload photos"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleQuickUpload}
+                    style={{ display: 'none' }}
+                    disabled={uploadingPhotos}
+                  />
+                </label>
+
+                {/* 2. Toggle Downloads Pill Switch */}
+                <button
+                  type="button"
+                  onClick={handleToggleDownloads}
+                  disabled={togglingDownloads}
+                  className={`${styles.topToggleBtn} ${downloadsOn ? styles.topToggleBtnActive : ''}`}
+                  title={downloadsOn ? 'Client downloads: ON' : 'Client downloads: OFF'}
+                  aria-label="Toggle client photo downloads"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  <span>Downloads: {downloadsOn ? 'ON' : 'OFF'}</span>
+                  <div className={styles.switchTrack}>
+                    <div className={styles.switchThumb} />
                   </div>
-                )}
-                {showQr && (
-                  <div className={styles.qrPopup}>
-                    <div className={styles.qrBox}>
-                      <QRCodeSVG value={origin ? `${origin}/a/${albumInfo.shareToken}` : `/a/${albumInfo.shareToken}`} size={120} level="M" />
-                    </div>
-                    <span className={styles.qrHint}>Scan with phone to open album</span>
-                  </div>
-                )}
+                </button>
+
+                {/* 3. Album Password Icon Button */}
+                <button
+                  type="button"
+                  onClick={() => { setPasswordError(null); setPasswordInput(''); setShowPasswordModal(true); }}
+                  className={`${styles.topActionBtn} ${hasPass ? styles.topActionBtnSecured : ''}`}
+                  title={hasPass ? 'Album protected by secret password' : 'Configure album password'}
+                  aria-label="Configure album password"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <span>{hasPass ? 'Secured' : 'Pass: OFF'}</span>
+                </button>
+
+                {/* 4. Share to Client Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowQr(true)}
+                  className={styles.shareMainBtn}
+                  aria-label="Toggle QR code / Share album"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                    <polyline points="16 6 12 2 8 6"/>
+                    <line x1="12" y1="2" x2="12" y2="15"/>
+                  </svg>
+                  <span>Share</span>
+                </button>
               </div>
             </div>
           )}
         </div>
       )}
 
+      {/* Share to client Popup Modal with blurred background overlay */}
+      {showQr && albumInfo?.shareToken && (
+        <div
+          className={styles.shareModalOverlay}
+          onClick={() => setShowQr(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Share to client Modal"
+        >
+          <div className={styles.shareModalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.shareModalHeader}>
+              <div>
+                <h2 className={styles.shareModalTitle}>Share to client</h2>
+                <p className={styles.shareModalSubtitle}>Scan the QR code or copy the full access link below to share with your client.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQr(false)}
+                className={styles.shareModalCloseBtn}
+                aria-label="Close modal"
+              >
+                <CloseOutlineIcon size={16} />
+              </button>
+            </div>
+
+            <div className={styles.shareModalQrContainer}>
+              <div className={styles.shareModalQrCard}>
+                <QRCodeSVG value={shareUrl} size={220} level="M" />
+              </div>
+              <span className={styles.shareModalQrHint}>
+                <PhoneOutlineIcon size={15} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                Scan with camera or QR reader on phone
+              </span>
+            </div>
+
+            <div className={styles.shareModalLinkRow}>
+              <div className={styles.shareModalLinkBox}>
+                <input
+                  type="text"
+                  readOnly
+                  value={shareUrl}
+                  className={styles.shareModalLinkInput}
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                  aria-label="Full client access link URL"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyShareLink}
+                className={`${styles.shareModalCopyBtn} ${copied ? styles.shareModalCopyBtnActive : ''}`}
+                aria-label="Copy link"
+              >
+                {copied ? (
+                  <>
+                    <CheckOutlineIcon size={15} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} /> Copied
+                  </>
+                ) : (
+                  <>
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {copied && (
+              <div role="alert" className={styles.shareModalCopiedAlert}>
+                Link copied to clipboard!
+              </div>
+            )}
+
+            {/* Album Customization Options inside Share Modal */}
+            <div className={styles.shareModalOptionsSection}>
+              <h4 className={styles.shareModalOptionsHeading}>Access Permissions & Security</h4>
+
+              <div className={styles.shareModalOptionRow}>
+                <div className={styles.shareModalOptionInfo}>
+                  <span className={styles.shareModalOptionTitle}>Allow client photo downloads</span>
+                  <span className={styles.shareModalOptionDesc}>Let clients download high-resolution and preview photos</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleToggleDownloads}
+                  disabled={togglingDownloads}
+                  className={`${styles.toggleSwitch} ${downloadsOn ? styles.toggleSwitchActive : ''}`}
+                  aria-label="Toggle downloads in share modal"
+                >
+                  <div className={styles.toggleSwitchThumb} />
+                </button>
+              </div>
+
+              <div className={styles.shareModalOptionRow}>
+                <div className={styles.shareModalOptionInfo}>
+                  <span className={styles.shareModalOptionTitle}>Password protection</span>
+                  <span className={styles.shareModalOptionDesc}>
+                    {hasPass ? 'Client must enter secret password before viewing album' : 'No password set (accessible directly via link)'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setPasswordError(null); setPasswordInput(''); setShowPasswordModal(true); }}
+                  className={styles.passwordModalTriggerBtn}
+                >
+                  {hasPass ? 'Change pass' : '+ Set pass'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Configuration Popup Modal */}
+      {showPasswordModal && (
+        <div
+          className={styles.passwordModalOverlay}
+          onClick={() => setShowPasswordModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Configure Album Password Modal"
+        >
+          <div className={styles.passwordModalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.shareModalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <LockOutlineIcon size={20} />
+                <div>
+                  <h2 className={styles.shareModalTitle}>Album Password</h2>
+                  <p className={styles.shareModalSubtitle}>Protect your client gallery with a secret password or remove existing protection.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPasswordModal(false)}
+                className={styles.shareModalCloseBtn}
+                aria-label="Close password modal"
+              >
+                <CloseOutlineIcon size={16} />
+              </button>
+            </div>
+
+            <div className={styles.passwordInputContainer}>
+              <label htmlFor="modal-album-pass" className={styles.passwordLabel}>Secret Password</label>
+              <input
+                id="modal-album-pass"
+                type="password"
+                placeholder="Enter new album password..."
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                className={styles.passwordInput}
+              />
+              {passwordError && (
+                <div role="alert" className={styles.passwordAlert} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <WarningOutlineIcon size={16} />
+                  <span>{passwordError}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.passwordActions}>
+              {hasPass && (
+                <button
+                  type="button"
+                  onClick={() => handleSavePassword(null)}
+                  disabled={passwordLoading}
+                  className={styles.btnRemovePass}
+                >
+                  {passwordLoading ? 'Saving...' : 'Remove password'}
+                </button>
+              )}
+              <div style={{ flex: 1 }} />
+              <button
+                type="button"
+                onClick={() => handleSavePassword(passwordInput || null)}
+                disabled={passwordLoading}
+                className={styles.btnSavePass}
+              >
+                {passwordLoading ? 'Saving...' : (hasPass ? 'Change password' : 'Save password')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Album Confirmation Modal */}
+      {isDeletingAlbum && (
+        <div
+          className={styles.passwordModalOverlay}
+          onClick={() => setIsDeletingAlbum(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Delete Album Confirmation Modal"
+        >
+          <div className={styles.passwordModalCard} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <div className={styles.shareModalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <DeleteOutlineIcon size={20} style={{ color: '#ff5c5c' }} />
+                <div>
+                  <h2 className={styles.shareModalTitle} style={{ color: '#ff5c5c' }}>Delete Album</h2>
+                  <p className={styles.shareModalSubtitle}>
+                    Are you sure you want to permanently delete <strong>&quot;{albumInfo?.name}&quot;</strong>? All photos, likes, and comments will be removed immediately.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDeletingAlbum(false)}
+                className={styles.shareModalCloseBtn}
+                aria-label="Close delete modal"
+              >
+                <CloseOutlineIcon size={16} />
+              </button>
+            </div>
+
+            {deleteAlbumError && <div className={styles.editError} style={{ marginTop: 10 }}>{deleteAlbumError}</div>}
+            <div className={styles.passwordActions}>
+              <button
+                type="button"
+                onClick={() => setIsDeletingAlbum(false)}
+                disabled={deletingAlbum}
+                className={styles.btnRemovePass}
+              >
+                Cancel
+              </button>
+              <div style={{ flex: 1 }} />
+              <button
+                type="button"
+                onClick={handleDeleteAlbum}
+                disabled={deletingAlbum}
+                className={styles.btnSavePass}
+                style={{ backgroundColor: '#ff5c5c', color: '#fff' }}
+              >
+                {deletingAlbum ? 'Deleting...' : 'Yes, Delete Album'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Grid Toolbar Controls matching AI Studio layout */}
       <div className={styles.toolbar}>
         <div className={styles.searchBox}>
-          <span className={styles.searchIcon}>🔍</span>
+          <span className={styles.searchIcon}>
+            <SearchOutlineIcon size={16} />
+          </span>
           <input
             type="text"
             placeholder="Search photos by title or ID..."
@@ -224,7 +799,9 @@ export function PhotographerGallery({
       {/* Photo Grid or Empty State */}
       {processedPhotos.length === 0 ? (
         <div className={styles.emptyState}>
-          <div style={{ fontSize: '2rem' }}>🖼️</div>
+          <div style={{ color: 'var(--text-muted, #a1a1aa)' }}>
+            <FolderOutlineIcon size={40} />
+          </div>
           <h3 className={styles.emptyTitle}>No Matching Photos Found</h3>
           <p className={styles.emptyText}>
             Adjust your search queries or category filters to list the matching client delivery photo cards.

@@ -77,11 +77,11 @@ describe('ClientGallery', () => {
   it('shows the suggested-by-photographer note on the tile and in the lightbox for a suggested photo', () => {
     render(<ClientGallery photos={photos} canDownload={false} />)
 
-    expect(screen.getByText('⭐ Suggested by photographer')).toBeTruthy()
+    expect(screen.getByText('Suggested by photographer')).toBeTruthy()
 
     fireEvent.click(screen.getAllByRole('button', { name: /open photo/i })[1])
 
-    expect(screen.getAllByText('⭐ Suggested by photographer')).toHaveLength(2)
+    expect(screen.getAllByText('Suggested by photographer')).toHaveLength(2)
   })
 
   it('does not show the suggested note for a photo with no photographer like', () => {

@@ -116,8 +116,8 @@
 }
 
 .checkCircleActive {
-  background: #3b82f6 !important;
-  border-color: #ffffff !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .checkCircleBtn:hover:not(:disabled) {
@@ -126,7 +126,7 @@
 }
 
 .checkCircleActive:hover:not(:disabled) {
-  background: #2563eb !important;
+  background: rgba(0, 0, 0, 0.75) !important;
 }
 
 .quickActions {

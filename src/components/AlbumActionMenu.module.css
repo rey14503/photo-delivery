@@ -1,0 +1,148 @@
+.container {
+  position: relative;
+  display: inline-flex;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(36, 36, 42, 0.9);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+.trigger:hover {
+  background: var(--accent, #e5532d);
+  border-color: var(--accent, #e5532d);
+  color: #ffffff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(229, 83, 45, 0.45);
+}
+
+.triggerActive {
+  background: var(--accent, #e5532d);
+  color: #ffffff;
+  border-color: var(--accent, #e5532d);
+  box-shadow: 0 0 0 3px rgba(229, 83, 45, 0.4);
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  z-index: 80;
+  min-width: 210px;
+  border-radius: 10px;
+  background-color: var(--card-bg, #181820);
+  border: 1px solid var(--border-color, #2d2d38);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 6px 0;
+  list-style: none;
+  margin: 0;
+}
+
+.menuDown {
+  top: calc(100% + 8px);
+  bottom: auto;
+  animation: fadeInDown 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menuUp {
+  bottom: calc(100% + 8px);
+  top: auto;
+  animation: fadeInUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.menuItemWrapper {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.itemBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main, #fff);
+  background: transparent;
+  border: none;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.itemBtn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.itemBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.menuIcon {
+  flex-shrink: 0;
+  color: #a0a0ab;
+  transition: color 0.15s ease;
+}
+
+.itemBtn:hover .menuIcon {
+  color: #ffffff;
+}
+
+.itemDelete {
+  color: #ff5c5c;
+}
+
+.itemDelete .menuIcon {
+  color: #ff5c5c;
+}
+
+.itemDelete:hover:not(:disabled) {
+  background-color: rgba(255, 92, 92, 0.14);
+  color: #ff6e6e;
+}
+
+.itemDelete:hover:not(:disabled) .menuIcon {
+  color: #ff6e6e;
+}
+
+.menuDivider {
+  height: 1px;
+  background-color: var(--border-color, #2d2d38);
+  margin: 6px 0;
+}

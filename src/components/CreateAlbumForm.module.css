@@ -138,6 +138,19 @@
   font-size: 0.85rem;
 }
 
+.successAlert {
+  padding: 14px 16px;
+  border-radius: var(--radius-md, 12px);
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgb(16, 185, 129);
+  color: #10b981;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .actions {
   padding-top: 16px;
   border-top: 1px solid var(--border-subtle);

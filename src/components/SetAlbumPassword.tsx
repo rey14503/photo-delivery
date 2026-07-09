@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import { LockOutlineIcon } from './PhotoIcons'
 import styles from './AlbumControls.module.css'
 
 async function submitPassword(albumId: string, password: string | null) {
@@ -21,23 +22,31 @@ export function SetAlbumPassword({
 }) {
   const router = useRouter()
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSetSubmit(e: FormEvent) {
     e.preventDefault()
-    await run(password)
-  }
-
-  async function handleRemove() {
-    await run(null)
-  }
-
-  async function run(value: string | null) {
     setSubmitting(true)
     setError(null)
     try {
-      const res = await submitPassword(albumId, value)
+      const res = await submitPassword(albumId, password.trim() || null)
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string }
+        setError(data.error ?? 'Save failed')
+      } else {
+        router.refresh()
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleRemove() {
+    setSubmitting(true)
+    setError(null)
+    try {
+      const res = await submitPassword(albumId, null)
       if (!res.ok) {
         const data = await res.json()
         setError(data.error ?? 'Something went wrong')
@@ -57,7 +66,9 @@ export function SetAlbumPassword({
       <form onSubmit={handleSetSubmit} className={styles.cardRow}>
         <div>
           <label className={styles.label}>
-            <span>🔐 Album password</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <LockOutlineIcon size={16} /> Album password
+            </span>
             <input
               aria-label="Album password"
               type="text"

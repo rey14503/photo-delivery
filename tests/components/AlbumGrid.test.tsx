@@ -22,7 +22,7 @@ describe('AlbumGrid', () => {
   it('renders inline create album card as first item alongside album cards', () => {
     render(<AlbumGrid albums={albums} />)
 
-    expect(screen.getByRole('button', { name: /tạo album mới trong danh sách/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /create new album in list/i })).toBeInTheDocument()
     expect(screen.getByText('Album 1')).toBeInTheDocument()
   })
 
@@ -30,7 +30,7 @@ describe('AlbumGrid', () => {
     render(<AlbumGrid albums={albums} />)
 
     expect(screen.queryByRole('dialog')).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: /tạo album mới trong danh sách/i }))
+    fireEvent.click(screen.getByRole('button', { name: /create new album in list/i }))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 })

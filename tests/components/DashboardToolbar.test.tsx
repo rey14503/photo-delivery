@@ -6,8 +6,8 @@ describe('DashboardToolbar', () => {
   it('renders dashboard title and correct metric counters', () => {
     render(<DashboardToolbar albumCount={5} photoCount={128} />)
 
-    expect(screen.getByText('Bảng điều khiển')).toBeInTheDocument()
-    expect(screen.getByText('Tổng số album: 5')).toBeInTheDocument()
-    expect(screen.getByText('Tổng số ảnh: 128')).toBeInTheDocument()
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+    expect(screen.getByText('Total albums: 5')).toBeInTheDocument()
+    expect(screen.getByText('Total photos: 128')).toBeInTheDocument()
   })
 })

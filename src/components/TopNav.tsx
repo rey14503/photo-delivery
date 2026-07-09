@@ -24,11 +24,11 @@ export function TopNav({ userName, userEmail, onCreateClick }: TopNavProps) {
         </Link>
         {onCreateClick ? (
           <button type="button" onClick={onCreateClick} className={styles.primaryBtn}>
-            + Tạo album
+            + Create Album
           </button>
         ) : (
           <Link href="/albums/new" className={styles.primaryBtn}>
-            + Tạo album
+            + Create Album
           </Link>
         )}
       </div>
@@ -38,9 +38,9 @@ export function TopNav({ userName, userEmail, onCreateClick }: TopNavProps) {
           type="button"
           onClick={() => signOut({ callbackUrl: '/login' })}
           className={styles.signOut}
-          aria-label="Đăng xuất"
+          aria-label="Sign out"
         >
-          Đăng xuất
+          Sign out
         </button>
       </div>
     </header>

@@ -5,6 +5,14 @@ import { PhotoTile } from './PhotoTile'
 import { PhotoLightbox } from './PhotoLightbox'
 import { useLikeToggle } from '@/lib/hooks/useLikeToggle'
 import type { ThreadComment } from './CommentThread'
+import {
+  CalendarOutlineIcon,
+  FolderOutlineIcon,
+  LockOutlineIcon,
+  SearchOutlineIcon,
+  BoltOutlineIcon,
+  StarIcon,
+} from './PhotoIcons'
 import styles from './ClientGallery.module.css'
 
 interface GalleryPhoto {
@@ -65,28 +73,31 @@ export function ClientGallery({
       {/* Client Shared Album Banner */}
       <div className={styles.banner}>
         <div className={styles.bannerLeft}>
-          <span className={styles.sharedAccessBadge}>
-            🛡️ Shared Gallery Access {albumInfo?.clientActorName ? `• ${albumInfo.clientActorName}` : ''}
+          <span className={styles.sharedAccessBadge} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <LockOutlineIcon size={14} /> Shared Gallery Access {albumInfo?.clientActorName ? `• ${albumInfo.clientActorName}` : ''}
           </span>
           <h1 className={styles.albumTitle}>{albumInfo?.title || 'Shared Album Gallery'}</h1>
           <p className={styles.deliveredBy}>
             Delivered by <span className={styles.brandHighlight}>BK Media Box</span> • Professional Client Portal
           </p>
           <div className={styles.bannerMeta}>
-            <div>📍 <span>{albumInfo?.location || 'Studio'}</span></div>
-            <div>📅 <span>{albumInfo?.date || 'Gần đây'}</span></div>
-            <div>📂 <span>{photos.length} photos delivered</span></div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <CalendarOutlineIcon size={15} />
+              <span>{albumInfo?.date || 'Recent'}</span>
+            </div>
           </div>
         </div>
 
         <div className={styles.bannerRight}>
           {canDownload && albumId ? (
-            <a href={`/api/albums/${albumId}/download-all`} className={styles.downloadAllBtn}>
-              ⬇️ Download all ({selectedCount > 0 ? `${selectedCount} selected` : 'ZIP'})
+            <a href={`/api/albums/${albumId}/download-all`} className={styles.downloadAllBtn} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <BoltOutlineIcon size={16} /> Download all ({selectedCount > 0 ? `${selectedCount} selected` : 'ZIP'})
             </a>
           ) : !canDownload ? (
             <div className={styles.disabledNotice}>
-              <div className={styles.disabledTitle}>🔒 Original Downloads Disabled</div>
+              <div className={styles.disabledTitle} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <LockOutlineIcon size={16} /> Original Downloads Disabled
+              </div>
               <div>The photographer has restricted access to compressed previews only.</div>
             </div>
           ) : null}
@@ -96,7 +107,9 @@ export function ClientGallery({
       {/* Grid Toolbar Controls matching AI Studio layout */}
       <div className={styles.toolbar}>
         <div className={styles.searchBox}>
-          <span className={styles.searchIcon}>🔍</span>
+          <span className={styles.searchIcon}>
+            <SearchOutlineIcon size={16} />
+          </span>
           <input
             type="text"
             placeholder="Search shared photos..."
@@ -141,7 +154,9 @@ export function ClientGallery({
       {/* Grid List or Empty State */}
       {processedPhotos.length === 0 ? (
         <div className={styles.emptyState}>
-          <div style={{ fontSize: '2rem' }}>🖼️</div>
+          <div style={{ color: 'var(--text-muted, #a1a1aa)' }}>
+            <FolderOutlineIcon size={40} />
+          </div>
           <div style={{ fontWeight: 600 }}>No Matching Photos Found</div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             Adjust your search queries or category filters to view delivered photos.
@@ -200,7 +215,7 @@ function ClientPhotoTile({
         name={photo.name}
         photographerName={photographerName}
         version={photo.version}
-        statusNote={photo.suggestedByPhotographer ? '⭐ Suggested by photographer' : undefined}
+        statusNote={photo.suggestedByPhotographer ? 'Suggested by photographer' : undefined}
         liked={photo.likedByMe}
         likeIcon="heart"
         likeLabel={photo.likedByMe ? 'Unselect this photo' : 'Select this photo'}
@@ -242,7 +257,7 @@ function ClientPhotoLightbox({
         photoId={photo.id}
         previewUrl={photo.previewUrl}
         name={photo.name}
-        statusNote={photo.suggestedByPhotographer ? '⭐ Suggested by photographer' : undefined}
+        statusNote={photo.suggestedByPhotographer ? 'Suggested by photographer' : undefined}
         liked={photo.likedByMe}
         likeIcon="heart"
         likeLabel={photo.likedByMe ? 'Unselect this photo' : 'Select this photo'}

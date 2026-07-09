@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { MoreActionsIcon } from './PhotoIcons'
 import styles from './PhotoActionMenu.module.css'
 
 export interface PhotoActionMenuProps {
@@ -64,7 +65,7 @@ export function PhotoActionMenu({
           setOpen((prev) => !prev)
         }}
       >
-        ⋮
+        <MoreActionsIcon size={20} />
       </button>
       {open && (
         <ul role="menu" className={`${styles.menu} ${direction === 'up' ? styles.menuUp : styles.menuDown}`}>
@@ -105,8 +106,8 @@ export function PhotoActionMenu({
               className={styles.itemBtn}
               onClick={(e) => {
                 e.stopPropagation()
-                onViewComments()
                 setOpen(false)
+                onViewComments()
               }}
             >
               View comments ({commentCount})

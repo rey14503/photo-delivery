@@ -6,9 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { canManageAlbum } from '@/lib/album-permissions'
 import { getDriveClientForUser } from '@/lib/drive'
 import { deleteAlbumIfDriveFolderGone } from '@/lib/album-lifecycle'
-import { UploadPhotos } from '@/components/UploadPhotos'
-import { SetAlbumPassword } from '@/components/SetAlbumPassword'
-import { DownloadToggle } from '@/components/DownloadToggle'
+import { TopNav } from '@/components/TopNav'
 import { PhotographerGallery } from '@/components/PhotographerGallery'
 import styles from './page.module.css'
 
@@ -43,11 +41,19 @@ export default async function AlbumDetailPage({
     notFound()
   }
 
-  const drive = getDriveClientForUser(album.owner)
-  const wasDeleted = await deleteAlbumIfDriveFolderGone(drive, {
-    id: album.id,
-    driveFolderId: album.driveFolderId,
-  })
+  let wasDeleted = false
+  try {
+    const drive = getDriveClientForUser(album.owner)
+    wasDeleted = await deleteAlbumIfDriveFolderGone(drive, {
+      id: album.id,
+      driveFolderId: album.driveFolderId,
+    })
+  } catch (error: any) {
+    console.warn('[page.tsx] Warning: Could not check Drive folder status for album:', album.id, {
+      message: error?.message,
+      code: error?.code,
+    })
+  }
   if (wasDeleted) {
     return (
       <div className={styles.fallbackContainer}>
@@ -98,29 +104,18 @@ export default async function AlbumDetailPage({
     photographerName: album.owner?.name ?? album.owner?.email ?? 'Photographer',
     shareToken: album.shareToken,
     date: new Date(album.createdAt).toLocaleDateString('vi-VN'),
+    downloadEnabled: album.downloadEnabled,
+    hasPassword: Boolean(album.passwordHash),
+    coverPhotoId: album.coverPhotoId ?? null,
   }
 
   return (
-    <main className={styles.page}>
-      {/* 1. Photographer Gallery Header Banner, Search/Filter Toolbar, and Photo Cards */}
-      <PhotographerGallery photos={photos} albumInfo={albumInfo} />
-
-      {/* 2. Management Controls Section matching AI Studio Studio Settings */}
-      <div>
-        <div className={styles.sectionHeader}>
-          <div>
-            <h3 className={styles.sectionTitle}>⚙️ Album Management & Security Settings</h3>
-            <p className={styles.sectionSub}>
-              Configure client portal permissions, password verification, and upload high-resolution delivery batches.
-            </p>
-          </div>
-        </div>
-        <div className={styles.controlsGrid} style={{ marginTop: 16 }}>
-          <SetAlbumPassword albumId={album.id} hasPassword={Boolean(album.passwordHash)} />
-          <DownloadToggle albumId={album.id} downloadEnabled={album.downloadEnabled} />
-          <UploadPhotos albumId={album.id} />
-        </div>
-      </div>
-    </main>
+    <>
+      <TopNav userName={session.user.name} userEmail={session.user.email} />
+      <main className={styles.page}>
+        {/* Photographer Gallery with Integrated Top Management Controls & Share Modal */}
+        <PhotographerGallery photos={photos} albumInfo={albumInfo} />
+      </main>
+    </>
   )
 }

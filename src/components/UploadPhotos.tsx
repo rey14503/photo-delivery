@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import { CameraOutlineIcon } from './PhotoIcons'
 import styles from './AlbumControls.module.css'
 
 export function UploadPhotos({ albumId }: { albumId: string }) {
@@ -43,7 +44,9 @@ export function UploadPhotos({ albumId }: { albumId: string }) {
       <div className={styles.cardRow}>
         <div>
           <div className={styles.label}>
-            <span>📤 Upload photos & Sync</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <CameraOutlineIcon size={16} /> Upload photos & Sync
+            </span>
           </div>
           <div className={styles.subText}>
             Select multiple high-resolution images to add directly to this client gallery.

@@ -2,9 +2,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
-  background-color: var(--bg-surface);
-  border-bottom: 1px solid var(--border-color);
+  padding: 14px 28px;
+  background-color: var(--bg-base, #121214);
+  border-bottom: 1px solid var(--border-color, #2e2e33);
+  color: var(--text-main, #f4f4f5);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -21,12 +22,13 @@
   align-items: center;
   gap: 10px;
   font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text-main);
+  font-size: 1.15rem;
+  color: var(--text-main, #f4f4f5);
+  text-decoration: none;
 }
 
 .brandAccent {
-  color: var(--accent);
+  color: var(--accent, #ff5722);
 }
 
 .logo {
@@ -35,21 +37,25 @@
 }
 
 .primaryBtn {
-  background-color: var(--accent);
-  color: var(--text-on-accent);
+  background-color: var(--accent, #ff5722);
+  color: #ffffff;
   border: none;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
+  padding: 8px 18px;
+  border-radius: 999px;
   font-weight: 600;
   font-size: 0.9rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(255, 87, 34, 0.3);
 }
 
 .primaryBtn:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-hover, #e64a19);
+  transform: translateY(-1px);
 }
 
 .right {
@@ -57,24 +63,28 @@
   align-items: center;
   gap: 16px;
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #a1a1aa);
 }
 
 .user {
-  color: var(--text-main);
-  font-weight: 500;
+  color: var(--text-main, #f4f4f5);
+  font-weight: 600;
 }
 
 .signOut {
-  background: transparent;
-  border: none;
-  font: inherit;
-  color: var(--text-muted);
+  background-color: transparent;
+  color: var(--text-muted, #a1a1aa);
+  border: 1px solid var(--border-color, #2e2e33);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0;
-  transition: color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .signOut:hover {
-  color: var(--danger);
+  background-color: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #ef4444;
 }

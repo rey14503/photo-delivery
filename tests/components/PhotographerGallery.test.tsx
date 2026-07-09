@@ -56,7 +56,9 @@ describe('PhotographerGallery', () => {
     render(<PhotographerGallery photos={photos} />)
 
     const suggestButton = screen.getByRole('button', { name: 'Suggest to client' })
-    expect(suggestButton.textContent).toBe('☆')
+    const svgIcon = suggestButton.querySelector('svg')
+    expect(svgIcon).toHaveAttribute('data-icon', 'star')
+    expect(svgIcon).toHaveAttribute('data-filled', 'false')
 
     fireEvent.click(suggestButton)
 
@@ -147,9 +149,57 @@ describe('PhotographerGallery', () => {
     expect(screen.queryByText(/cmrbj8px100018ltoanzqoqyz/)).toBeNull()
     expect(screen.queryByText(/📍/)).toBeNull()
 
-    const copyBtn = screen.getByRole('button', { name: /copy link/i })
-    expect(copyBtn).toBeTruthy()
     const qrBtn = screen.getByRole('button', { name: /toggle qr code/i })
     expect(qrBtn).toBeTruthy()
+    fireEvent.click(qrBtn)
+
+    const copyBtn = screen.getByRole('button', { name: /copy link/i })
+    expect(copyBtn).toBeTruthy()
+  })
+
+  it('renders photo count with items label and allows toggling the edit names form', async () => {
+    const albumInfo = {
+      id: 'cmrbj8px100018ltoanzqoqyz',
+      name: 'Wedding Album',
+      clientName: 'Alice & Bob',
+      photographerName: 'Jane Photographer',
+      shareToken: '1234567890abcdef1234567890abcdef',
+      date: '09/07/2026',
+    }
+    render(<PhotographerGallery photos={photos} albumInfo={albumInfo} />)
+
+    expect(screen.getByText('2 photos')).toBeTruthy()
+
+    const moreMenuBtn = screen.getByRole('button', { name: /more actions menu/i })
+    expect(moreMenuBtn).toBeTruthy()
+    fireEvent.click(moreMenuBtn)
+
+    const editTrigger = screen.getByRole('button', { name: /edit details/i })
+    expect(editTrigger).toBeTruthy()
+
+    fireEvent.click(editTrigger)
+    const albumInput = screen.getByPlaceholderText('Album title')
+    const clientInput = screen.getByPlaceholderText('Client name')
+    expect(albumInput).toHaveValue('Wedding Album')
+    expect(clientInput).toHaveValue('Alice & Bob')
+
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ name: 'New Wedding Album', clientName: 'Charlie & Dave' }),
+    } as never)
+
+    fireEvent.change(albumInput, { target: { value: 'New Wedding Album' } })
+    fireEvent.change(clientInput, { target: { value: 'Charlie & Dave' } })
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('/api/albums/cmrbj8px100018ltoanzqoqyz', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'New Wedding Album', clientName: 'Charlie & Dave' }),
+      })
+      expect(screen.getByText('New Wedding Album')).toBeTruthy()
+      expect(screen.getByText('Charlie & Dave')).toBeTruthy()
+    })
   })
 })

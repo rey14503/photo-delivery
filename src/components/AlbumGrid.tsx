@@ -28,10 +28,15 @@ export function AlbumGrid({ albums, userName, userEmail }: AlbumGridProps) {
             type="button"
             onClick={() => setModalOpen(true)}
             className={styles.createTile}
-            aria-label="Tạo album mới trong danh sách"
+            aria-label="Create new album in list"
           >
-            <span className={styles.iconPlus}>+</span>
-            <span className={styles.labelCreate}>Tạo album mới</span>
+            <div className={styles.iconPlusWrap}>
+              <span>+</span>
+            </div>
+            <span className={styles.labelCreate}>Create Album</span>
+            <span className={styles.descCreate}>
+              Upload photos, generate share links, and collaborate seamlessly with your clients.
+            </span>
           </button>
           {albums.map((album) => (
             <AlbumCard key={album.id} album={album} />

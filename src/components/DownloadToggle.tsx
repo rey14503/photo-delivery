@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { BoltOutlineIcon } from './PhotoIcons'
 import styles from './AlbumControls.module.css'
 
 export function DownloadToggle({
@@ -52,7 +53,9 @@ export function DownloadToggle({
       <div className={styles.cardRow}>
         <div>
           <div className={styles.label}>
-            <span>⚡ Client Downloads</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <BoltOutlineIcon size={16} /> Client Downloads
+            </span>
             <span
               style={{
                 fontSize: '0.7rem',

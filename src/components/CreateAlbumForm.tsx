@@ -13,6 +13,7 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
   const router = useRouter()
   const [name, setName] = useState('')
   const [clientName, setClientName] = useState('')
+  const [driveLink, setDriveLink] = useState('')
 
   // Backed settings toggles
   const [passwordProtected, setPasswordProtected] = useState(false)
@@ -20,17 +21,19 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
   const [downloadEnabled, setDownloadEnabled] = useState(true)
 
   const [error, setError] = useState<string | null>(null)
+  const [importSummary, setImportSummary] = useState<{ imported: number; skipped: number } | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setSubmitting(true)
     setError(null)
+    setImportSummary(null)
     try {
       const res = await fetch('/api/albums', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, clientName }),
+        body: JSON.stringify({ name, clientName, driveLink }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -38,6 +41,10 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
         return
       }
       const album = await res.json()
+
+      if (typeof album.imported === 'number') {
+        setImportSummary({ imported: album.imported, skipped: album.skipped ?? 0 })
+      }
 
       // If password protection is enabled, set album password right away
       if (passwordProtected && albumPassword && album?.id) {
@@ -68,7 +75,7 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
       if (onSuccess) {
         onSuccess()
       } else {
-        router.push('/albums')
+        router.push(album?.id ? `/albums/${album.id}` : '/albums')
       }
       router.refresh()
     } catch {
@@ -80,46 +87,84 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      {/* Album Title */}
+      {/* 1. Google Drive Folder Link */}
+      <div className={styles.field}>
+        <label htmlFor="driveLinkInput" className={styles.labelRow}>
+          <span className={styles.star}>*</span>
+          Google Drive folder link
+        </label>
+        <input
+          id="driveLinkInput"
+          aria-label="Google Drive folder link"
+          type="url"
+          placeholder="https://drive.google.com/drive/folders/..."
+          value={driveLink}
+          onChange={(e) => setDriveLink(e.target.value)}
+          required
+          className={styles.input}
+        />
+      </div>
+
+      {/* 2. Album Title */}
       <div className={styles.field}>
         <label htmlFor="albumNameInput" className={styles.labelRow}>
           <span className={styles.star}>*</span>
-          Tên album (Album name)
+          Album name
         </label>
         <input
           id="albumNameInput"
           aria-label="Album name"
           type="text"
-          placeholder="Tên album"
+          placeholder="Album name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className={styles.input}
         />
       </div>
 
-      {/* Client Name */}
+      {/* 3. Client Name */}
       <div className={styles.field}>
         <label htmlFor="clientNameInput" className={styles.labelRow}>
           <span className={styles.star}>*</span>
-          Tên khách hàng (Client name)
+          Client name
         </label>
         <input
           id="clientNameInput"
           aria-label="Client name"
           type="text"
-          placeholder="Tên khách hàng"
+          placeholder="Client name"
           value={clientName}
           onChange={(e) => setClientName(e.target.value)}
           className={styles.input}
         />
       </div>
 
+      {/* 4. Cover Photo info */}
+      <div className={styles.field}>
+        <label className={styles.labelRow}>
+          Cover photo
+        </label>
+        <div
+          className={styles.input}
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            color: '#a1a1aa',
+            fontSize: '0.85rem',
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'default',
+          }}
+        >
+          ✦ Auto-assign first photo from Drive after import (default)
+        </div>
+      </div>
+
       {/* Settings Section: Backed options only (Rule 4) */}
       <div className={styles.settingsSection}>
-        {/* 1. Bảo vệ album bằng mật khẩu Toggle */}
+        {/* 1. Password Protect Album Toggle */}
         <div>
           <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>Bảo vệ album bằng mật khẩu</span>
+            <span className={styles.settingLabel}>Password protect album</span>
             <button
               type="button"
               aria-pressed={passwordProtected}
@@ -143,7 +188,7 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
             <div className={styles.subInputContainer}>
               <input
                 type="text"
-                placeholder="Nhập mật khẩu truy cập album..."
+                placeholder="Enter album access password..."
                 value={albumPassword}
                 onChange={(e) => setAlbumPassword(e.target.value)}
                 className={styles.input}
@@ -152,9 +197,9 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
           )}
         </div>
 
-        {/* 2. Cho phép tải xuống Toggle */}
+        {/* 2. Enable Original Download Toggle */}
         <div className={styles.settingRow}>
-          <span className={styles.settingLabel}>Cho phép tải xuống gốc</span>
+          <span className={styles.settingLabel}>Allow original photo downloads</span>
           <button
             type="button"
             aria-pressed={downloadEnabled}
@@ -176,6 +221,17 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
         </div>
       </div>
 
+      {importSummary && (
+        <div role="status" className={styles.successAlert}>
+          <div>🎉 Successfully imported {importSummary.imported} {importSummary.imported === 1 ? 'photo' : 'photos'}!</div>
+          {importSummary.skipped > 0 && (
+            <div style={{ fontSize: '0.8rem', fontWeight: 500, opacity: 0.9 }}>
+              (Skipped {importSummary.skipped} non-image {importSummary.skipped === 1 ? 'file' : 'files'})
+            </div>
+          )}
+        </div>
+      )}
+
       {error && (
         <p role="alert" className={styles.alert}>
           {error}
@@ -186,11 +242,11 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
       <div className={styles.actions}>
         {onCancel && (
           <button type="button" onClick={onCancel} className={styles.btnCancel}>
-            Hủy bỏ
+            Cancel
           </button>
         )}
         <button type="submit" disabled={submitting} aria-label="Create album" className={styles.btnSubmit}>
-          {submitting ? 'Creating…' : 'Tạo ngay'}
+          {submitting ? 'Creating…' : 'Create album'}
         </button>
       </div>
     </form>

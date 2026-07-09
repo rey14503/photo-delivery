@@ -2,6 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { AlbumCard } from '@/components/AlbumCard'
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}))
+
 describe('AlbumCard', () => {
   const sampleAlbum = {
     id: 'alb_1',
@@ -34,6 +38,7 @@ describe('AlbumCard', () => {
     Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
 
     render(<AlbumCard album={sampleAlbum} />)
+    fireEvent.click(screen.getByRole('button', { name: /menu tùy chọn/i }))
     fireEvent.click(screen.getByRole('button', { name: /copy link/i }))
 
     await waitFor(() => expect(screen.getByRole('button', { name: /đã copy!/i })).toBeInTheDocument())

@@ -1,102 +1,542 @@
 .card {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 18px;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--card-bg, #1e1e24);
+  color: var(--text-main, #f4f4f5);
+  border: 1px solid var(--border-color, #2e2e33);
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 16px;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.15));
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  border-color: var(--accent, #ff5722);
+  box-shadow: var(--shadow-lg, 0 16px 36px rgba(0, 0, 0, 0.35));
 }
 
-.header {
+.coverContainer {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  background: var(--bg-surface, #1c1c1f);
+  overflow: hidden;
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:hover .coverImage {
+  transform: scale(1.06);
+}
+
+.coverPlaceholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-muted, #a1a1aa);
+  background: radial-gradient(circle at 70% 30%, rgba(255, 87, 34, 0.08) 0%, rgba(0, 0, 0, 0) 60%), linear-gradient(135deg, var(--bg-surface, #1c1c1f) 0%, var(--border-color, #2e2e33) 100%);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.badgePhotoCount {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(15, 23, 42, 0.88);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.deleteCircleBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.85);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+}
+
+.coverContainer:hover .deleteCircleBtn,
+.deleteCircleBtn:hover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.deleteCircleBtn:hover {
+  transform: scale(1.1);
+  background-color: #dc2626;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.6);
+}
+
+.centerButtonsRow {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 6;
+}
+
+.coverContainer:hover .centerButtonsRow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.btnChiTiet {
+  background: #ffffff;
+  color: #0f172a;
+  padding: 11px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  text-decoration: none;
+}
+
+.btnChiTiet:hover {
+  transform: scale(1.04);
+}
+
+.btnChinhSua {
+  background: rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  padding: 11px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.btnChinhSua:hover {
+  transform: scale(1.04);
+  background: rgba(30, 41, 59, 0.98);
+}
+
+.btnIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.contentContainer {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  background: var(--card-bg, #1e1e24);
+  gap: 14px;
 }
 
 .title {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--text-main);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--accent, #ff5722);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+}
+
+.title:hover {
+  text-decoration: underline;
+}
+
+.metaList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-muted, #a1a1aa);
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.client {
-  font-size: 0.88rem;
-  color: var(--text-muted);
-}
-
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.badge {
+.metaIcon {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  background-color: var(--bg-base);
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
+  justify-content: center;
+  color: currentColor;
+  flex-shrink: 0;
 }
 
 .footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid var(--border-color);
-  padding-top: 14px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color, #2e2e33);
 }
 
-.date {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btnView {
-  background-color: var(--accent);
-  color: var(--text-on-accent);
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 0.82rem;
+.dateText {
+  font-size: 0.85rem;
   font-weight: 600;
-  transition: background-color 0.15s ease;
+  color: var(--text-muted, #a1a1aa);
+  font-family: ui-monospace, monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.btnView:hover {
-  background-color: var(--accent-hover);
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.btnCopy {
-  background-color: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border-color);
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 0.82rem;
-  transition: color 0.15s ease, border-color 0.15s ease;
+.statusBadge {
+  background: var(--success-subtle, rgba(16, 185, 129, 0.15));
+  color: var(--success, #10b981);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
-.btnCopy:hover {
-  color: var(--text-main);
-  border-color: var(--text-main);
+.shareIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main, #ffffff);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.shareIconBtn:hover {
+  background: var(--accent, #ff5722);
+  border-color: var(--accent, #ff5722);
+  color: #ffffff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(255, 87, 34, 0.45);
+}
+
+/* Modals (Fixed center overlay so they NEVER overlap or squeeze inside the card) */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 1050;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.18s ease;
+}
+
+.modalCard {
+  background-color: var(--card-bg, #181822);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-sizing: border-box;
+  animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.editTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main, #ffffff);
+  margin: 0;
+}
+
+.editInput {
+  background-color: var(--bg-subtle, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.2));
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text-main, #ffffff);
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: var(--accent, #ff5722);
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.2);
+}
+
+.editBtnRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.saveBtn {
+  background: linear-gradient(135deg, var(--accent, #ff5722) 0%, #e64a19 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+}
+
+.saveBtn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.deleteConfirmBtn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.deleteConfirmBtn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.cancelBtn {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted, #a1a1aa);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+  background-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.confirmBox {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.confirmText {
+  color: var(--text-main, #f4f4f5);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Share to Client Modal styles identical to PhotographerGallery.module.css */
+.shareModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.shareModalTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main, #f3f4f6);
+  margin: 0 0 6px 0;
+  font-family: var(--font-display, sans-serif);
+}
+
+.shareModalSubtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted, #9ca3af);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.shareModalCloseBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--bg-subtle, rgba(255, 255, 255, 0.08));
+  border: none;
+  color: var(--text-muted, #9ca3af);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.shareModalCloseBtn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.shareModalQrContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.shareModalQrCard {
+  background: #ffffff !important;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shareModalQrHint {
+  font-size: 0.8rem;
+  color: var(--text-muted, #9ca3af);
+  font-weight: 500;
+}
+
+.shareModalLinkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--bg-subtle, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.12));
+  border-radius: 14px;
+  padding: 6px 6px 6px 14px;
+}
+
+.shareModalLinkBox {
+  flex: 1;
+  min-width: 0;
+}
+
+.shareModalLinkInput {
+  background: transparent;
+  border: none;
+  color: var(--text-main, #f3f4f6);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  width: 100%;
+  outline: none;
+  padding: 4px 0;
+}
+
+.shareModalCopyBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background-color: var(--accent, #ff5722);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.shareModalCopyBtn:hover {
+  background-color: var(--accent-hover, #ff6e40);
+}
+
+.shareModalCopyBtnActive {
+  background-color: var(--success, #10b981) !important;
 }

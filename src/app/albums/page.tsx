@@ -15,21 +15,35 @@ export default async function AlbumsPage() {
     where: albumScopeFor(session.user),
     orderBy: { createdAt: 'desc' },
     include: {
+      photos: {
+        take: 20,
+        orderBy: { displayOrder: 'asc' },
+        select: { id: true, thumbnailUrl: true, previewUrl: true },
+      },
       _count: {
         select: { photos: true },
+      },
+      owner: {
+        select: { name: true },
       },
     },
   })
 
-  const formattedAlbums = albums.map((alb) => ({
-    id: alb.id,
-    name: alb.name,
-    clientName: alb.clientName,
-    shareToken: alb.shareToken,
-    hasPassword: Boolean(alb.passwordHash),
-    photoCount: alb._count.photos,
-    createdAt: alb.createdAt,
-  }))
+  const formattedAlbums = albums.map((alb) => {
+    const coverPhotoObj = alb.photos.find((p) => p.id === alb.coverPhotoId) || alb.photos[0]
+    return {
+      id: alb.id,
+      name: alb.name,
+      clientName: alb.clientName,
+      photographerName: alb.owner?.name || session.user.name || 'Photographer',
+      shareToken: alb.shareToken,
+      hasPassword: Boolean(alb.passwordHash),
+      photoCount: alb._count.photos,
+      createdAt: alb.createdAt,
+      downloadEnabled: alb.downloadEnabled,
+      coverUrl: coverPhotoObj?.previewUrl || coverPhotoObj?.thumbnailUrl || null,
+    }
+  })
 
   return (
     <AlbumGrid

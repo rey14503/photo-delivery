@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { CommentThread, type ThreadComment } from './CommentThread'
 import { PhotoActionMenu } from './PhotoActionMenu'
+import { LikeIcon, DownloadIcon, CommentIcon } from './PhotoIcons'
 import { stripExtension } from '@/lib/photo-name'
 import styles from './PhotoLightbox.module.css'
 
@@ -26,11 +27,6 @@ export interface PhotoLightboxProps {
   onPrevious: () => void
   onNext: () => void
   onClose: () => void
-}
-
-function likeGlyph(liked: boolean, icon: 'heart' | 'star') {
-  if (icon === 'heart') return liked ? '♥' : '♡'
-  return liked ? '⭐' : '☆'
 }
 
 export function PhotoLightbox({
@@ -106,7 +102,7 @@ export function PhotoLightbox({
               onClick={onToggleLike}
               className={styles.iconButton}
             >
-              {likeGlyph(liked, likeIcon)}
+              <LikeIcon liked={liked} icon={likeIcon} size={20} />
             </button>
             {showDownload && (
               <a
@@ -115,7 +111,7 @@ export function PhotoLightbox({
                 aria-label="Download"
                 title="Download"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <DownloadIcon size={20} />
               </a>
             )}
             <button
@@ -126,7 +122,7 @@ export function PhotoLightbox({
               onClick={() => setCommentsOpen((prev) => !prev)}
               className={styles.iconButton}
             >
-              💬
+              <CommentIcon filled={commentsOpen || comments.length > 0} size={20} />
             </button>
             <PhotoActionMenu
               likeLabel={likeLabel}

@@ -205,9 +205,21 @@ export async function driveFolderIsGone(
 ): Promise<boolean> {
   try {
     const res = await drive.files.get({ fileId: folderId, fields: 'trashed' })
+    console.log('[driveFolderIsGone] folderId:', folderId, 'trashed:', res.data.trashed)
     return res.data.trashed === true
-  } catch (error) {
-    const code = (error as { code?: number })?.code
-    return code === 404
+  } catch (error: any) {
+    const code = (error as { code?: number | string })?.code
+    const status = error?.status ?? error?.response?.status
+    const isGone = code === 404 || code === '404' || status === 404
+    if (isGone) {
+      console.log('[driveFolderIsGone] Confirmed 404 for folderId:', folderId)
+    } else {
+      console.error('[driveFolderIsGone] Error checking folderId:', folderId, {
+        code,
+        status,
+        message: error?.message,
+      })
+    }
+    return isGone
   }
 }

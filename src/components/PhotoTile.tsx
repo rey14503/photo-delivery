@@ -1,6 +1,7 @@
 'use client'
 
 import { PhotoActionMenu } from './PhotoActionMenu'
+import { LikeIcon, CommentIcon } from './PhotoIcons'
 import { stripExtension } from '@/lib/photo-name'
 import styles from './PhotoTile.module.css'
 
@@ -21,11 +22,6 @@ export interface PhotoTileProps {
   showReplace: boolean
   onReplace: () => void
   onOpen: () => void
-}
-
-function likeGlyph(liked: boolean, icon: 'heart' | 'star') {
-  if (icon === 'heart') return liked ? '♥' : '♡'
-  return liked ? '⭐' : '☆'
 }
 
 export function PhotoTile({
@@ -76,7 +72,7 @@ export function PhotoTile({
                 className={`${styles.checkCircleBtn} ${liked ? styles.checkCircleActive : ''}`}
                 title={likeLabel}
               >
-                {likeGlyph(liked, likeIcon)}
+                <LikeIcon liked={liked} icon={likeIcon} size={16} />
               </button>
             </div>
             <div className={styles.quickActions}>
@@ -97,7 +93,8 @@ export function PhotoTile({
           <div className={styles.bottomRowOverlay}>
             {commentCount > 0 && (
               <div className={styles.commentCountBadge}>
-                <span>💬 {commentCount}</span>
+                <CommentIcon filled={true} size={13} />
+                <span>{commentCount}</span>
               </div>
             )}
           </div>
