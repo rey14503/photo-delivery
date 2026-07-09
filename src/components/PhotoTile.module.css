@@ -1,0 +1,25 @@
+.tile {
+  position: relative;
+  display: inline-block;
+}
+
+.quickActions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.tile:hover .quickActions,
+.tile:focus-within .quickActions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .quickActions {
+    opacity: 1;
+  }
+}
