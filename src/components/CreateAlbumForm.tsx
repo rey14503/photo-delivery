@@ -3,7 +3,11 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 
-export function CreateAlbumForm() {
+export interface CreateAlbumFormProps {
+  onSuccess?: () => void
+}
+
+export function CreateAlbumForm({ onSuccess }: CreateAlbumFormProps = {}) {
   const router = useRouter()
   const [name, setName] = useState('')
   const [clientName, setClientName] = useState('')
@@ -25,7 +29,11 @@ export function CreateAlbumForm() {
         setError(data.error ?? 'Something went wrong')
         return
       }
-      router.push('/albums')
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push('/albums')
+      }
       router.refresh()
     } catch {
       setError('Network error — please try again.')
