@@ -105,12 +105,15 @@ describe('PhotoTile', () => {
     expect(props.onOpen).toHaveBeenCalledTimes(1)
   })
 
-  it('shows the given photo name, falling back to a placeholder when omitted', () => {
+  it('shows the given photo name with file extensions stripped, falling back to a placeholder when omitted', () => {
     const { rerender } = render(<PhotoTile {...baseProps({ name: undefined })} />)
     expect(screen.getByText('Untitled photo')).toBeTruthy()
 
     rerender(<PhotoTile {...baseProps({ name: 'IMG_0001.jpg' })} />)
-    expect(screen.getByText('IMG_0001.jpg')).toBeTruthy()
+    expect(screen.getByText('IMG_0001')).toBeTruthy()
+
+    rerender(<PhotoTile {...baseProps({ name: 'photo.with.dots.PNG' })} />)
+    expect(screen.getByText('photo.with.dots')).toBeTruthy()
   })
 
   it('shows the photographer attribution only when provided', () => {

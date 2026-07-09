@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import { CommentThread, type ThreadComment } from './CommentThread'
 import { PhotoActionMenu } from './PhotoActionMenu'
+import { stripExtension } from '@/lib/photo-name'
 import styles from './PhotoLightbox.module.css'
 
 export interface PhotoLightboxProps {
   photoId: string
   previewUrl: string
+  name?: string
   statusNote?: string
   liked: boolean
   likeIcon: 'heart' | 'star'
@@ -34,6 +36,7 @@ function likeGlyph(liked: boolean, icon: 'heart' | 'star') {
 export function PhotoLightbox({
   photoId,
   previewUrl,
+  name,
   statusNote,
   liked,
   likeIcon,
@@ -52,6 +55,7 @@ export function PhotoLightbox({
   onClose,
 }: PhotoLightboxProps) {
   const [commentsOpen, setCommentsOpen] = useState(false)
+  const displayName = stripExtension(name)
 
   return (
     <div
@@ -60,7 +64,7 @@ export function PhotoLightbox({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div role="dialog" aria-label="Photo preview" className={styles.lightbox}>
+      <div role="dialog" aria-label={`Photo preview: ${displayName}`} className={styles.lightbox}>
         <div className={styles.stage}>
           <button type="button" onClick={onClose} className={styles.closeButton} aria-label="Close" title="Close">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -90,7 +94,7 @@ export function PhotoLightbox({
           {statusNote && <p className={styles.statusNote}>{statusNote}</p>}
 
           <div className={styles.imageContainer}>
-            <img src={previewUrl} alt="Photo preview" className={styles.image} />
+            <img src={previewUrl} alt={displayName} className={styles.image} />
           </div>
 
           <div className={styles.actionBar}>

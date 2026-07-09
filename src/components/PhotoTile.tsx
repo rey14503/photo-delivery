@@ -1,6 +1,7 @@
 'use client'
 
 import { PhotoActionMenu } from './PhotoActionMenu'
+import { stripExtension } from '@/lib/photo-name'
 import styles from './PhotoTile.module.css'
 
 export interface PhotoTileProps {
@@ -45,7 +46,7 @@ export function PhotoTile({
   onReplace,
   onOpen,
 }: PhotoTileProps) {
-  const displayName = name && name.trim() ? name : 'Untitled photo'
+  const displayName = stripExtension(name)
 
   return (
     <div className={styles.tile}>

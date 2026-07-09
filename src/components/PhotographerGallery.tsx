@@ -261,6 +261,7 @@ function PhotographerPhotoLightbox({
       <PhotoLightbox
         photoId={photo.id}
         previewUrl={photo.previewUrl}
+        name={photo.name}
         statusNote={statusNoteFor(photo)}
         liked={photo.suggestedByMe}
         likeIcon="star"

@@ -241,6 +241,7 @@ function ClientPhotoLightbox({
       <PhotoLightbox
         photoId={photo.id}
         previewUrl={photo.previewUrl}
+        name={photo.name}
         statusNote={photo.suggestedByPhotographer ? '⭐ Suggested by photographer' : undefined}
         liked={photo.likedByMe}
         likeIcon="heart"
