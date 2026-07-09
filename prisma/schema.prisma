@@ -36,6 +36,8 @@ model Album {
   shareToken       String   @unique
   passwordHash     String?
   downloadEnabled  Boolean  @default(false)
+  coverPhotoId     String?
+  coverPhoto       Photo?   @relation("AlbumCoverPhoto", fields: [coverPhotoId], references: [id])
   createdAt        DateTime @default(now())
   photos           Photo[]
 }
@@ -54,6 +56,7 @@ model Photo {
   updatedAt    DateTime  @updatedAt
   likes        Like[]
   comments     Comment[]
+  coverOfAlbums Album[]  @relation("AlbumCoverPhoto")
 
   @@index([albumId])
 }
