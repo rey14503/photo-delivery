@@ -44,6 +44,7 @@ import {
   findOrCreateFolder,
   isSupportedImageMimeType,
   listFolderFiles,
+  driveFolderIsGone,
 } from '@/lib/drive'
 import { google } from 'googleapis'
 
@@ -448,5 +449,43 @@ describe('listFolderFiles', () => {
     const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
 
     expect(await listFolderFiles(drive, 'empty_folder')).toEqual([])
+  })
+})
+
+describe('driveFolderIsGone', () => {
+  it('returns true when the folder resolves as trashed', async () => {
+    filesGet.mockResolvedValue({ data: { trashed: true } })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await driveFolderIsGone(drive, 'folder_1')).toBe(true)
+    expect(filesGet).toHaveBeenCalledWith({ fileId: 'folder_1', fields: 'trashed' })
+  })
+
+  it('returns true when the Drive API responds with a 404 not-found error', async () => {
+    filesGet.mockRejectedValue({ code: 404, message: 'File not found' })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await driveFolderIsGone(drive, 'missing_folder')).toBe(true)
+  })
+
+  it('returns false for a successful, non-trashed response', async () => {
+    filesGet.mockResolvedValue({ data: { trashed: false } })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await driveFolderIsGone(drive, 'folder_1')).toBe(false)
+  })
+
+  it('returns false (never true) for a non-404 error, e.g. a transient network failure', async () => {
+    filesGet.mockRejectedValue(new Error('network down'))
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await driveFolderIsGone(drive, 'folder_1')).toBe(false)
+  })
+
+  it('returns false for a 403 permission error (ambiguous, not a confirmed deletion)', async () => {
+    filesGet.mockRejectedValue({ code: 403, message: 'Forbidden' })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await driveFolderIsGone(drive, 'folder_1')).toBe(false)
   })
 })

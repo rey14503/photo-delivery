@@ -3,6 +3,8 @@ import { redirect, notFound } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { canManageAlbum } from '@/lib/album-permissions'
+import { getDriveClientForUser } from '@/lib/drive'
+import { deleteAlbumIfDriveFolderGone } from '@/lib/album-lifecycle'
 import { UploadPhotos } from '@/components/UploadPhotos'
 import { SetAlbumPassword } from '@/components/SetAlbumPassword'
 import { DownloadToggle } from '@/components/DownloadToggle'
@@ -23,6 +25,7 @@ export default async function AlbumDetailPage({
   const album = await prisma.album.findUnique({
     where: { id: albumId },
     include: {
+      owner: { select: { encryptedRefreshToken: true } },
       photos: {
         orderBy: { displayOrder: 'asc' },
         include: {
@@ -37,6 +40,21 @@ export default async function AlbumDetailPage({
   })
   if (!album || !canManageAlbum(session.user, album)) {
     notFound()
+  }
+
+  const drive = getDriveClientForUser(album.owner)
+  const wasDeleted = await deleteAlbumIfDriveFolderGone(drive, {
+    id: album.id,
+    driveFolderId: album.driveFolderId,
+  })
+  if (wasDeleted) {
+    return (
+      <main>
+        <h1>This album is no longer available</h1>
+        <p>Its Google Drive folder was deleted, so the album was removed.</p>
+        <a href="/albums">Back to your albums</a>
+      </main>
+    )
   }
 
   const photos = album.photos.map((photo) => {

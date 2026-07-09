@@ -43,7 +43,7 @@ model Album {
 model Photo {
   id           String    @id @default(cuid())
   albumId      String
-  album        Album     @relation(fields: [albumId], references: [id])
+  album        Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
   driveFileId  String
   originalName String?
   version      Int       @default(1)
@@ -66,7 +66,7 @@ enum ActorType {
 model Like {
   id              String    @id @default(cuid())
   photoId         String
-  photo           Photo     @relation(fields: [photoId], references: [id])
+  photo           Photo     @relation(fields: [photoId], references: [id], onDelete: Cascade)
   actorType       ActorType
   actorName       String?
   userId          String?
@@ -82,7 +82,7 @@ model Like {
 model Comment {
   id        String    @id @default(cuid())
   photoId   String
-  photo     Photo     @relation(fields: [photoId], references: [id])
+  photo     Photo     @relation(fields: [photoId], references: [id], onDelete: Cascade)
   actorType ActorType
   actorName String?
   userId    String?
