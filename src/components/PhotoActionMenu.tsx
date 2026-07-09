@@ -13,6 +13,7 @@ export interface PhotoActionMenuProps {
   onViewComments: () => void
   showReplace: boolean
   onReplace: () => void
+  direction?: 'up' | 'down'
 }
 
 export function PhotoActionMenu({
@@ -25,6 +26,7 @@ export function PhotoActionMenu({
   onViewComments,
   showReplace,
   onReplace,
+  direction = 'down',
 }: PhotoActionMenuProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -65,7 +67,7 @@ export function PhotoActionMenu({
         ⋮
       </button>
       {open && (
-        <ul role="menu" className={styles.menu}>
+        <ul role="menu" className={`${styles.menu} ${direction === 'up' ? styles.menuUp : styles.menuDown}`}>
           <li role="none" className={styles.menuItemWrapper}>
             <button
               type="button"

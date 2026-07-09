@@ -62,29 +62,36 @@ export function PhotoLightbox({
     >
       <div role="dialog" aria-label="Photo preview" className={styles.lightbox}>
         <div className={styles.stage}>
-          <button type="button" onClick={onClose} className={styles.closeButton} aria-label="Close">
-            Close
+          <button type="button" onClick={onClose} className={styles.closeButton} aria-label="Close" title="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
           {hasPrevious && (
             <button
               type="button"
               onClick={onPrevious}
               className={`${styles.navButton} ${styles.previousButton}`}
+              aria-label="Previous"
+              title="Previous"
             >
-              Previous
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </button>
           )}
-          <img src={previewUrl} alt="Photo preview" className={styles.image} />
           {hasNext && (
             <button
               type="button"
               onClick={onNext}
               className={`${styles.navButton} ${styles.nextButton}`}
+              aria-label="Next"
+              title="Next"
             >
-              Next
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </button>
           )}
           {statusNote && <p className={styles.statusNote}>{statusNote}</p>}
+
+          <div className={styles.imageContainer}>
+            <img src={previewUrl} alt="Photo preview" className={styles.image} />
+          </div>
 
           <div className={styles.actionBar}>
             <button
@@ -121,6 +128,7 @@ export function PhotoLightbox({
               onViewComments={() => setCommentsOpen(true)}
               showReplace={showReplace}
               onReplace={onReplace}
+              direction="up"
             />
           </div>
         </div>

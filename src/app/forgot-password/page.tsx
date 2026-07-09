@@ -49,10 +49,10 @@ export default function ForgotPasswordPage() {
       {submitted ? (
         <div style={{ textAlign: 'center', padding: '16px 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ fontSize: '2rem' }}>📬</div>
-          <p style={{ color: 'var(--text-main, #ffffff)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
+          <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
             If an account exists for that email, we&apos;ve sent a reset link.
           </p>
-          <p style={{ color: 'var(--text-muted, #a1a1aa)', fontSize: '0.82rem', margin: 0 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: 0 }}>
             Please check your inbox and spam folder.
           </p>
         </div>

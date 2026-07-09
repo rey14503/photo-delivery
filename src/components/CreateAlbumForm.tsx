@@ -122,10 +122,15 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
             <span className={styles.settingLabel}>Bảo vệ album bằng mật khẩu</span>
             <button
               type="button"
+              aria-pressed={passwordProtected}
               onClick={() => setPasswordProtected(!passwordProtected)}
               className={`${styles.toggleBtn} ${
                 passwordProtected ? styles.toggleOnOrange : styles.toggleOff
               }`}
+              style={{
+                backgroundColor: passwordProtected ? '#ff5722' : '#71717a',
+                borderColor: passwordProtected ? '#e64a19' : '#52525b',
+              }}
             >
               <span
                 className={`${styles.toggleThumb} ${
@@ -152,10 +157,15 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
           <span className={styles.settingLabel}>Cho phép tải xuống gốc</span>
           <button
             type="button"
+            aria-pressed={downloadEnabled}
             onClick={() => setDownloadEnabled(!downloadEnabled)}
             className={`${styles.toggleBtn} ${
               downloadEnabled ? styles.toggleOnGreen : styles.toggleOff
             }`}
+            style={{
+              backgroundColor: downloadEnabled ? '#10b981' : '#71717a',
+              borderColor: downloadEnabled ? '#059669' : '#52525b',
+            }}
           >
             <span
               className={`${styles.toggleThumb} ${

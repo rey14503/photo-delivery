@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './AlbumControls.module.css'
 
@@ -12,26 +12,36 @@ export function DownloadToggle({
   downloadEnabled: boolean
 }) {
   const router = useRouter()
+  const [active, setActive] = useState(downloadEnabled)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  useEffect(() => {
+    setActive(downloadEnabled)
+  }, [downloadEnabled])
+
   async function handleToggle() {
+    if (submitting) return
+    const nextState = !active
+    setActive(nextState)
     setSubmitting(true)
     setError(null)
     try {
       const res = await fetch(`/api/albums/${albumId}/download-toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !downloadEnabled }),
+        body: JSON.stringify({ enabled: nextState }),
       })
       if (!res.ok) {
         const data = await res.json()
         setError(data.error ?? 'Something went wrong')
+        setActive(!nextState)
         return
       }
       router.refresh()
     } catch {
       setError('Network error — please try again.')
+      setActive(!nextState)
     } finally {
       setSubmitting(false)
     }
@@ -48,18 +58,18 @@ export function DownloadToggle({
                 fontSize: '0.7rem',
                 padding: '2px 8px',
                 borderRadius: '4px',
-                backgroundColor: downloadEnabled
-                  ? 'rgba(16, 185, 129, 0.15)'
-                  : 'rgba(245, 158, 11, 0.15)',
-                color: downloadEnabled ? '#10b981' : '#f59e0b',
+                backgroundColor: active
+                  ? 'var(--success-subtle)'
+                  : 'var(--warning-subtle)',
+                color: active ? 'var(--success)' : 'var(--warning)',
                 fontWeight: 700,
               }}
             >
-              {downloadEnabled ? 'ACTIVE' : 'DISABLED'}
+              {active ? 'ACTIVE' : 'DISABLED'}
             </span>
           </div>
           <div className={styles.subText}>
-            {downloadEnabled
+            {active
               ? 'Clients can download original high-resolution files and ZIP archives.'
               : 'Clients can only view compressed previews without original download links.'}
           </div>
@@ -69,12 +79,16 @@ export function DownloadToggle({
             type="button"
             onClick={handleToggle}
             disabled={submitting}
-            aria-pressed={downloadEnabled}
-            className={`${styles.toggleBtn} ${downloadEnabled ? styles.toggleOn : styles.toggleOff}`}
-            title={downloadEnabled ? 'Downloads: On' : 'Downloads: Off'}
+            aria-pressed={active}
+            className={`${styles.toggleBtn} ${active ? styles.toggleOn : styles.toggleOff}`}
+            style={{
+              backgroundColor: active ? '#10b981' : '#71717a',
+              borderColor: active ? '#059669' : '#52525b',
+            }}
+            title={active ? 'Downloads: On' : 'Downloads: Off'}
           >
             <span
-              className={`${styles.toggleThumb} ${downloadEnabled ? styles.toggleThumbOn : ''}`}
+              className={`${styles.toggleThumb} ${active ? styles.toggleThumbOn : ''}`}
             />
             <span
               style={{
@@ -88,7 +102,7 @@ export function DownloadToggle({
                 border: 0,
               }}
             >
-              {downloadEnabled ? 'Downloads: On' : 'Downloads: Off'}
+              {active ? 'Downloads: On' : 'Downloads: Off'}
             </span>
           </button>
         </div>

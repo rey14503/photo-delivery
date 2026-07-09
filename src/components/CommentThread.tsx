@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import styles from './CommentThread.module.css'
 
 export interface ThreadComment {
   id: string
@@ -46,24 +47,65 @@ export function CommentThread({
   }
 
   return (
-    <div>
-      <ul>
-        {comments.map((comment) => (
-          <li key={comment.id}>
-            <strong>{comment.authorLabel}:</strong> {comment.text}
-          </li>
-        ))}
-      </ul>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Add a comment
-          <textarea value={text} onChange={(e) => setText(e.target.value)} />
-        </label>
-        {error && <p role="alert">{error}</p>}
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'Posting…' : 'Post comment'}
-        </button>
-      </form>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <span>Comments</span>
+        <span>{comments.length}</span>
+      </div>
+      {comments.length === 0 ? (
+        <div className={styles.empty}>No comments yet. Start the conversation!</div>
+      ) : (
+        <ul className={styles.list}>
+          {comments.map((comment) => (
+            <li key={comment.id} className={styles.item}>
+              <span className={styles.author}>
+                <span>👤</span>
+                {comment.authorLabel}
+              </span>
+              <span className={styles.text}>{comment.text}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className={styles.footer}>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.inputRow}>
+            <label
+              htmlFor={`commentInput_${photoId}`}
+              style={{
+                position: 'absolute',
+                width: '1px',
+                height: '1px',
+                padding: 0,
+                margin: '-1px',
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
+                border: 0,
+              }}
+            >
+              Add a comment
+            </label>
+            <textarea
+              id={`commentInput_${photoId}`}
+              aria-label="Add a comment"
+              placeholder="Add a comment..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className={styles.textarea}
+              rows={1}
+            />
+            <button
+              type="submit"
+              disabled={submitting}
+              className={styles.sendButton}
+              aria-label="Post comment"
+            >
+              {submitting ? 'Posting…' : 'Post comment'}
+            </button>
+          </div>
+          {error && <p role="alert" className={styles.error}>{error}</p>}
+        </form>
+      </div>
     </div>
   )
 }

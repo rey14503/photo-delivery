@@ -36,7 +36,7 @@
 
 .primaryBtn {
   background-color: var(--accent);
-  color: #ffffff;
+  color: var(--text-on-accent);
   border: none;
   padding: 8px 16px;
   border-radius: var(--radius-sm);
@@ -76,5 +76,5 @@
 }
 
 .signOut:hover {
-  color: var(--danger, #ef4444);
+  color: var(--danger);
 }

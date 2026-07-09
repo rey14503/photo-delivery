@@ -20,6 +20,32 @@
   --accent: #ff5722;
   --accent-hover: #e64a19;
   --danger: #ef4444;
+  --bg-overlay: rgba(0, 0, 0, 0.88);
+  --bg-modal: rgba(18, 18, 20, 0.85);
+  --bg-toolbar: rgba(28, 28, 31, 0.95);
+  --bg-subtle: rgba(255, 255, 255, 0.05);
+  --bg-subtle-hover: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.15);
+  --accent-subtle: rgba(255, 87, 34, 0.18);
+  --accent-border: rgba(255, 87, 34, 0.28);
+  --success: #10b981;
+  --success-subtle: rgba(16, 185, 129, 0.15);
+  --warning: #f59e0b;
+  --warning-subtle: rgba(245, 158, 11, 0.15);
+  --danger-subtle: rgba(239, 68, 68, 0.15);
+  --scrollbar-thumb: rgba(156, 163, 175, 0.3);
+  --scrollbar-thumb-hover: rgba(156, 163, 175, 0.5);
+  --overlay-subtle: rgba(0, 0, 0, 0.35);
+  --overlay-medium: rgba(0, 0, 0, 0.65);
+  --overlay-strong: rgba(0, 0, 0, 0.85);
+  --overlay-pill: rgba(0, 0, 0, 0.6);
+  --accent-border-strong: rgba(255, 87, 34, 0.4);
+  --shadow-accent: 0 4px 10px rgba(255, 87, 34, 0.3);
+  --warning-border: rgba(245, 158, 11, 0.25);
+  --text-on-accent: #ffffff;
+  --bg-white: #ffffff;
+  --bg-dark: #121214;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -41,6 +67,32 @@
     --accent: #ff5722;
     --accent-hover: #e64a19;
     --danger: #dc2626;
+    --bg-overlay: rgba(0, 0, 0, 0.75);
+    --bg-modal: rgba(255, 255, 255, 0.95);
+    --bg-toolbar: rgba(255, 255, 255, 0.95);
+    --bg-subtle: rgba(0, 0, 0, 0.04);
+    --bg-subtle-hover: rgba(0, 0, 0, 0.08);
+    --border-subtle: rgba(0, 0, 0, 0.08);
+    --border-medium: rgba(0, 0, 0, 0.15);
+    --accent-subtle: rgba(255, 87, 34, 0.12);
+    --accent-border: rgba(255, 87, 34, 0.25);
+    --success: #059669;
+    --success-subtle: rgba(16, 185, 129, 0.12);
+    --warning: #d97706;
+    --warning-subtle: rgba(245, 158, 11, 0.12);
+    --danger-subtle: rgba(239, 68, 68, 0.12);
+    --scrollbar-thumb: rgba(100, 116, 139, 0.3);
+    --scrollbar-thumb-hover: rgba(100, 116, 139, 0.5);
+    --overlay-subtle: rgba(0, 0, 0, 0.15);
+    --overlay-medium: rgba(0, 0, 0, 0.45);
+    --overlay-strong: rgba(0, 0, 0, 0.75);
+    --overlay-pill: rgba(0, 0, 0, 0.55);
+    --accent-border-strong: rgba(255, 87, 34, 0.35);
+    --shadow-accent: 0 4px 10px rgba(255, 87, 34, 0.2);
+    --warning-border: rgba(245, 158, 11, 0.2);
+    --text-on-accent: #ffffff;
+    --bg-white: #ffffff;
+    --bg-dark: #121214;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
     --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -84,9 +136,9 @@ input, select, textarea {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.3);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.5);
+  background: var(--scrollbar-thumb-hover);
 }

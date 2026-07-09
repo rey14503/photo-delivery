@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.88);
+  background-color: var(--bg-overlay);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -31,104 +31,126 @@
   position: relative;
   flex: 1;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  height: 100%;
+  padding: 24px 88px 24px 88px;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.imageContainer {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 0;
-  padding: 64px 88px;
+  position: relative;
+  overflow: visible;
 }
 
 .image {
+  width: auto;
+  height: auto;
   max-width: 100%;
-  max-height: 100%;
+  max-height: calc(100vh - 140px);
   object-fit: contain;
   border-radius: var(--radius-md, 10px);
   box-shadow: var(--shadow-lg);
+  display: block;
+  flex-shrink: 0;
 }
 
 .closeButton {
   position: absolute;
   top: 16px;
-  right: 16px;
-  min-height: 36px;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background-color: rgba(18, 18, 20, 0.85);
-  color: #ffffff;
-  font-size: 0.875rem;
-  font-weight: 500;
+  right: 20px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(28, 28, 34, 0.9) !important;
+  color: #ffffff !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 20;
+  z-index: 30;
   transition: all 0.15s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 
 .closeButton:hover {
-  background-color: rgba(28, 28, 31, 0.95);
-  border-color: var(--accent, #ff5722);
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
+  transform: scale(1.08);
 }
 
 .navButton {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  min-height: 40px;
-  padding: 0.5rem 1.125rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background-color: rgba(18, 18, 20, 0.85);
-  color: #ffffff;
-  font-size: 0.875rem;
-  font-weight: 500;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(28, 28, 34, 0.9) !important;
+  color: #ffffff !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 20;
+  z-index: 30;
   transition: all 0.15s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 
 .navButton:hover {
-  background-color: rgba(28, 28, 31, 0.95);
-  border-color: var(--accent, #ff5722);
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
+  transform: translateY(-50%) scale(1.08);
 }
 
 .previousButton {
-  left: 16px;
+  left: 20px;
 }
 
 .nextButton {
-  right: 16px;
+  right: 20px;
 }
 
 .statusNote {
   position: absolute;
   top: 16px;
-  left: 16px;
-  background-color: rgba(16, 185, 129, 0.9);
-  color: #ffffff;
+  left: 20px;
+  background-color: var(--success);
+  color: var(--text-on-accent);
   padding: 6px 14px;
   border-radius: var(--radius-md, 10px);
   font-size: 0.85rem;
   font-weight: 600;
-  z-index: 20;
+  z-index: 30;
 }
 
 .actionBar {
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background-color: rgba(18, 18, 20, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  justify-content: center;
+  gap: 12px;
+  background-color: rgba(24, 24, 28, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 9999px;
-  padding: 8px 16px;
-  box-shadow: var(--shadow-lg);
+  padding: 8px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
   z-index: 20;
   backdrop-filter: blur(12px);
 }
@@ -136,17 +158,17 @@
 .iconButton,
 .downloadLink {
   min-height: 36px;
-  padding: 0.5rem 0.875rem;
+  padding: 0.5rem 0.95rem;
   border-radius: 9999px;
   border: none;
-  background: transparent;
-  color: #ffffff;
-  font-size: 0.875rem;
-  font-weight: 500;
+  background: transparent !important;
+  color: #f4f4f5 !important;
+  font-size: 0.9rem;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
@@ -155,13 +177,13 @@
 
 .iconButton:hover,
 .downloadLink:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--accent, #ff5722);
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
 }
 
 .iconButton[aria-pressed='true'] {
-  color: var(--accent, #ff5722);
-  background-color: rgba(255, 87, 34, 0.15);
+  color: #ff6b35 !important;
+  background-color: rgba(255, 107, 53, 0.22) !important;
 }
 
 .iconButton:disabled {
@@ -172,16 +194,22 @@
 .commentsPanel {
   width: 360px;
   flex-shrink: 0;
-  background-color: var(--bg-surface, #1c1c1f);
-  border-left: 1px solid var(--border-color, #2e2e33);
-  padding: 24px;
-  overflow-y: auto;
+  background-color: var(--bg-surface);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   z-index: 25;
 }
 
 @media (max-width: 720px) {
   .stage {
-    padding: 64px 16px 96px 16px;
+    padding: 20px 16px 20px 16px;
+    gap: 12px;
+  }
+
+  .image {
+    max-height: calc(100vh - 120px);
   }
 
   .commentsPanel {

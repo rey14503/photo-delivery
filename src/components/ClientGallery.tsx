@@ -143,7 +143,7 @@ export function ClientGallery({
         <div className={styles.emptyState}>
           <div style={{ fontSize: '2rem' }}>🖼️</div>
           <div style={{ fontWeight: 600 }}>No Matching Photos Found</div>
-          <div style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             Adjust your search queries or category filters to view delivered photos.
           </div>
         </div>

@@ -58,7 +58,7 @@ function ResetPasswordContent() {
       {submitted ? (
         <div style={{ textAlign: 'center', padding: '16px 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ fontSize: '2rem' }}>🎉</div>
-          <p style={{ color: 'var(--text-main, #ffffff)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
+          <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
             Your password has been successfully reset.
           </p>
           <div>
@@ -125,7 +125,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <AuthCard title="Set a new password">
-        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted, #a1a1aa)' }}>
+        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)' }}>
           Loading reset options...
         </div>
       </AuthCard>

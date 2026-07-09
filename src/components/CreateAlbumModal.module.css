@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.65);
+  background-color: var(--overlay-medium);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -21,15 +21,16 @@
 }
 
 .modal {
-  background-color: #1e1e24;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-medium);
   border-radius: 24px;
   width: 100%;
   max-width: 460px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   animation: zoomIn 0.2s ease-out;
 }
@@ -48,20 +49,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #ff5722;
+  color: var(--accent);
   letter-spacing: -0.02em;
 }
 
 .closeBtn {
   background: transparent;
   border: none;
-  color: #a1a1aa;
+  color: var(--text-muted);
   font-size: 1.1rem;
   width: 32px;
   height: 32px;
@@ -74,8 +75,8 @@
 }
 
 .closeBtn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background-color: var(--bg-subtle-hover);
+  color: var(--text-on-accent);
 }
 
 .content {

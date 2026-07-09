@@ -74,7 +74,7 @@
 
 .btnView {
   background-color: var(--accent);
-  color: #fff;
+  color: var(--text-on-accent);
   padding: 6px 12px;
   border-radius: var(--radius-sm);
   font-size: 0.82rem;
