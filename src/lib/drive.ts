@@ -198,3 +198,16 @@ export async function listFolderFiles(
     .filter((file) => file.id && file.name && file.mimeType)
     .map((file) => ({ id: file.id!, name: file.name!, mimeType: file.mimeType! }))
 }
+
+export async function driveFolderIsGone(
+  drive: drive_v3.Drive,
+  folderId: string
+): Promise<boolean> {
+  try {
+    const res = await drive.files.get({ fileId: folderId, fields: 'trashed' })
+    return res.data.trashed === true
+  } catch (error) {
+    const code = (error as { code?: number })?.code
+    return code === 404
+  }
+}
