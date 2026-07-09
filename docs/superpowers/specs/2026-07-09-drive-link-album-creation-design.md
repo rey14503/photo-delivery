@@ -6,7 +6,7 @@ Today, creating an album always auto-creates a brand-new, empty Drive folder (pl
 
 This is a full replacement of the creation flow, not an additional option — the old "always create a new empty folder" behavior is removed entirely, per explicit decision.
 
-**Scope note:** this spec covers *only* Drive-link-based creation and photo import. It intentionally excludes several other fields shown in the ShotPik reference screenshot that inspired this work (album cover photo, a comments-enabled toggle, moving the password/download toggles into the creation form, a photo-selection-limit field, and a scheduled auto-resync interval) — each of those is independent scope for a future spec/plan, decided separately. Face-search is explicitly out of scope permanently, not deferred.
+**Scope note:** this spec covers *only* the server side — `POST /api/albums`'s request/response contract and the new `src/lib/drive.ts` functions it needs. **`CreateAlbumForm.tsx` and every other UI file are explicitly out of scope and must not be touched by this plan.** As of this spec, `CreateAlbumForm.tsx` already has its own `googleDriveLink` input field and a much richer set of fields/toggles (client email, location, category, refresh time, comments/password/download toggles, a selection-limit field) built independently, as part of a separate, actively in-progress dashboard redesign effort. This backend work only needs to accept `driveLink` in the POST body under that same name the form already uses (`googleDriveLink` client-side, sent as `driveLink` in the request body — confirm this exact key against the form's current `fetch` call before implementing, since the form owner may adjust it) and return `{ imported, skipped }` in the response for that UI to consume however it already plans to. Every other ShotPik-inspired field (album cover photo, comments toggle, password/download toggles at creation time, a photo-selection-limit field, and a scheduled auto-resync interval) is being handled by that separate UI effort or is independent future backend work — not part of this spec. Face-search is out of scope permanently, not deferred.
 
 ## Goals
 
@@ -45,7 +45,7 @@ No schema changes. `Album.driveFolderId` and `Album.selectedFolderId` already ex
 
 ## UI Changes
 
-`CreateAlbumForm` gains a required "Drive folder link" text input, positioned first (matching the ShotPik reference). Submission shows a loading state for the potentially-longer import step (the existing `submitting` boolean/disabled-button pattern is enough — no new progress UI). On success, the form (or the page it redirects to) surfaces the `imported`/`skipped` counts from the response so the photographer immediately knows what came in and what was left out — exact copy: "Imported N photos, skipped M unsupported files."
+None. This spec is server-only — see the Scope note above. Whoever owns `CreateAlbumForm.tsx` wires its existing Drive-link field to this API and decides how to surface `imported`/`skipped` in the UI; that is not decided or specified here.
 
 ## Error Handling
 
@@ -58,8 +58,7 @@ Follows the established convention throughout: `role="alert"` on the client for 
 - `findOrCreateFolder`: existing "Selected" subfolder is reused (no new folder created); absent subfolder triggers creation.
 - `listImageFiles`: mixed folder contents (jpg, png, ARW, xmp, mp4, a subfolder) return only the image files.
 - `POST /api/albums`: missing/unparseable `driveLink` → 400, no Drive calls made; inaccessible folder → 400, no `Album` row created; happy path creates the `Album` with the linked folder's ID, imports only the supported images, returns the correct `imported`/`skipped` counts, and does not call the existing `uploadFile` function (proving imported photos register the existing Drive file rather than re-uploading it).
-- `CreateAlbumForm`: renders the new required field; shows the imported/skipped summary on success; shows a `role="alert"` message on failure, matching the existing test conventions for this component.
 
 ## Out of Scope
 
-Everything listed in the Overview's scope note (cover photo, comments toggle, password/download toggles at creation time, selection limits, scheduled auto-resync, face search) — each is independent future work, not part of this spec. Recursive subfolder scanning is also out of scope — only files directly inside the linked folder are imported.
+`CreateAlbumForm.tsx` and all other UI (see Scope note above). Every other ShotPik-inspired field (cover photo, comments toggle, password/download toggles at creation time, selection limits, scheduled auto-resync, face search) — each is independent future work, not part of this spec. Recursive subfolder scanning is also out of scope — only files directly inside the linked folder are imported.
