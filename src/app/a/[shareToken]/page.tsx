@@ -75,7 +75,7 @@ export default async function SharePage({
     title: album.name,
     clientActorName: nameCookie,
     photographerName: album.owner.name ?? undefined,
-    location: (album as any).location || 'Studio',
+    location: 'Studio',
     date: new Date(album.createdAt).toLocaleDateString('vi-VN'),
   }
 

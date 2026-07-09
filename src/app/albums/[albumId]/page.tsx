@@ -71,7 +71,7 @@ export default async function AlbumDetailPage({
     name: album.name,
     clientName: album.clientName,
     shareToken: album.shareToken,
-    location: (album as any).location || 'Đà Lạt Studio',
+    location: 'Đà Lạt Studio',
     date: new Date(album.createdAt).toLocaleDateString('vi-VN'),
   }
 
