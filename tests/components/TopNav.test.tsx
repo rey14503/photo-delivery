@@ -13,8 +13,9 @@ describe('TopNav', () => {
     const onCreate = vi.fn()
     render(<TopNav userName="Khoa Nguyen" userEmail="khoa@example.com" onCreateClick={onCreate} />)
 
-    expect(screen.getByAltText('Product Logo')).toHaveAttribute('src', '/logo.png')
-    expect(screen.getByText('Photo Delivery')).toBeInTheDocument()
+    expect(screen.getByAltText('BK Media Box Logo')).toHaveAttribute('src', '/logo.png')
+    expect(screen.getByText(/BK/)).toBeInTheDocument()
+    expect(screen.getByText(/Media Box/)).toBeInTheDocument()
     expect(screen.getByText('Khoa Nguyen')).toBeInTheDocument()
 
     const signOutBtn = screen.getByRole('button', { name: /đăng xuất/i })

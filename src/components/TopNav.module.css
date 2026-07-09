@@ -25,6 +25,10 @@
   color: var(--text-main);
 }
 
+.brandAccent {
+  color: var(--accent);
+}
+
 .logo {
   height: 28px;
   width: auto;

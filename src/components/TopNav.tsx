@@ -17,8 +17,10 @@ export function TopNav({ userName, userEmail, onCreateClick }: TopNavProps) {
     <header className={styles.nav}>
       <div className={styles.left}>
         <Link href="/albums" className={styles.brand}>
-          <img src="/logo.png" alt="Product Logo" className={styles.logo} />
-          <span>Photo Delivery</span>
+          <img src="/logo.png" alt="BK Media Box Logo" className={styles.logo} />
+          <span>
+            <span className={styles.brandAccent}>BK</span> Media Box
+          </span>
         </Link>
         {onCreateClick ? (
           <button type="button" onClick={onCreateClick} className={styles.primaryBtn}>
