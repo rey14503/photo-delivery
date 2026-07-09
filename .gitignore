@@ -3,3 +3,7 @@ node_modules
 .env
 .env.local
 *.log
+next-env.d.ts
+*.tsbuildinfo
+.superpowers/
+.claude/worktrees/
