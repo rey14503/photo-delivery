@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import styles from './PhotoActionMenu.module.css'
 
 export interface PhotoActionMenuProps {
   likeLabel: string
@@ -49,24 +50,30 @@ export function PhotoActionMenu({
   }, [open])
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className={styles.container}>
       <button
         type="button"
         aria-label="More actions"
         aria-haspopup="menu"
         aria-expanded={open}
-        onClick={() => setOpen((prev) => !prev)}
+        className={`${styles.trigger} ${open ? styles.triggerActive : ''}`}
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen((prev) => !prev)
+        }}
       >
         ⋮
       </button>
       {open && (
-        <ul role="menu">
-          <li role="none">
+        <ul role="menu" className={styles.menu}>
+          <li role="none" className={styles.menuItemWrapper}>
             <button
               type="button"
               role="menuitem"
               disabled={toggling}
-              onClick={() => {
+              className={styles.itemBtn}
+              onClick={(e) => {
+                e.stopPropagation()
                 onToggleLike()
                 setOpen(false)
               }}
@@ -75,17 +82,27 @@ export function PhotoActionMenu({
             </button>
           </li>
           {showDownload && (
-            <li role="none">
-              <a role="menuitem" href={downloadHref} onClick={() => setOpen(false)}>
+            <li role="none" className={styles.menuItemWrapper}>
+              <a
+                role="menuitem"
+                href={downloadHref}
+                className={styles.itemLink}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setOpen(false)
+                }}
+              >
                 Download
               </a>
             </li>
           )}
-          <li role="none">
+          <li role="none" className={styles.menuItemWrapper}>
             <button
               type="button"
               role="menuitem"
-              onClick={() => {
+              className={styles.itemBtn}
+              onClick={(e) => {
+                e.stopPropagation()
                 onViewComments()
                 setOpen(false)
               }}
@@ -94,11 +111,13 @@ export function PhotoActionMenu({
             </button>
           </li>
           {showReplace && (
-            <li role="none">
+            <li role="none" className={styles.menuItemWrapper}>
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => {
+                className={`${styles.itemBtn} ${styles.replaceBtn}`}
+                onClick={(e) => {
+                  e.stopPropagation()
                   onReplace()
                   setOpen(false)
                 }}

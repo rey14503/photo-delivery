@@ -1,12 +1,12 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 1000;
   animation: fadeIn 0.15s ease-out;
 }
 
@@ -41,51 +41,58 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md, 10px);
+  box-shadow: var(--shadow-lg);
 }
 
 .closeButton {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background-color: rgba(28, 28, 31, 0.8);
-  color: var(--text-main);
-  font-size: 1.1rem;
-  display: flex;
+  min-height: 36px;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: rgba(18, 18, 20, 0.85);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 1;
+  z-index: 20;
+  transition: all 0.15s ease;
 }
 
 .closeButton:hover {
-  background-color: var(--bg-surface-hover);
+  background-color: rgba(28, 28, 31, 0.95);
+  border-color: var(--accent, #ff5722);
 }
 
 .navButton {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: none;
-  background-color: rgba(28, 28, 31, 0.8);
-  color: var(--text-main);
-  font-size: 1.4rem;
-  display: flex;
+  min-height: 40px;
+  padding: 0.5rem 1.125rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: rgba(18, 18, 20, 0.85);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  z-index: 20;
+  transition: all 0.15s ease;
 }
 
 .navButton:hover {
-  background-color: var(--bg-surface-hover);
+  background-color: rgba(28, 28, 31, 0.95);
+  border-color: var(--accent, #ff5722);
 }
 
 .previousButton {
@@ -100,87 +107,87 @@
   position: absolute;
   top: 16px;
   left: 16px;
-  background-color: rgba(28, 28, 31, 0.8);
-  color: var(--text-main);
-  padding: 6px 12px;
-  border-radius: var(--radius-md);
+  background-color: rgba(16, 185, 129, 0.9);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: var(--radius-md, 10px);
   font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 20;
 }
 
 .actionBar {
   position: absolute;
-  bottom: 16px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 8px;
-  background-color: rgba(28, 28, 31, 0.9);
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
-  padding: 8px 12px;
+  gap: 10px;
+  background-color: rgba(18, 18, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  box-shadow: var(--shadow-lg);
+  z-index: 20;
+  backdrop-filter: blur(12px);
 }
 
-.iconButton {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+.iconButton,
+.downloadLink {
+  min-height: 36px;
+  padding: 0.5rem 0.875rem;
+  border-radius: 9999px;
   border: none;
   background: transparent;
-  color: var(--text-main);
-  font-size: 1.1rem;
-  display: flex;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
-.iconButton:hover {
-  background-color: var(--bg-surface-hover);
+.iconButton:hover,
+.downloadLink:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--accent, #ff5722);
 }
 
 .iconButton[aria-pressed='true'] {
-  color: var(--accent);
+  color: var(--accent, #ff5722);
+  background-color: rgba(255, 87, 34, 0.15);
 }
 
 .iconButton:disabled {
   opacity: 0.5;
-  cursor: default;
-}
-
-.downloadLink {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-main);
-  font-size: 1.1rem;
-}
-
-.downloadLink:hover {
-  background-color: var(--bg-surface-hover);
+  cursor: not-allowed;
 }
 
 .commentsPanel {
-  width: 340px;
+  width: 360px;
   flex-shrink: 0;
-  background-color: var(--bg-surface);
-  border-left: 1px solid var(--border-color);
-  padding: 20px;
+  background-color: var(--bg-surface, #1c1c1f);
+  border-left: 1px solid var(--border-color, #2e2e33);
+  padding: 24px;
   overflow-y: auto;
+  z-index: 25;
 }
 
 @media (max-width: 720px) {
   .stage {
-    padding: 48px 16px;
+    padding: 64px 16px 96px 16px;
   }
 
   .commentsPanel {
     position: absolute;
     inset: 0;
     width: 100%;
-    z-index: 2;
+    z-index: 30;
   }
 }
