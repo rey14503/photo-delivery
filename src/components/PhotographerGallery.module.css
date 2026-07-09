@@ -6,17 +6,17 @@
 
 .banner {
   position: relative;
-  border-radius: 20px;
+  border-radius: var(--radius-lg, 20px);
   overflow: hidden;
-  background-color: #1e1e24;
-  color: #ffffff;
+  background-color: var(--card-bg, #1e1e24);
+  color: var(--text-main, #ffffff);
   padding: 24px 32px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
 }
 
 @media (min-width: 768px) {
@@ -39,29 +39,30 @@
 }
 
 .modeBadge {
-  background-color: rgba(255, 87, 34, 0.2);
-  color: #ff5722;
-  font-size: 0.65rem;
+  background-color: rgba(255, 87, 34, 0.18);
+  color: var(--accent, #ff5722);
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-family: monospace;
-  border: 1px solid rgba(255, 87, 34, 0.25);
+  font-family: var(--font-mono, monospace);
+  border: 1px solid rgba(255, 87, 34, 0.28);
 }
 
 .idText {
-  color: #a1a1aa;
+  color: var(--text-muted, #a1a1aa);
   font-size: 0.75rem;
-  font-family: monospace;
+  font-family: var(--font-mono, monospace);
 }
 
 .albumTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-main, #ffffff);
   letter-spacing: -0.02em;
+  font-family: var(--font-display, sans-serif);
 }
 
 @media (min-width: 768px) {
@@ -71,19 +72,19 @@
 }
 
 .accessRow {
-  font-size: 0.8rem;
-  color: #d4d4d8;
+  font-size: 0.82rem;
+  color: var(--text-muted, #d4d4d8);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .shareTokenCode {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-surface, rgba(255, 255, 255, 0.1));
   padding: 2px 8px;
   border-radius: 4px;
-  font-family: monospace;
-  color: #ff5722;
+  font-family: var(--font-mono, monospace);
+  color: var(--accent, #ff5722);
   font-size: 0.75rem;
   font-weight: 700;
 }
@@ -93,12 +94,12 @@
   flex-wrap: wrap;
   gap: 16px;
   font-size: 0.8rem;
-  color: #a1a1aa;
+  color: var(--text-muted, #a1a1aa);
   padding-top: 8px;
 }
 
 .bannerMeta span {
-  color: #e4e4e7;
+  color: var(--text-main, #e4e4e7);
 }
 
 .bannerRight {
@@ -109,14 +110,14 @@
 }
 
 .toolbar {
-  background-color: #1e1e24;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 12px;
+  background-color: var(--card-bg, #1e1e24);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 16px);
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 @media (min-width: 768px) {
@@ -142,17 +143,17 @@
   width: 100%;
   padding: 8px 12px 8px 36px;
   font-size: 0.85rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-surface, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 10px;
-  color: #ffffff;
+  color: var(--text-main, #ffffff);
   transition: all 0.15s ease;
 }
 
 .searchInput:focus {
   outline: none;
-  background-color: #121214;
-  border-color: #ff5722;
+  background-color: var(--bg-base, #121214);
+  border-color: var(--accent, #ff5722);
 }
 
 .searchIcon {
@@ -160,7 +161,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #a1a1aa;
+  color: var(--text-muted, #a1a1aa);
   font-size: 0.85rem;
 }
 
@@ -174,21 +175,22 @@
 .filterBtn {
   padding: 6px 12px;
   border-radius: 8px;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-  border: none;
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #d4d4d8;
+  border: 1px solid transparent;
+  background-color: var(--bg-surface, rgba(255, 255, 255, 0.05));
+  color: var(--text-muted, #d4d4d8);
 }
 
 .filterBtn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-surface-hover, rgba(255, 255, 255, 0.1));
+  color: var(--text-main, #ffffff);
 }
 
 .filterBtnActive {
-  background-color: #ff5722;
+  background-color: var(--accent, #ff5722);
   color: #ffffff;
 }
 
@@ -199,24 +201,24 @@
 }
 
 .sortSelect {
-  font-size: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.78rem;
+  background-color: var(--bg-surface, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   padding: 6px 10px;
-  color: #ffffff;
+  color: var(--text-main, #ffffff);
   font-weight: 600;
   cursor: pointer;
 }
 
 .sortSelect:focus {
   outline: none;
-  border-color: #ff5722;
+  border-color: var(--accent, #ff5722);
 }
 
 .sortSelect option {
-  background-color: #1e1e24;
-  color: #ffffff;
+  background-color: var(--card-bg, #1e1e24);
+  color: var(--text-main, #ffffff);
 }
 
 .grid {
@@ -247,9 +249,9 @@
 }
 
 .emptyState {
-  background-color: #1e1e24;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  background-color: var(--card-bg, #1e1e24);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 16px);
   padding: 48px;
   text-align: center;
   display: flex;
@@ -261,11 +263,11 @@
 .emptyTitle {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-main, #ffffff);
 }
 
 .emptyText {
   font-size: 0.8rem;
-  color: #a1a1aa;
+  color: var(--text-muted, #a1a1aa);
   max-width: 380px;
 }
