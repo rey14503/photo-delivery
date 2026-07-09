@@ -12,6 +12,7 @@ export interface PhotographerGalleryPhoto {
   id: string
   thumbnailUrl: string
   previewUrl: string
+  name?: string
   version: number
   suggestedByMe: boolean
   clientLikers: string[]
@@ -206,6 +207,7 @@ function PhotographerPhotoTile({
     <>
       <PhotoTile
         thumbnailUrl={photo.thumbnailUrl}
+        name={photo.name}
         version={photo.version}
         statusNote={statusNoteFor(photo)}
         liked={photo.suggestedByMe}

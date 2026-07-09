@@ -59,6 +59,7 @@ export async function POST(
       data: {
         albumId,
         driveFileId,
+        originalName: file.name ?? null,
         displayOrder,
         thumbnailUrl,
         previewUrl,

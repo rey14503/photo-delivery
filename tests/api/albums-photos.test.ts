@@ -171,10 +171,11 @@ describe('POST /api/albums/[albumId]/photos', () => {
       expect.any(Buffer)
     )
     const createArgs = vi.mocked(prisma.photo.create).mock.calls[0][0] as {
-      data: { albumId: string; driveFileId: string; displayOrder: number }
+      data: { albumId: string; driveFileId: string; displayOrder: number; originalName: string | null }
     }
     expect(createArgs.data.albumId).toBe('album_1')
     expect(createArgs.data.driveFileId).toBe('drive_file_1')
     expect(createArgs.data.displayOrder).toBe(2)
+    expect(createArgs.data.originalName).toBe('IMG_0001.jpg')
   })
 })

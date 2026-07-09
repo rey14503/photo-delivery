@@ -58,6 +58,7 @@ export default async function AlbumDetailPage({
       id: photo.id,
       thumbnailUrl: photo.thumbnailUrl,
       previewUrl: photo.previewUrl,
+      name: photo.originalName ?? undefined,
       version: photo.version,
       suggestedByMe,
       clientLikers,

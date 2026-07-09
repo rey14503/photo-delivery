@@ -5,6 +5,8 @@ import styles from './PhotoTile.module.css'
 
 export interface PhotoTileProps {
   thumbnailUrl: string
+  name?: string
+  photographerName?: string
   version: number
   statusNote?: string
   liked: boolean
@@ -27,6 +29,8 @@ function likeGlyph(liked: boolean, icon: 'heart' | 'star') {
 
 export function PhotoTile({
   thumbnailUrl,
+  name,
+  photographerName,
   version,
   statusNote,
   liked,
@@ -41,8 +45,7 @@ export function PhotoTile({
   onReplace,
   onOpen,
 }: PhotoTileProps) {
-  // Extract simple ID or name from URL or fallback for sleek bottom display
-  const displayId = thumbnailUrl ? thumbnailUrl.split('/').pop()?.split('?')[0] || 'photo' : 'photo'
+  const displayName = name && name.trim() ? name : 'Untitled photo'
 
   return (
     <div className={styles.tile}>
@@ -108,13 +111,16 @@ export function PhotoTile({
         )}
       </div>
 
-      {/* Meta info underneath matching AI Studio PhotoTile layout */}
+      {/* Meta info underneath: real filename + photographer attribution */}
       <div className={styles.metaInfo}>
-        <h4 className={styles.photoTitle}>{displayId}</h4>
-        <div className={styles.metaBottom}>
-          <span>ID: {displayId.slice(0, 10)}</span>
-          <span style={{ textTransform: 'uppercase' }}>LANDSCAPE</span>
-        </div>
+        <h4 className={styles.photoTitle} title={displayName}>
+          {displayName}
+        </h4>
+        {photographerName && (
+          <div className={styles.metaBottom}>
+            <span>by {photographerName}</span>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -11,6 +11,7 @@ interface GalleryPhoto {
   id: string
   thumbnailUrl: string
   previewUrl: string
+  name?: string
   version: number
   likedByMe: boolean
   suggestedByPhotographer: boolean
@@ -20,6 +21,7 @@ interface GalleryPhoto {
 export interface ClientGalleryAlbumInfo {
   title?: string
   clientActorName?: string
+  photographerName?: string
   location?: string
   date?: string
 }
@@ -154,6 +156,7 @@ export function ClientGallery({
                 <ClientPhotoTile
                   photo={photo}
                   canDownload={canDownload}
+                  photographerName={albumInfo?.photographerName}
                   onOpen={() => setOpenIndex(actualIndex)}
                 />
               </li>
@@ -180,10 +183,12 @@ export function ClientGallery({
 function ClientPhotoTile({
   photo,
   canDownload,
+  photographerName,
   onOpen,
 }: {
   photo: GalleryPhoto
   canDownload: boolean
+  photographerName?: string
   onOpen: () => void
 }) {
   const { submitting, error, toggle } = useLikeToggle(photo.id)
@@ -191,6 +196,8 @@ function ClientPhotoTile({
     <>
       <PhotoTile
         thumbnailUrl={photo.thumbnailUrl}
+        name={photo.name}
+        photographerName={photographerName}
         version={photo.version}
         statusNote={photo.suggestedByPhotographer ? '⭐ Suggested by photographer' : undefined}
         liked={photo.likedByMe}

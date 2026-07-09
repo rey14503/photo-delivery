@@ -988,6 +988,7 @@ export async function POST(request: NextRequest) {
         data: {
           albumId: album.id,
           driveFileId: file.id,
+          originalName: file.name,
           displayOrder,
           thumbnailUrl,
           previewUrl,

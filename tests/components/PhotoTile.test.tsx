@@ -104,4 +104,20 @@ describe('PhotoTile', () => {
 
     expect(props.onOpen).toHaveBeenCalledTimes(1)
   })
+
+  it('shows the given photo name, falling back to a placeholder when omitted', () => {
+    const { rerender } = render(<PhotoTile {...baseProps({ name: undefined })} />)
+    expect(screen.getByText('Untitled photo')).toBeTruthy()
+
+    rerender(<PhotoTile {...baseProps({ name: 'IMG_0001.jpg' })} />)
+    expect(screen.getByText('IMG_0001.jpg')).toBeTruthy()
+  })
+
+  it('shows the photographer attribution only when provided', () => {
+    const { rerender } = render(<PhotoTile {...baseProps({ photographerName: undefined })} />)
+    expect(screen.queryByText(/^by /)).toBeNull()
+
+    rerender(<PhotoTile {...baseProps({ photographerName: 'Jane Doe' })} />)
+    expect(screen.getByText('by Jane Doe')).toBeTruthy()
+  })
 })

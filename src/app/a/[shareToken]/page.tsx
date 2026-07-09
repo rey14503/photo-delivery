@@ -18,6 +18,7 @@ export default async function SharePage({
   const album = await prisma.album.findUnique({
     where: { shareToken },
     include: {
+      owner: { select: { name: true } },
       photos: {
         orderBy: { displayOrder: 'asc' },
         include: {
@@ -58,6 +59,7 @@ export default async function SharePage({
     id: photo.id,
     thumbnailUrl: photo.thumbnailUrl,
     previewUrl: photo.previewUrl,
+    name: photo.originalName ?? undefined,
     version: photo.version,
     likedByMe: myActorKey ? photo.likes.some((like) => like.actorKey === myActorKey) : false,
     suggestedByPhotographer: photo.likes.some((like) => like.actorType === 'PHOTOGRAPHER'),
@@ -72,6 +74,7 @@ export default async function SharePage({
   const albumInfo = {
     title: album.name,
     clientActorName: nameCookie,
+    photographerName: album.owner.name ?? undefined,
     location: (album as any).location || 'Studio',
     date: new Date(album.createdAt).toLocaleDateString('vi-VN'),
   }

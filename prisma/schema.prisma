@@ -45,6 +45,7 @@ model Photo {
   albumId      String
   album        Album     @relation(fields: [albumId], references: [id])
   driveFileId  String
+  originalName String?
   version      Int       @default(1)
   displayOrder Int
   thumbnailUrl String
