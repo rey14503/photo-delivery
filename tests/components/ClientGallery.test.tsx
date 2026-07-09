@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { ClientGallery } from '@/components/ClientGallery'
 
+const refreshMock = vi.fn()
+
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: vi.fn() }),
+  useRouter: () => ({ refresh: refreshMock }),
 }))
 
 beforeEach(() => {
@@ -42,52 +44,48 @@ const photos = [
 ]
 
 describe('ClientGallery', () => {
-  it('renders a thumbnail for every photo and no lightbox initially', () => {
+  it('renders a tile for every photo and no lightbox initially', () => {
     render(<ClientGallery photos={photos} canDownload={false} />)
 
-    expect(screen.getAllByRole('img')).toHaveLength(3)
-    expect(screen.getAllByRole('button')).toHaveLength(3)
+    expect(screen.getAllByRole('button', { name: /open photo/i })).toHaveLength(3)
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
-  it('opens the lightbox showing the preview image when a thumbnail is clicked', () => {
+  it('opens the lightbox showing the preview image when a tile is clicked', () => {
     render(<ClientGallery photos={photos} canDownload={false} />)
 
-    fireEvent.click(screen.getAllByRole('button')[1])
+    fireEvent.click(screen.getAllByRole('button', { name: /open photo/i })[1])
 
     const dialog = screen.getByRole('dialog')
-    const dialogImage = dialog.querySelector('img')
-    expect(dialogImage?.getAttribute('src')).toBe('https://blob/p2-preview.jpg')
+    expect(dialog.querySelector('img')?.getAttribute('src')).toBe('https://blob/p2-preview.jpg')
   })
 
   it('navigates to the next photo and closes the lightbox', () => {
     render(<ClientGallery photos={photos} canDownload={false} />)
 
-    fireEvent.click(screen.getAllByRole('button')[0])
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    fireEvent.click(screen.getAllByRole('button', { name: /open photo/i })[0])
+    fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
 
     const dialog = screen.getByRole('dialog')
     expect(dialog.querySelector('img')?.getAttribute('src')).toBe('https://blob/p2-preview.jpg')
 
-    fireEvent.click(screen.getByRole('button', { name: /close/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^close$/i }))
 
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
-  it('shows the suggested-by-photographer badge and existing comments for the open photo', () => {
+  it('shows the suggested-by-photographer note on the tile and in the lightbox for a suggested photo', () => {
     render(<ClientGallery photos={photos} canDownload={false} />)
 
-    fireEvent.click(screen.getAllByRole('button')[1])
+    expect(screen.getByText('⭐ Suggested by photographer')).toBeTruthy()
 
-    expect(screen.getByText(/suggested by photographer/i)).toBeTruthy()
-    expect(screen.getByText(/Lovely/)).toBeTruthy()
-    expect(screen.getByText(/Jane Doe/)).toBeTruthy()
+    fireEvent.click(screen.getAllByRole('button', { name: /open photo/i })[1])
+
+    expect(screen.getAllByText('⭐ Suggested by photographer')).toHaveLength(2)
   })
 
-  it('does not show the suggested badge for a photo with no photographer like', () => {
-    render(<ClientGallery photos={photos} canDownload={false} />)
-
-    fireEvent.click(screen.getAllByRole('button')[0])
+  it('does not show the suggested note for a photo with no photographer like', () => {
+    render(<ClientGallery photos={[photos[0]]} canDownload={false} />)
 
     expect(screen.queryByText(/suggested by photographer/i)).toBeNull()
   })
@@ -97,7 +95,7 @@ describe('ClientGallery', () => {
 
     expect(screen.queryByRole('link', { name: /download all/i })).toBeNull()
 
-    fireEvent.click(screen.getAllByRole('button')[0])
+    fireEvent.click(screen.getAllByRole('button', { name: /open photo/i })[0])
 
     expect(screen.queryByRole('link', { name: /^download$/i })).toBeNull()
   })
@@ -108,9 +106,43 @@ describe('ClientGallery', () => {
     const downloadAll = screen.getByRole('link', { name: /download all/i })
     expect(downloadAll).toHaveAttribute('href', '/api/albums/album_1/download-all')
 
-    fireEvent.click(screen.getAllByRole('button')[1])
+    fireEvent.click(screen.getAllByRole('button', { name: /open photo/i })[1])
 
     const downloadPhoto = screen.getByRole('link', { name: /^download$/i })
     expect(downloadPhoto).toHaveAttribute('href', '/api/photos/p2/download')
+  })
+
+  it('toggles like via the quick icon on the tile, posting to the like endpoint', () => {
+    vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as never)
+    render(<ClientGallery photos={photos} canDownload={false} />)
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Select this photo' })[0])
+
+    expect(global.fetch).toHaveBeenCalledWith('/api/photos/p1/like', { method: 'POST' })
+  })
+
+  it('shows an error message when the like toggle fails', async () => {
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: false,
+      json: async () => ({ error: 'Forbidden' }),
+    } as never)
+    render(<ClientGallery photos={photos} canDownload={false} />)
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Select this photo' })[0])
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Forbidden')
+  })
+
+  it('shows the correct action menu items for a client actor', () => {
+    render(<ClientGallery photos={photos} canDownload={true} albumId="album_1" />)
+
+    fireEvent.click(screen.getAllByRole('button', { name: /open photo/i })[1])
+    const dialog = screen.getByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: /more actions/i }))
+
+    expect(within(dialog).getByRole('menuitem', { name: 'Unselect this photo' })).toBeTruthy()
+    expect(within(dialog).getByRole('menuitem', { name: /download/i })).toBeTruthy()
+    expect(within(dialog).getByRole('menuitem', { name: /view comments \(1\)/i })).toBeTruthy()
+    expect(within(dialog).queryByRole('menuitem', { name: /replace/i })).toBeNull()
   })
 })
