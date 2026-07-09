@@ -61,7 +61,23 @@ Already covered by D2's referenced spec/plan — both pages get the same `PhotoT
 
 ## Open Questions for Whoever Continues
 
-1. Styling approach for the whole app (CSS Modules vs. Tailwind vs. component library) — unresolved, needs a decision before D1/D3 can be built.
-2. Dark mode — in or out of scope?
-3. Product name/branding — not decided.
-4. Does D1 (dashboard redesign) get its own brainstorm/spec/plan cycle before or after `docs/superpowers/plans/2026-07-09-photo-action-ui.md` is executed? No dependency between them, so either order works — sequencing is a scheduling choice, not an architectural one.
+1. ~~Styling approach~~ — **resolved**: CSS Modules, one per component, backed by CSS custom properties in `globals.css`. See D5 below for the binding consistency rule this alone doesn't guarantee.
+2. ~~Dark mode~~ — **resolved, in scope**. See D5.
+3. Product name/branding — still not decided.
+4. Does D1 (dashboard redesign) get its own brainstorm/spec/plan cycle before or after `docs/superpowers/plans/2026-07-09-photo-action-ui.md` is executed? No dependency between them, so either order works — moot now, both have been built.
+
+## D5 — Theme consistency (added after the first build shipped inconsistent theming)
+
+The first dashboard/album-detail build shipped with light-themed and dark-themed screens mixed inconsistently within the same app — e.g. the album-detail header card rendering as a hardcoded white card sitting on a dark page background, while the dashboard list page rendered fully light regardless of the OS/stored theme preference. `globals.css` does define a full token set (`--bg-base`, `--bg-surface`, `--text-main`, etc., light and dark variants via `@media (prefers-color-scheme: light)`) — the bug is that not every component actually *consumes* those tokens; some hardcode literal colors (e.g. `background-color: #ffffff` / `#000000`) instead of `var(--bg-surface)` / `var(--text-main)`.
+
+**Binding rule, going forward:** no component's CSS Module may hardcode a background, text, or border color as a literal hex/rgb value. Every color must come from the shared custom properties in `globals.css`. This is what actually makes "dark mode" and "light mode" work as a single coherent theme rather than a per-page coin-flip — the token system already exists, it just needs to be the *only* source of color for every component, with no exceptions. When auditing or reviewing any new component, check its `.module.css` for literal color values as a first pass; any hit is a bug.
+
+## D6 — Client Access / share-link presentation
+
+The album-detail page currently shows the client share link as a bare relative path (`/a/<32-char-hex-token>`), not a full clickable URL, with no copy affordance on that page (the dashboard's own album-card list does have a "Copy link" button, but the album detail page's own header banner doesn't) and no way for a photographer to hand a client a scannable link.
+
+**Decision:** improve the *presentation* only — the underlying `shareToken` (32 hex characters, from `randomBytes(16)`) must not be shortened. For an album with no password, that token is the sole access control; shortening it would measurably weaken it. Instead:
+- Always render the share link as a full, absolute URL (`${origin}/a/${shareToken}`, not the bare path) so it's meaningfully copy-pasteable outside the app.
+- Add a one-click "Copy link" control on the album-detail header banner itself (not just the dashboard card list), with a brief visual confirmation on click (e.g. a checkmark or "Copied" label for ~2 seconds) — this app already has this exact pattern's underlying convention (`role="alert"`/inline feedback) to draw from.
+- Add a QR code rendering of that same full URL next to it, so a client can scan-and-open on their phone instead of typing or receiving a pasted link. Generate the QR code entirely client-side (a small, well-known library such as `qrcode.react` is a reasonable choice) — do not call any third-party QR-generation API with the link, since that would leak an unguessable, unauthenticated album-access token to an external service.
+- The *visible* text of the link may be visually truncated/ellipsized for readability (e.g. `.../a/257afd…f17cb`) as long as the actual `href`/copy action always uses the full, untruncated token — never let the display truncation leak into the real value.

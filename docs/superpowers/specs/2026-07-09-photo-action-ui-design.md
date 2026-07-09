@@ -98,6 +98,12 @@ The first build of this spec (by an external UI tool) shipped with real, user-vi
 
 **Stacking:** every menu, action bar, and chrome button must render above the photo in stacking order with an explicit `z-index` — never interleaved with image content such that a later-painted image element could cover an earlier control.
 
+**The comment panel:** the first build shipped this as a bare, floating textarea + a disconnected "Post comment" button, positioned arbitrarily, with no visible list of existing comments and no panel background — effectively unusable. Model it explicitly on Google Photos' own comment panel:
+- The panel is a proper side panel with its own solid background (`var(--bg-surface)`, per D5 in the ADR — never transparent, never see-through to the photo behind it), full-height alongside the image (already specified as "beside the image, not over it" earlier in this doc — that part of the spec was correctly followed; the panel's *internal* layout was not).
+- **Existing comments render as a scrollable list at the top of the panel**, each comment showing its author label and text (the data this needs — `authorLabel`, `text` — already exists on every comment object; nothing new to fetch). Newest-at-bottom or oldest-at-bottom is fine either way, but pick one and be consistent — don't leave the list unstyled/unlisted the way the first build did.
+- **The input control is anchored at the bottom of the panel**, not floating disconnected at the top — a single-line (auto-growing) text input plus a compact send affordance directly beside it (an icon button is sufficient — a full separate "Post comment" button rendered far from the input, as in the first build, is the bug being fixed here). Submitting clears the input and the new comment appears in the list above.
+- The panel's own padding, comment-row spacing, and input styling should read as one cohesive component — not, as shipped, two unrelated floating elements that happen to be near each other.
+
 ## Out of Scope
 
 - Any change to access control, API routes, or the data model — this is purely a presentation change.
