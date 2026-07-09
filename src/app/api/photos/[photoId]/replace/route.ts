@@ -51,7 +51,12 @@ export async function POST(
 
     const updated = await prisma.photo.update({
       where: { id: photoId },
-      data: { version: newVersion, thumbnailUrl, previewUrl },
+      data: {
+        version: newVersion,
+        thumbnailUrl,
+        previewUrl,
+        originalName: file.name ? file.name : photo.originalName,
+      },
     })
 
     return NextResponse.json(updated)
