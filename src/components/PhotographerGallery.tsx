@@ -175,6 +175,7 @@ export function PhotographerGallery({
               </li>
             )
           })}
+          <li className={styles.flexSpacer} aria-hidden="true" />
         </ul>
       )}
 

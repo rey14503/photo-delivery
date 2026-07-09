@@ -162,6 +162,7 @@ export function ClientGallery({
               </li>
             )
           })}
+          <li className={styles.flexSpacer} aria-hidden="true" />
         </ul>
       )}
 

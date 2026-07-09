@@ -49,17 +49,20 @@ export function PhotoTile({
 
   return (
     <div className={styles.tile}>
-      {/* Image Container with AI Studio aspect ratio and hover overlay */}
       <div className={styles.imageContainer}>
-        <button type="button" aria-label="Open photo" onClick={onOpen} className={styles.openButton}>
-          <img src={thumbnailUrl} alt="Photo thumbnail" className={styles.image} />
+        <button
+          type="button"
+          aria-label={`Open photo: ${displayName}`}
+          title={displayName}
+          onClick={onOpen}
+          className={styles.openButton}
+        >
+          <img src={thumbnailUrl} alt={displayName} className={styles.image} />
         </button>
 
-        {/* Hover / Always-visible Overlay for controls matching exact AI Studio mockup */}
         <div className={styles.overlay}>
           <div className={styles.topRow}>
-            <div />
-            <div className={styles.quickActions}>
+            <div className={styles.checkBadgeBox}>
               <button
                 type="button"
                 aria-label={likeLabel}
@@ -69,11 +72,13 @@ export function PhotoTile({
                   e.stopPropagation()
                   onToggleLike()
                 }}
-                className={styles.actionBtn}
+                className={`${styles.checkCircleBtn} ${liked ? styles.checkCircleActive : ''}`}
                 title={likeLabel}
               >
                 {likeGlyph(liked, likeIcon)}
               </button>
+            </div>
+            <div className={styles.quickActions}>
               <PhotoActionMenu
                 likeLabel={likeLabel}
                 onToggleLike={onToggleLike}
@@ -97,7 +102,6 @@ export function PhotoTile({
           </div>
         </div>
 
-        {/* ALWAYS VISIBLE BADGES matching AI Studio layout */}
         {version > 1 && (
           <div className={styles.versionBadge}>
             <span>v{version}</span>
@@ -111,7 +115,6 @@ export function PhotoTile({
         )}
       </div>
 
-      {/* Meta info underneath: real filename + photographer attribution */}
       <div className={styles.metaInfo}>
         <h4 className={styles.photoTitle} title={displayName}>
           {displayName}

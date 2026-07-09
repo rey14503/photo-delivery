@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth/next'
 import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { canManageAlbum } from '@/lib/album-permissions'
@@ -18,7 +19,7 @@ export default async function AlbumDetailPage({
 }) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
-    redirect('/login')
+    redirect('/api/auth/signin')
   }
 
   const { albumId } = await params
@@ -49,10 +50,16 @@ export default async function AlbumDetailPage({
   })
   if (wasDeleted) {
     return (
-      <main>
-        <h1>This album is no longer available</h1>
-        <p>Its Google Drive folder was deleted, so the album was removed.</p>
-        <a href="/albums">Back to your albums</a>
+      <main className={styles.fallbackContainer}>
+        <div className={styles.fallbackCard}>
+          <h1 className={styles.fallbackTitle}>This album is no longer available</h1>
+          <p className={styles.fallbackText}>
+            Its Google Drive folder was deleted or is inaccessible, so the album has been removed.
+          </p>
+          <Link href="/albums" className={styles.fallbackLink}>
+            ← Back to your albums
+          </Link>
+        </div>
       </main>
     )
   }

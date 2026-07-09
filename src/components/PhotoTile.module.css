@@ -3,25 +3,24 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: var(--radius-lg, 16px);
+  height: 100%;
+  border-radius: 4px;
   overflow: hidden;
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  background-color: var(--bg-base);
+  border: none;
+  box-shadow: none;
   cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
 }
 
 .tile:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--accent-border-strong);
-  transform: translateY(-2px);
+  filter: brightness(0.96);
 }
 
 .imageContainer {
   position: relative;
   width: 100%;
-  min-height: 200px;
+  height: 100%;
   background-color: var(--bg-base);
   display: flex;
   align-items: center;
@@ -43,25 +42,24 @@
 
 .image {
   width: 100%;
-  height: auto;
-  max-height: 520px;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tile:hover .image {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  background-color: var(--overlay-subtle);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.35) 100%);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 12px;
+  padding: 10px;
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;
@@ -85,6 +83,50 @@
   width: 100%;
   pointer-events: auto;
   z-index: 10;
+}
+
+.checkBadgeBox {
+  display: flex;
+  align-items: center;
+  z-index: 15;
+}
+
+.checkCircleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  color: #ffffff !important;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.tile:hover .checkCircleBtn,
+.tile:focus-within .checkCircleBtn,
+.checkCircleActive {
+  opacity: 1 !important;
+}
+
+.checkCircleActive {
+  background: #3b82f6 !important;
+  border-color: #ffffff !important;
+}
+
+.checkCircleBtn:hover:not(:disabled) {
+  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.65) !important;
+}
+
+.checkCircleActive:hover:not(:disabled) {
+  background: #2563eb !important;
 }
 
 .quickActions {
@@ -182,30 +224,49 @@
 }
 
 .metaInfo {
-  padding: 12px;
-  background-color: var(--card-bg);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.35) 65%, transparent 100%);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  flex: 1;
-  border-top: 1px solid var(--border-subtle);
+  justify-content: flex-end;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.tile:hover .metaInfo,
+.tile:focus-within .metaInfo {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .metaInfo {
+    opacity: 1;
+  }
 }
 
 .photoTitle {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-main);
+  color: #ffffff !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .metaBottom {
-  margin-top: 4px;
+  margin-top: 2px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.68rem;
-  color: var(--text-muted);
+  font-size: 0.65rem;
+  color: #e4e4e7 !important;
   font-family: var(--font-mono, monospace);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
