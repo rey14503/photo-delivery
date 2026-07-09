@@ -1,0 +1,250 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.banner {
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: #1e1e24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+  .banner {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.bannerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sharedAccessBadge {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: monospace;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  display: inline-block;
+  width: fit-content;
+}
+
+.albumTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+  .albumTitle {
+    font-size: 1.875rem;
+  }
+}
+
+.deliveredBy {
+  font-size: 0.8rem;
+  color: #a1a1aa;
+}
+
+.brandHighlight {
+  color: #ff5722;
+  font-weight: 600;
+}
+
+.bannerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: #a1a1aa;
+  padding-top: 8px;
+}
+
+.bannerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .bannerRight {
+    align-items: flex-end;
+  }
+}
+
+.downloadAllBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  background-color: #ff5722;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 10px 20px;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);
+  transition: all 0.15s ease;
+}
+
+.downloadAllBtn:hover {
+  background-color: #e64a19;
+  transform: translateY(-1px);
+}
+
+.disabledNotice {
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  background-color: rgba(245, 158, 11, 0.1);
+  padding: 12px;
+  max-width: 320px;
+  color: #fcd34d;
+  font-size: 0.75rem;
+}
+
+.disabledTitle {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.toolbar {
+  background-color: #1e1e24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (min-width: 768px) {
+  .toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.searchBox {
+  position: relative;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .searchBox {
+    width: 280px;
+  }
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  font-size: 0.85rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  background-color: #121214;
+  border-color: #ff5722;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a1a1aa;
+  font-size: 0.85rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.filterBtn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #d4d4d8;
+}
+
+.filterBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.filterBtnActive {
+  background-color: #ff5722;
+  color: #ffffff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 24px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.emptyState {
+  background-color: #1e1e24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 48px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}

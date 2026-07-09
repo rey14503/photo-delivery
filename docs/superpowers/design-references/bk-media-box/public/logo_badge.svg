@@ -1,0 +1,132 @@
+<svg
+  viewBox="0 0 500 500"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <!-- Smooth peach radial gradient for the badge background -->
+    <radialGradient id="badge-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFF0E6" />
+      <stop offset="60%" stop-color="#FFE0CE" />
+      <stop offset="100%" stop-color="#FCCAA9" />
+    </radialGradient>
+  </defs>
+
+  <!-- Main Circular Badge Body -->
+  <circle cx="250" cy="250" r="235" fill="url(#badge-grad)" />
+
+  <!-- Textured/Brush-like Outer Accent Circle -->
+  <circle
+    cx="250"
+    cy="250"
+    r="225"
+    stroke="#FF5722"
+    stroke-width="2.5"
+    stroke-dasharray="10 5 2 5"
+    opacity="0.3"
+  />
+  <circle
+    cx="250"
+    cy="250"
+    r="215"
+    stroke="#FF5722"
+    stroke-width="1"
+    stroke-dasharray="150 10 50 15"
+    opacity="0.15"
+  />
+
+  <!-- Camera & Lens Icon scaled and centered inside badge (cx=250, cy=180 instead of cx=210, cy=260) -->
+  <g transform="translate(100, 60) scale(0.6)">
+    <!-- Outer offset thin aesthetic ring -->
+    <circle
+      cx="210"
+      cy="260"
+      r="170"
+      stroke="#FF5722"
+      stroke-width="3.5"
+      stroke-dasharray="8 4"
+      opacity="0.5"
+    />
+    <circle
+      cx="195"
+      cy="260"
+      r="175"
+      stroke="#FF5722"
+      stroke-width="2"
+      opacity="0.4"
+    />
+
+    <!-- Main camera body outline -->
+    <path
+      d="M210 120H470V450H210"
+      stroke="#FF5722"
+      stroke-width="16"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- Top Handle / Strap Mount -->
+    <path
+      d="M260 80C260 55 280 40 305 40H425C450 40 470 55 470 80V120H260V80Z"
+      fill="#FF5722"
+    />
+
+    <!-- Inner Lens Area Circle -->
+    <circle
+      cx="210"
+      cy="260"
+      r="150"
+      stroke="#FF5722"
+      stroke-width="16"
+      fill="transparent"
+    />
+
+    <!-- Large aesthetic swooping brush/film curve -->
+    <path
+      d="M 210 110 C 292.8 110, 360 177.2, 360 260 C 360 330, 320 410, 395 450 L 470 450 L 470 120 L 210 120 Z"
+      fill="#FF5722"
+    />
+
+    <!-- Central Aperture Shutter / Blades structure -->
+    <!-- Central Hexagon -->
+    <polygon
+      points="210,230 245,245 245,275 210,290 175,275 175,245"
+      fill="#FF5722"
+    />
+
+    <!-- Radiating Shutter Blade Lines -->
+    <line x1="210" y1="110" x2="210" y2="230" stroke="#FF5722" stroke-width="10" stroke-linecap="round" />
+    <line x1="340" y1="185" x2="245" y2="245" stroke="#FF5722" stroke-width="10" stroke-linecap="round" />
+    <line x1="340" y1="335" x2="245" y2="275" stroke="#FF5722" stroke-width="10" stroke-linecap="round" />
+    <line x1="210" y1="410" x2="210" y2="290" stroke="#FF5722" stroke-width="10" stroke-linecap="round" />
+    <line x1="80" y1="335" x2="175" y2="275" stroke="#FF5722" stroke-width="10" stroke-linecap="round" />
+    <line x1="80" y1="185" x2="175" y2="245" stroke="#FF5722" stroke-width="10" stroke-linecap="round" />
+  </g>
+
+  <!-- BK MEDIA Brand Text -->
+  <text
+    x="250"
+    y="360"
+    font-family="'Inter', system-ui, sans-serif"
+    font-size="52"
+    font-weight="900"
+    text-anchor="middle"
+    letter-spacing="-1.5"
+  >
+    <tspan fill="#FF5722">BK</tspan><tspan fill="#222222">MEDIA</tspan>
+  </text>
+
+  <!-- Tagline Text -->
+  <text
+    x="250"
+    y="392"
+    font-family="'Inter', system-ui, sans-serif"
+    font-size="20"
+    font-weight="500"
+    fill="#4A4A4A"
+    text-anchor="middle"
+    letter-spacing="2.5"
+  >
+    practice makes perfect
+  </text>
+</svg>

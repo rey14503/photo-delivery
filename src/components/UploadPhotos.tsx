@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import styles from './AlbumControls.module.css'
 
 export function UploadPhotos({ albumId }: { albumId: string }) {
   const router = useRouter()
@@ -38,12 +39,36 @@ export function UploadPhotos({ albumId }: { albumId: string }) {
   }
 
   return (
-    <div>
-      <label>
-        Upload photos
-        <input type="file" accept="image/*" multiple onChange={handleChange} disabled={uploading} />
-      </label>
-      {error && <p role="alert">{error}</p>}
+    <div className={styles.card}>
+      <div className={styles.cardRow}>
+        <div>
+          <div className={styles.label}>
+            <span>📤 Upload photos & Sync</span>
+          </div>
+          <div className={styles.subText}>
+            Select multiple high-resolution images to add directly to this client gallery.
+          </div>
+        </div>
+        <div>
+          <label className={styles.btnPrimary} style={{ cursor: uploading ? 'not-allowed' : 'pointer', display: 'inline-block' }}>
+            {uploading ? 'Uploading files...' : '+ Upload photos'}
+            <input
+              aria-label="Upload photos"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleChange}
+              disabled={uploading}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
+      </div>
+      {error && (
+        <p role="alert" className={styles.alert}>
+          {error}
+        </p>
+      )}
     </div>
   )
 }

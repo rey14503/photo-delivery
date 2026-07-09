@@ -7,6 +7,7 @@ import { resolveActor, actorKeyFor } from '@/lib/actor'
 import { PasswordGate } from '@/components/PasswordGate'
 import { NameGate } from '@/components/NameGate'
 import { ClientGallery } from '@/components/ClientGallery'
+import styles from '../../albums/[albumId]/page.module.css'
 
 export default async function SharePage({
   params,
@@ -68,10 +69,16 @@ export default async function SharePage({
     })),
   }))
 
+  const albumInfo = {
+    title: album.name,
+    clientActorName: nameCookie,
+    location: (album as any).location || 'Studio',
+    date: new Date(album.createdAt).toLocaleDateString('vi-VN'),
+  }
+
   return (
-    <main>
-      <h1>{album.name}</h1>
-      <ClientGallery photos={photos} canDownload={canDownload} albumId={album.id} />
+    <main className={styles.page}>
+      <ClientGallery photos={photos} canDownload={canDownload} albumId={album.id} albumInfo={albumInfo} />
     </main>
   )
 }

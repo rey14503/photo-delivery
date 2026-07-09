@@ -28,14 +28,16 @@ export function CreateAlbumModal({ isOpen, onClose }: CreateAlbumModalProps) {
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div role="dialog" aria-modal="true" aria-label="Tạo album mới" className={styles.modal}>
+      <div role="dialog" aria-modal="true" aria-label="Tạo album" className={styles.modal}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Tạo album mới</h2>
+          <h2 className={styles.title}>Tạo album</h2>
           <button type="button" onClick={onClose} aria-label="Đóng" className={styles.closeBtn}>
             ✕
           </button>
         </div>
-        <CreateAlbumForm onSuccess={onClose} />
+        <div className={styles.content}>
+          <CreateAlbumForm onSuccess={onClose} onCancel={onClose} />
+        </div>
       </div>
     </div>
   )

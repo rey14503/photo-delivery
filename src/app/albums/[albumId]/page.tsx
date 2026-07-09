@@ -7,6 +7,7 @@ import { UploadPhotos } from '@/components/UploadPhotos'
 import { SetAlbumPassword } from '@/components/SetAlbumPassword'
 import { DownloadToggle } from '@/components/DownloadToggle'
 import { PhotographerGallery } from '@/components/PhotographerGallery'
+import styles from './page.module.css'
 
 export default async function AlbumDetailPage({
   params,
@@ -64,18 +65,36 @@ export default async function AlbumDetailPage({
     }
   })
 
+  const albumInfo = {
+    id: album.id,
+    name: album.name,
+    clientName: album.clientName,
+    shareToken: album.shareToken,
+    location: (album as any).location || 'Đà Lạt Studio',
+    date: new Date(album.createdAt).toLocaleDateString('vi-VN'),
+  }
+
   return (
-    <main>
-      <h1>
-        {album.name} — {album.clientName}
-      </h1>
-      <p>
-        Share link: <code>/a/{album.shareToken}</code>
-      </p>
-      <SetAlbumPassword albumId={album.id} hasPassword={Boolean(album.passwordHash)} />
-      <DownloadToggle albumId={album.id} downloadEnabled={album.downloadEnabled} />
-      <UploadPhotos albumId={album.id} />
-      <PhotographerGallery photos={photos} />
+    <main className={styles.page}>
+      {/* 1. Photographer Gallery Header Banner, Search/Filter Toolbar, and Photo Cards */}
+      <PhotographerGallery photos={photos} albumInfo={albumInfo} />
+
+      {/* 2. Management Controls Section matching AI Studio Studio Settings */}
+      <div>
+        <div className={styles.sectionHeader}>
+          <div>
+            <h3 className={styles.sectionTitle}>⚙️ Album Management & Security Settings</h3>
+            <p className={styles.sectionSub}>
+              Configure client portal permissions, password verification, and upload high-resolution delivery batches.
+            </p>
+          </div>
+        </div>
+        <div className={styles.controlsGrid} style={{ marginTop: 16 }}>
+          <SetAlbumPassword albumId={album.id} hasPassword={Boolean(album.passwordHash)} />
+          <DownloadToggle albumId={album.id} downloadEnabled={album.downloadEnabled} />
+          <UploadPhotos albumId={album.id} />
+        </div>
+      </div>
     </main>
   )
 }

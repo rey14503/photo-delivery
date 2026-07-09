@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import styles from './AlbumControls.module.css'
 
 async function submitPassword(albumId: string, password: string | null) {
   return fetch(`/api/albums/${albumId}/password`, {
@@ -52,26 +53,43 @@ export function SetAlbumPassword({
   }
 
   return (
-    <div>
-      <form onSubmit={handleSetSubmit}>
-        <label>
-          Album password
-          <input
-            type="text"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-        <button type="submit" disabled={submitting}>
-          {hasPassword ? 'Change password' : 'Set password'}
-        </button>
+    <div className={styles.card}>
+      <form onSubmit={handleSetSubmit} className={styles.cardRow}>
+        <div>
+          <label className={styles.label}>
+            <span>🔐 Album password</span>
+            <input
+              aria-label="Album password"
+              type="text"
+              placeholder="Enter PIN / password..."
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={styles.input}
+              style={{ marginLeft: 8 }}
+            />
+          </label>
+          <div className={styles.subText}>
+            {hasPassword
+              ? 'Password protection is currently ACTIVE for client access.'
+              : 'Set a password to restrict unauthorized client gallery view.'}
+          </div>
+        </div>
+        <div className={styles.inputGroup}>
+          <button type="submit" disabled={submitting} className={styles.btnPrimary}>
+            {hasPassword ? 'Change password' : 'Set password'}
+          </button>
+          {hasPassword && (
+            <button type="button" onClick={handleRemove} disabled={submitting} className={styles.btnSecondary}>
+              Remove password
+            </button>
+          )}
+        </div>
       </form>
-      {hasPassword && (
-        <button type="button" onClick={handleRemove} disabled={submitting}>
-          Remove password
-        </button>
+      {error && (
+        <p role="alert" className={styles.alert}>
+          {error}
+        </p>
       )}
-      {error && <p role="alert">{error}</p>}
     </div>
   )
 }
