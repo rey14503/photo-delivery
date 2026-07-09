@@ -16,6 +16,22 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-base: #f7f7f8;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f0f0f2;
+    --border-color: #e4e4e7;
+    --text-main: #18181b;
+    --text-muted: #71717a;
+    --accent: #ff5722;
+    --accent-hover: #e64a19;
+    --danger: #dc2626;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
