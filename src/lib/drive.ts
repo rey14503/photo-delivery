@@ -134,3 +134,67 @@ export function dedupeFilename(name: string, seen: Map<string, number>): string 
   }
   return `${name.slice(0, lastDot)} (${count})${name.slice(lastDot)}`
 }
+
+export function parseDriveFolderId(link: string): string | null {
+  const match = link.match(/\/folders\/([a-zA-Z0-9_-]+)/)
+  return match ? match[1] : null
+}
+
+export async function canEditFolder(drive: drive_v3.Drive, folderId: string): Promise<boolean> {
+  try {
+    const res = await drive.files.get({
+      fileId: folderId,
+      fields: 'mimeType,trashed,capabilities(canEdit)',
+    })
+    return (
+      res.data.mimeType === 'application/vnd.google-apps.folder' &&
+      res.data.trashed !== true &&
+      res.data.capabilities?.canEdit === true
+    )
+  } catch {
+    return false
+  }
+}
+
+export async function findOrCreateFolder(
+  drive: drive_v3.Drive,
+  name: string,
+  parentId: string
+): Promise<string> {
+  const escapedName = name.replace(/'/g, "\\'")
+  const res = await drive.files.list({
+    q: `'${parentId}' in parents and name = '${escapedName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+    fields: 'files(id)',
+  })
+  const existing = res.data.files?.[0]
+  if (existing?.id) {
+    return existing.id
+  }
+  return createFolder(drive, name, parentId)
+}
+
+const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
+export function isSupportedImageMimeType(mimeType: string): boolean {
+  return SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType)
+}
+
+export interface DriveFolderFile {
+  id: string
+  name: string
+  mimeType: string
+}
+
+export async function listFolderFiles(
+  drive: drive_v3.Drive,
+  folderId: string
+): Promise<DriveFolderFile[]> {
+  const res = await drive.files.list({
+    q: `'${folderId}' in parents and trashed = false`,
+    fields: 'files(id,name,mimeType)',
+  })
+  const files = res.data.files ?? []
+  return files
+    .filter((file) => file.id && file.name && file.mimeType)
+    .map((file) => ({ id: file.id!, name: file.name!, mimeType: file.mimeType! }))
+}

@@ -4,6 +4,7 @@ const filesCreate = vi.fn()
 const filesUpdate = vi.fn()
 const filesDelete = vi.fn()
 const filesGet = vi.fn()
+const filesList = vi.fn()
 
 vi.mock('googleapis', () => ({
   google: {
@@ -13,7 +14,13 @@ vi.mock('googleapis', () => ({
       }),
     },
     drive: vi.fn().mockImplementation(() => ({
-      files: { create: filesCreate, update: filesUpdate, delete: filesDelete, get: filesGet },
+      files: {
+        create: filesCreate,
+        update: filesUpdate,
+        delete: filesDelete,
+        get: filesGet,
+        list: filesList,
+      },
     })),
   },
 }))
@@ -32,6 +39,11 @@ import {
   deleteFile,
   downloadOriginal,
   dedupeFilename,
+  parseDriveFolderId,
+  canEditFolder,
+  findOrCreateFolder,
+  isSupportedImageMimeType,
+  listFolderFiles,
 } from '@/lib/drive'
 import { google } from 'googleapis'
 
@@ -267,5 +279,174 @@ describe('dedupeFilename', () => {
     expect(dedupeFilename('two.jpg', seen)).toBe('two.jpg')
     expect(dedupeFilename('one.jpg', seen)).toBe('one (1).jpg')
     expect(dedupeFilename('two.jpg', seen)).toBe('two (1).jpg')
+  })
+})
+
+describe('parseDriveFolderId', () => {
+  it('extracts the id from a folder link with a trailing query string', () => {
+    expect(
+      parseDriveFolderId('https://drive.google.com/drive/folders/1A_bC-2Demo?usp=sharing')
+    ).toBe('1A_bC-2Demo')
+  })
+
+  it('extracts the id from a bare folder link with no query string', () => {
+    expect(parseDriveFolderId('https://drive.google.com/drive/folders/1A_bC-2Demo')).toBe(
+      '1A_bC-2Demo'
+    )
+  })
+
+  it('returns null for an unrelated URL', () => {
+    expect(parseDriveFolderId('https://example.com/not-drive')).toBeNull()
+  })
+
+  it('returns null for a bare folder id with no URL wrapper', () => {
+    expect(parseDriveFolderId('1A_bC-2Demo')).toBeNull()
+  })
+
+  it('returns null for an empty string', () => {
+    expect(parseDriveFolderId('')).toBeNull()
+  })
+})
+
+describe('canEditFolder', () => {
+  it('returns true for an editable, non-trashed folder', async () => {
+    filesGet.mockResolvedValue({
+      data: {
+        mimeType: 'application/vnd.google-apps.folder',
+        trashed: false,
+        capabilities: { canEdit: true },
+      },
+    })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await canEditFolder(drive, 'folder_1')).toBe(true)
+    expect(filesGet).toHaveBeenCalledWith({
+      fileId: 'folder_1',
+      fields: 'mimeType,trashed,capabilities(canEdit)',
+    })
+  })
+
+  it('returns false for a view-only folder', async () => {
+    filesGet.mockResolvedValue({
+      data: {
+        mimeType: 'application/vnd.google-apps.folder',
+        trashed: false,
+        capabilities: { canEdit: false },
+      },
+    })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await canEditFolder(drive, 'folder_1')).toBe(false)
+  })
+
+  it('returns false when the id resolves to a file, not a folder', async () => {
+    filesGet.mockResolvedValue({
+      data: { mimeType: 'image/jpeg', trashed: false, capabilities: { canEdit: true } },
+    })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await canEditFolder(drive, 'file_1')).toBe(false)
+  })
+
+  it('returns false for a trashed folder', async () => {
+    filesGet.mockResolvedValue({
+      data: {
+        mimeType: 'application/vnd.google-apps.folder',
+        trashed: true,
+        capabilities: { canEdit: true },
+      },
+    })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await canEditFolder(drive, 'folder_1')).toBe(false)
+  })
+
+  it('returns false when the Drive API call throws (not found / no access)', async () => {
+    filesGet.mockRejectedValue(new Error('File not found'))
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await canEditFolder(drive, 'missing_folder')).toBe(false)
+  })
+})
+
+describe('findOrCreateFolder', () => {
+  it('reuses an existing subfolder with the given name instead of creating one', async () => {
+    filesList.mockResolvedValue({ data: { files: [{ id: 'existing_selected' }] } })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    const id = await findOrCreateFolder(drive, 'Selected', 'parent_folder')
+
+    expect(id).toBe('existing_selected')
+    expect(filesCreate).not.toHaveBeenCalled()
+    expect(filesList).toHaveBeenCalledWith({
+      q: "'parent_folder' in parents and name = 'Selected' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+      fields: 'files(id)',
+    })
+  })
+
+  it('creates a new subfolder when none exists with that name', async () => {
+    filesList.mockResolvedValue({ data: { files: [] } })
+    filesCreate.mockResolvedValue({ data: { id: 'new_selected' } })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    const id = await findOrCreateFolder(drive, 'Selected', 'parent_folder')
+
+    expect(id).toBe('new_selected')
+    expect(filesCreate).toHaveBeenCalledWith({
+      requestBody: {
+        name: 'Selected',
+        mimeType: 'application/vnd.google-apps.folder',
+        parents: ['parent_folder'],
+      },
+      fields: 'id',
+    })
+  })
+})
+
+describe('isSupportedImageMimeType', () => {
+  it('returns true for jpeg, png, and webp', () => {
+    expect(isSupportedImageMimeType('image/jpeg')).toBe(true)
+    expect(isSupportedImageMimeType('image/png')).toBe(true)
+    expect(isSupportedImageMimeType('image/webp')).toBe(true)
+  })
+
+  it('returns false for RAW, sidecar, video, and other mime types', () => {
+    expect(isSupportedImageMimeType('image/x-sony-arw')).toBe(false)
+    expect(isSupportedImageMimeType('application/octet-stream')).toBe(false)
+    expect(isSupportedImageMimeType('video/mp4')).toBe(false)
+  })
+})
+
+describe('listFolderFiles', () => {
+  it('lists every non-trashed direct child of the folder, unfiltered by type', async () => {
+    filesList.mockResolvedValue({
+      data: {
+        files: [
+          { id: 'f1', name: 'IMG_0001.jpg', mimeType: 'image/jpeg' },
+          { id: 'f2', name: 'IMG_0001.ARW', mimeType: 'image/x-sony-arw' },
+          { id: 'f3', name: 'IMG_0001.xmp', mimeType: 'application/octet-stream' },
+        ],
+      },
+    })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    const files = await listFolderFiles(drive, 'folder_1')
+
+    expect(files).toEqual([
+      { id: 'f1', name: 'IMG_0001.jpg', mimeType: 'image/jpeg' },
+      { id: 'f2', name: 'IMG_0001.ARW', mimeType: 'image/x-sony-arw' },
+      { id: 'f3', name: 'IMG_0001.xmp', mimeType: 'application/octet-stream' },
+    ])
+    expect(filesList).toHaveBeenCalledWith({
+      q: "'folder_1' in parents and trashed = false",
+      fields: 'files(id,name,mimeType)',
+    })
+  })
+
+  it('returns an empty array when the folder has no children', async () => {
+    filesList.mockResolvedValue({ data: {} })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    expect(await listFolderFiles(drive, 'empty_folder')).toEqual([])
   })
 })
