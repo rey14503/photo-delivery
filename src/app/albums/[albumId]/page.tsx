@@ -16,7 +16,7 @@ export default async function AlbumDetailPage({
 }) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
-    redirect('/api/auth/signin')
+    redirect('/login')
   }
 
   const { albumId } = await params

@@ -8,7 +8,7 @@ import { AlbumGrid } from '@/components/AlbumGrid'
 export default async function AlbumsPage() {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
-    redirect('/api/auth/signin')
+    redirect('/login')
   }
 
   const albums = await prisma.album.findMany({
