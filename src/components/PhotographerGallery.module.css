@@ -57,45 +57,143 @@
   font-family: var(--font-mono, monospace);
 }
 
-.albumTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
+.albumTitleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.titleLine {
+  font-size: 1.15rem;
+  font-weight: 600;
   color: var(--text-main);
-  letter-spacing: -0.02em;
-  font-family: var(--font-display, sans-serif);
 }
 
 @media (min-width: 768px) {
-  .albumTitle {
-    font-size: 1.875rem;
+  .titleLine {
+    font-size: 1.35rem;
   }
 }
 
-.accessRow {
-  font-size: 0.82rem;
+.titleLabel {
   color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.shareTokenCode {
-  background-color: var(--bg-subtle-hover);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-family: var(--font-mono, monospace);
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
+  margin-right: 6px;
 }
 
 .bannerMeta {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   padding-top: 8px;
+  align-items: center;
+}
+
+.bannerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.shareCard {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 12px);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 280px;
+}
+
+.shareHeader {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.shareRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shareLink {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-decoration: none;
+  background: var(--bg-base);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  flex: 1;
+  word-break: break-all;
+}
+
+.shareLink:hover {
+  text-decoration: underline;
+}
+
+.copyBtn,
+.qrBtn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-base);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.copyBtn:hover,
+.qrBtn:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.qrBtnActive {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.copiedFeedback {
+  color: var(--success);
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.qrPopup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-subtle);
+  margin-top: 4px;
+}
+
+.qrBox {
+  background: #ffffff !important;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.qrHint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .bannerMeta span {

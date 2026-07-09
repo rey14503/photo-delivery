@@ -26,7 +26,7 @@ export default async function AlbumDetailPage({
   const album = await prisma.album.findUnique({
     where: { id: albumId },
     include: {
-      owner: { select: { encryptedRefreshToken: true } },
+      owner: { select: { name: true, email: true, encryptedRefreshToken: true } },
       photos: {
         orderBy: { displayOrder: 'asc' },
         include: {
@@ -50,17 +50,17 @@ export default async function AlbumDetailPage({
   })
   if (wasDeleted) {
     return (
-      <main className={styles.fallbackContainer}>
+      <div className={styles.fallbackContainer}>
         <div className={styles.fallbackCard}>
-          <h1 className={styles.fallbackTitle}>This album is no longer available</h1>
+          <h2 className={styles.fallbackTitle}>Album no longer available</h2>
           <p className={styles.fallbackText}>
-            Its Google Drive folder was deleted or is inaccessible, so the album has been removed.
+            The linked Google Drive folder has been deleted or is no longer accessible.
           </p>
           <Link href="/albums" className={styles.fallbackLink}>
-            ← Back to your albums
+            Return to Dashboard
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
@@ -95,8 +95,8 @@ export default async function AlbumDetailPage({
     id: album.id,
     name: album.name,
     clientName: album.clientName,
+    photographerName: album.owner?.name ?? album.owner?.email ?? 'Photographer',
     shareToken: album.shareToken,
-    location: 'Đà Lạt Studio',
     date: new Date(album.createdAt).toLocaleDateString('vi-VN'),
   }
 

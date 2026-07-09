@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import { PhotoTile } from './PhotoTile'
 import { PhotoLightbox } from './PhotoLightbox'
 import { useLikeToggle } from '@/lib/hooks/useLikeToggle'
@@ -23,8 +24,8 @@ export interface PhotographerGalleryAlbumInfo {
   id?: string
   name?: string
   clientName?: string
+  photographerName?: string
   shareToken?: string
-  location?: string
   date?: string
 }
 
@@ -43,6 +44,25 @@ export function PhotographerGallery({
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'suggested' | 'selected' | 'comments'>('all')
   const [sortBy, setSortBy] = useState<'default' | 'version' | 'comments-count'>('default')
+  const [origin, setOrigin] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [showQr, setShowQr] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin)
+    }
+  }, [])
+
+  function handleCopyShareLink() {
+    if (!albumInfo?.shareToken) return
+    const url = origin ? `${origin}/a/${albumInfo.shareToken}` : `${window.location.origin}/a/${albumInfo.shareToken}`
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const shareUrl = albumInfo?.shareToken ? (origin ? `${origin}/a/${albumInfo.shareToken}` : `/a/${albumInfo.shareToken}`) : ''
 
   // Processing photos matching exact AI Studio logic
   let processedPhotos = [...photos]
@@ -76,26 +96,71 @@ export function PhotographerGallery({
           <div className={styles.bannerLeft}>
             <div className={styles.modeBadgeRow}>
               <span className={styles.modeBadge}>Photographer Mode</span>
-              {albumInfo.id && <span className={styles.idText}>• ID: {albumInfo.id}</span>}
+              {albumInfo.photographerName && (
+                <span className={styles.idText}>• by {albumInfo.photographerName}</span>
+              )}
             </div>
-            <h2 className={styles.albumTitle}>
-              {albumInfo.name || 'Album'} {albumInfo.clientName ? `— ${albumInfo.clientName}` : ''}
-            </h2>
-            {albumInfo.shareToken && (
-              <div className={styles.accessRow}>
-                <span>Client Access:</span>
-                <span className={styles.shareTokenCode}>/a/{albumInfo.shareToken}</span>
+            <div className={styles.albumTitleGroup}>
+              <div className={styles.titleLine}>
+                <span className={styles.titleLabel}>Album:</span> {albumInfo.name || 'Untitled Album'}
               </div>
-            )}
+              <div className={styles.titleLine}>
+                <span className={styles.titleLabel}>Client:</span> {albumInfo.clientName || 'None'}
+              </div>
+            </div>
             <div className={styles.bannerMeta}>
-              <div>📍 <span>{albumInfo.location || 'Studio'}</span></div>
               <div>📅 <span>{albumInfo.date || 'Gần đây'}</span></div>
-              <div>📂 <span>{photos.length} original photos</span></div>
+              <div>📂 <span>{photos.length}</span></div>
             </div>
           </div>
-          <div className={styles.bannerRight}>
-            {/* Optional right slots for download or extra controls */}
-          </div>
+          {albumInfo.shareToken && (
+            <div className={styles.bannerRight}>
+              <div className={styles.shareCard}>
+                <div className={styles.shareHeader}>Client Access Link</div>
+                <div className={styles.shareRow}>
+                  <a
+                    href={shareUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.shareLink}
+                    title={shareUrl}
+                  >
+                    {shareUrl.length > 36 ? `${shareUrl.slice(0, 22)}...${shareUrl.slice(-10)}` : shareUrl}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleCopyShareLink}
+                    className={styles.copyBtn}
+                    aria-label="Copy link"
+                  >
+                    {copied ? '✓ Copied' : 'Copy link'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowQr((prev) => !prev)}
+                    className={`${styles.qrBtn} ${showQr ? styles.qrBtnActive : ''}`}
+                    aria-label="Toggle QR code"
+                    aria-expanded={showQr}
+                  >
+                    QR Code
+                  </button>
+                </div>
+                {copied && (
+                  <div role="alert" className={styles.copiedFeedback}>
+                    Copied to clipboard!
+                  </div>
+                )}
+                {showQr && (
+                  <div className={styles.qrPopup}>
+                    <div className={styles.qrBox}>
+                      <QRCodeSVG value={origin ? `${origin}/a/${albumInfo.shareToken}` : `/a/${albumInfo.shareToken}`} size={120} level="M" />
+                    </div>
+                    <span className={styles.qrHint}>Scan with phone to open album</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

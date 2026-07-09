@@ -129,4 +129,27 @@ describe('PhotographerGallery', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('File too large')
   })
+
+  it('renders D6/D7 banner features: by photographer attribution, separate title lines, and copy/QR share link', () => {
+    const albumInfo = {
+      id: 'cmrbj8px100018ltoanzqoqyz',
+      name: 'Wedding Album',
+      clientName: 'Alice & Bob',
+      photographerName: 'Jane Photographer',
+      shareToken: '1234567890abcdef1234567890abcdef',
+      date: '09/07/2026',
+    }
+    render(<PhotographerGallery photos={photos} albumInfo={albumInfo} />)
+
+    expect(screen.getByText('• by Jane Photographer')).toBeTruthy()
+    expect(screen.getByText('Wedding Album')).toBeTruthy()
+    expect(screen.getByText('Alice & Bob')).toBeTruthy()
+    expect(screen.queryByText(/cmrbj8px100018ltoanzqoqyz/)).toBeNull()
+    expect(screen.queryByText(/📍/)).toBeNull()
+
+    const copyBtn = screen.getByRole('button', { name: /copy link/i })
+    expect(copyBtn).toBeTruthy()
+    const qrBtn = screen.getByRole('button', { name: /toggle qr code/i })
+    expect(qrBtn).toBeTruthy()
+  })
 })
