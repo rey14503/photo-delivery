@@ -18,6 +18,9 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   session: { strategy: 'jwt' },
+  pages: {
+    signIn: '/login',
+  },
   callbacks: {
     async signIn({ user, account }) {
       if (!user.email || !account) return false

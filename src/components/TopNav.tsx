@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
 import styles from './TopNav.module.css'
 
 export interface TopNavProps {
@@ -31,9 +32,14 @@ export function TopNav({ userName, userEmail, onCreateClick }: TopNavProps) {
       </div>
       <div className={styles.right}>
         <span className={styles.user}>{displayUser}</span>
-        <Link href="/api/auth/signout" className={styles.signOut}>
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className={styles.signOut}
+          aria-label="Đăng xuất"
+        >
           Đăng xuất
-        </Link>
+        </button>
       </div>
     </header>
   )

@@ -1,0 +1,210 @@
+.container {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  background: radial-gradient(circle at top, rgba(255, 87, 34, 0.08) 0%, transparent 70%);
+}
+
+.card {
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--card-bg, #1e1e24);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 20px);
+  padding: 36px 32px;
+  box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.5));
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main, #ffffff);
+  letter-spacing: -0.02em;
+  font-family: var(--font-display, sans-serif);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted, #a1a1aa);
+  margin: 0;
+}
+
+.link {
+  color: var(--accent, #ff5722);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.link:hover {
+  color: var(--accent-hover, #e64a19);
+  text-decoration: underline;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted, #a1a1aa);
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  padding-top: 20px;
+  margin-top: 4px;
+}
+
+/* Shared Auth Form Controls */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main, #ffffff);
+}
+
+.input {
+  width: 100%;
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  background-color: var(--bg-surface, rgba(255, 255, 255, 0.05));
+  color: var(--text-main, #ffffff);
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent, #ff5722);
+  background-color: var(--bg-surface-hover, rgba(255, 255, 255, 0.08));
+}
+
+.btnPrimary {
+  width: 100%;
+  border-radius: var(--radius-md, 12px);
+  padding: 12px 20px;
+  background-color: var(--accent, #ff5722);
+  border: none;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);
+  transition: all 0.15s ease;
+  margin-top: 6px;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background-color: var(--accent-hover, #e64a19);
+  transform: translateY(-1px);
+}
+
+.btnPrimary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btnGoogle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: var(--radius-md, 12px);
+  padding: 12px 20px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1f2937;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease;
+}
+
+.btnGoogle:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.btnGoogle:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btnGoogle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted, #a1a1aa);
+  font-size: 0.8rem;
+  margin: 4px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-color, rgba(255, 255, 255, 0.1));
+}
+
+.forgotLink {
+  align-self: flex-end;
+  font-size: 0.82rem;
+  color: var(--accent, #ff5722);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.forgotLink:hover {
+  color: var(--accent-hover, #e64a19);
+  text-decoration: underline;
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 12px);
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}

@@ -62,10 +62,15 @@
 }
 
 .signOut {
+  background: transparent;
+  border: none;
+  font: inherit;
   color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
   transition: color 0.15s ease;
 }
 
 .signOut:hover {
-  color: var(--danger);
+  color: var(--danger, #ef4444);
 }
