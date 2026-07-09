@@ -4,11 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { canManageAlbum } from '@/lib/album-permissions'
 import { UploadPhotos } from '@/components/UploadPhotos'
-import { ReplacePhotoButton } from '@/components/ReplacePhotoButton'
 import { SetAlbumPassword } from '@/components/SetAlbumPassword'
-import { LikeButton } from '@/components/LikeButton'
-import { CommentThread } from '@/components/CommentThread'
 import { DownloadToggle } from '@/components/DownloadToggle'
+import { PhotographerGallery } from '@/components/PhotographerGallery'
 
 export default async function AlbumDetailPage({
   params,
@@ -40,6 +38,32 @@ export default async function AlbumDetailPage({
     notFound()
   }
 
+  const photos = album.photos.map((photo) => {
+    const suggestedByMe = photo.likes.some(
+      (like) => like.actorType === 'PHOTOGRAPHER' && like.userId === session.user.id
+    )
+    const clientLikers = photo.likes
+      .filter((like) => like.actorType === 'CLIENT')
+      .map((like) => like.actorName)
+      .filter((name): name is string => Boolean(name))
+    const comments = photo.comments.map((comment) => ({
+      id: comment.id,
+      text: comment.text,
+      authorLabel:
+        comment.actorName ?? comment.user?.name ?? comment.user?.email ?? 'Photographer',
+    }))
+
+    return {
+      id: photo.id,
+      thumbnailUrl: photo.thumbnailUrl,
+      previewUrl: photo.previewUrl,
+      version: photo.version,
+      suggestedByMe,
+      clientLikers,
+      comments,
+    }
+  })
+
   return (
     <main>
       <h1>
@@ -51,38 +75,7 @@ export default async function AlbumDetailPage({
       <SetAlbumPassword albumId={album.id} hasPassword={Boolean(album.passwordHash)} />
       <DownloadToggle albumId={album.id} downloadEnabled={album.downloadEnabled} />
       <UploadPhotos albumId={album.id} />
-      <ul>
-        {album.photos.map((photo) => {
-          const suggestedByMe = photo.likes.some(
-            (like) => like.actorType === 'PHOTOGRAPHER' && like.userId === session.user.id
-          )
-          const clientLikers = photo.likes
-            .filter((like) => like.actorType === 'CLIENT')
-            .map((like) => like.actorName)
-            .filter((name): name is string => Boolean(name))
-          const comments = photo.comments.map((comment) => ({
-            id: comment.id,
-            text: comment.text,
-            authorLabel:
-              comment.actorName ?? comment.user?.name ?? comment.user?.email ?? 'Photographer',
-          }))
-
-          return (
-            <li key={photo.id}>
-              <img src={photo.thumbnailUrl} alt="" width={200} />
-              {photo.version > 1 && <span> v{photo.version}</span>}
-              <ReplacePhotoButton photoId={photo.id} />
-              <LikeButton
-                photoId={photo.id}
-                liked={suggestedByMe}
-                label="⭐ Suggest to client"
-              />
-              {clientLikers.length > 0 && <p>❤ Selected by: {clientLikers.join(', ')}</p>}
-              <CommentThread photoId={photo.id} comments={comments} />
-            </li>
-          )
-        })}
-      </ul>
+      <PhotographerGallery photos={photos} />
     </main>
   )
 }
