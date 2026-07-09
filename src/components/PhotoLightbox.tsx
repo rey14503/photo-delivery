@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { CommentThread, type ThreadComment } from './CommentThread'
 import { PhotoActionMenu } from './PhotoActionMenu'
+import styles from './PhotoLightbox.module.css'
 
 export interface PhotoLightboxProps {
   photoId: string
@@ -53,60 +54,83 @@ export function PhotoLightbox({
   const [commentsOpen, setCommentsOpen] = useState(false)
 
   return (
-    <div role="dialog" aria-label="Photo preview">
-      <button type="button" onClick={onClose}>
-        Close
-      </button>
-      {hasPrevious && (
-        <button type="button" onClick={onPrevious}>
-          Previous
-        </button>
-      )}
-      <img src={previewUrl} alt="Photo preview" />
-      {hasNext && (
-        <button type="button" onClick={onNext}>
-          Next
-        </button>
-      )}
-      {statusNote && <p>{statusNote}</p>}
+    <div
+      className={styles.backdrop}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
+    >
+      <div role="dialog" aria-label="Photo preview" className={styles.lightbox}>
+        <div className={styles.stage}>
+          <button type="button" onClick={onClose} className={styles.closeButton} aria-label="Close">
+            Close
+          </button>
+          {hasPrevious && (
+            <button
+              type="button"
+              onClick={onPrevious}
+              className={`${styles.navButton} ${styles.previousButton}`}
+            >
+              Previous
+            </button>
+          )}
+          <img src={previewUrl} alt="Photo preview" className={styles.image} />
+          {hasNext && (
+            <button
+              type="button"
+              onClick={onNext}
+              className={`${styles.navButton} ${styles.nextButton}`}
+            >
+              Next
+            </button>
+          )}
+          {statusNote && <p className={styles.statusNote}>{statusNote}</p>}
 
-      <div>
-        <button
-          type="button"
-          aria-label={likeLabel}
-          aria-pressed={liked}
-          disabled={toggling}
-          onClick={onToggleLike}
-        >
-          {likeGlyph(liked, likeIcon)}
-        </button>
-        {showDownload && <a href={downloadHref}>Download</a>}
-        <button
-          type="button"
-          aria-pressed={commentsOpen}
-          aria-label={`Comments (${comments.length})`}
-          onClick={() => setCommentsOpen((prev) => !prev)}
-        >
-          💬 Comments ({comments.length})
-        </button>
-        <PhotoActionMenu
-          likeLabel={likeLabel}
-          onToggleLike={onToggleLike}
-          toggling={toggling}
-          showDownload={showDownload}
-          downloadHref={downloadHref}
-          commentCount={comments.length}
-          onViewComments={() => setCommentsOpen(true)}
-          showReplace={showReplace}
-          onReplace={onReplace}
-        />
+          <div className={styles.actionBar}>
+            <button
+              type="button"
+              aria-label={likeLabel}
+              aria-pressed={liked}
+              disabled={toggling}
+              onClick={onToggleLike}
+              className={styles.iconButton}
+            >
+              {likeGlyph(liked, likeIcon)}
+            </button>
+            {showDownload && (
+              <a href={downloadHref} className={styles.downloadLink}>
+                Download
+              </a>
+            )}
+            <button
+              type="button"
+              aria-pressed={commentsOpen}
+              aria-label={`Comments (${comments.length})`}
+              onClick={() => setCommentsOpen((prev) => !prev)}
+              className={styles.iconButton}
+            >
+              💬 Comments ({comments.length})
+            </button>
+            <PhotoActionMenu
+              likeLabel={likeLabel}
+              onToggleLike={onToggleLike}
+              toggling={toggling}
+              showDownload={showDownload}
+              downloadHref={downloadHref}
+              commentCount={comments.length}
+              onViewComments={() => setCommentsOpen(true)}
+              showReplace={showReplace}
+              onReplace={onReplace}
+            />
+          </div>
+        </div>
+
+        {commentsOpen && (
+          <aside aria-label="Comments" className={styles.commentsPanel}>
+            <CommentThread photoId={photoId} comments={comments} />
+          </aside>
+        )}
       </div>
-
-      {commentsOpen && (
-        <aside aria-label="Comments">
-          <CommentThread photoId={photoId} comments={comments} />
-        </aside>
-      )}
     </div>
   )
 }
