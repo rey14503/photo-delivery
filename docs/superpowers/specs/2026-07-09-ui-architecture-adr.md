@@ -81,3 +81,24 @@ The album-detail page currently shows the client share link as a bare relative p
 - Add a one-click "Copy link" control on the album-detail header banner itself (not just the dashboard card list), with a brief visual confirmation on click (e.g. a checkmark or "Copied" label for ~2 seconds) — this app already has this exact pattern's underlying convention (`role="alert"`/inline feedback) to draw from.
 - Add a QR code rendering of that same full URL next to it, so a client can scan-and-open on their phone instead of typing or receiving a pasted link. Generate the QR code entirely client-side (a small, well-known library such as `qrcode.react` is a reasonable choice) — do not call any third-party QR-generation API with the link, since that would leak an unguessable, unauthenticated album-access token to an external service.
 - The *visible* text of the link may be visually truncated/ellipsized for readability (e.g. `.../a/257afd…f17cb`) as long as the actual `href`/copy action always uses the full, untruncated token — never let the display truncation leak into the real value.
+
+## D7 — Album-detail header banner content (rewrite)
+
+The current header banner (screenshotted during review) has three problems, each with a specific fix:
+
+1. **"ID: cmrbj8px100018ltoanzqoqyz" next to the "PHOTOGRAPHER MODE" badge is a raw database id, meaningless to the photographer viewing it.** Replace it with the owning photographer's name: `by {photographerName}` (the same `photographerName` data already threaded through to `PhotoTile` for photo attribution — reuse it here, don't refetch).
+2. **The album name and client name are currently concatenated on one line** (`{name} — {clientName}`, rendering as e.g. "test — none" when a client name is a placeholder). Split into two separate, clearly labeled lines:
+   ```
+   Album: {album's name}
+   Client: {client's name}
+   ```
+3. **The meta row (`📍 location  📅 date  📂 N original photos`) has a location field that doesn't exist in the data model** (see D5's note — `(album as any).location` was already found and removed as dead code) and an overly verbose photo-count label. Fix:
+   - Remove the location item entirely — no pin icon, no fallback text, nothing in its place.
+   - Keep the date item as-is (📅 + the album's creation date).
+   - Simplify the photo-count item to just an icon plus the number — `📂 5`, not `📂 5 original photos`.
+
+## D8 — Album deletion control
+
+`docs/superpowers/plans/2026-07-09-album-deletion.md` adds `DELETE /api/albums/[albumId]` (photographer/admin only, deletes the album from the app without touching anything on Drive) and an automatic removal when the linked Drive folder is confirmed gone. The UI needs:
+- A "Delete album" action on the album-detail page (e.g. near the existing management controls — password/download-toggle/upload section) that calls this route. Since deletion is irreversible from the web app's side, require an explicit confirmation step (a native `confirm()` is acceptable for MVP, or a small confirmation dialog matching this app's existing modal patterns — either is fine, just don't delete on a single unconfirmed click).
+- A rendered state for "this album is no longer available" (the plan's page-level auto-delete check returns this when it fires) — simple centered message + a link back to the dashboard, no special styling requirements beyond matching the app's existing typography/spacing.

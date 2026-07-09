@@ -17,7 +17,7 @@ Plans 1-5 shipped every per-photo interaction (select/suggest like, comment, dow
 
 ### Grid thumbnails (both pages)
 
-Each thumbnail shows, always visible (no hover needed): the version badge (`v2`, `v3`, ...) if the photo has been replaced, and — on the photographer's page only — the list of client names who selected that photo.
+Each thumbnail shows, always visible (no hover needed): the photo's real original filename (from `Photo.originalName`, already plumbed through as the `name` prop on `PhotoTile`) **with its file extension stripped** — `IMG_0001`, not `IMG_0001.jpg` or `IMG_0001.JPG` — since the extension is implementation detail, not something a client or photographer needs to see under every thumbnail. Strip everything from the last `.` onward if present; if a name has no extension, or no name is available at all (older photos uploaded before `originalName` existed), fall back to the existing "Untitled photo" placeholder, not a blank string. Also shown: the version badge (`v2`, `v3`, ...) if the photo has been replaced, and — on the photographer's page only — the list of client names who selected that photo.
 
 On hover (or always, on touch devices — see Touch Devices below), a semi-transparent overlay reveals exactly two icons:
 - **❤️ / ⭐** (top-left) — the select/suggest toggle. One click toggles it immediately, no menu needed. Heart for a CLIENT actor ("select this photo"), star for a PHOTOGRAPHER actor ("suggest to client").
