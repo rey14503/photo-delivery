@@ -70,7 +70,7 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
       if (!downloadEnabled && album?.id) {
         try {
           await fetch(`/api/albums/${album.id}/download-toggle`, {
-            method: 'PATCH',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ enabled: false }),
           })
