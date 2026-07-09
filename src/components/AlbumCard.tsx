@@ -347,24 +347,30 @@ export function AlbumCard({ album }: AlbumCardProps) {
             <h3 className={styles.editTitle}>Edit Album</h3>
             <form
               onSubmit={handleSave}
-              style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}
+              style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%' }}
             >
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className={styles.editInput}
-                placeholder="Album Name"
-                required
-              />
-              <input
-                type="text"
-                value={editClientName}
-                onChange={(e) => setEditClientName(e.target.value)}
-                className={styles.editInput}
-                placeholder="Client Name"
-                required
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#a0a0ab' }}>Album:</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className={styles.editInput}
+                  placeholder="Album Name"
+                  required
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#a0a0ab' }}>Client:</label>
+                <input
+                  type="text"
+                  value={editClientName}
+                  onChange={(e) => setEditClientName(e.target.value)}
+                  className={styles.editInput}
+                  placeholder="Client Name"
+                  required
+                />
+              </div>
               <div className={styles.editBtnRow}>
                 <button type="submit" disabled={saving} className={styles.saveBtn}>
                   {saving ? 'Saving...' : 'Save'}

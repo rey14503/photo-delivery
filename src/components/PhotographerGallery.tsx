@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
@@ -107,7 +108,7 @@ export function PhotographerGallery({
       setEditClientName(albumInfo.clientName || '')
       setDisplayName(albumInfo.name || '')
       setDisplayClientName(albumInfo.clientName || '')
-      setEditCoverPhotoId(albumInfo.coverPhotoId ?? null)
+      setEditCoverPhotoId(albumInfo?.coverPhotoId ?? null)
       if (albumInfo.downloadEnabled !== undefined) {
         setDownloadsOn(albumInfo.downloadEnabled)
       }
@@ -321,98 +322,35 @@ export function PhotographerGallery({
                 <span className={styles.idText}>• by {albumInfo.photographerName}</span>
               )}
             </div>
-            {isEditingInfo ? (
-              <form onSubmit={handleSaveInfo} className={styles.editInfoForm}>
-                <div className={styles.editFieldRow}>
-                  <label className={styles.titleLabel}>Album:</label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    required
-                    className={styles.editInput}
-                    placeholder="Album title"
-                  />
-                </div>
-                <div className={styles.editFieldRow}>
-                  <label className={styles.titleLabel}>Client:</label>
-                  <input
-                    type="text"
-                    value={editClientName}
-                    onChange={(e) => setEditClientName(e.target.value)}
-                    className={styles.editInput}
-                    placeholder="Client name"
-                  />
-                </div>
-                <div className={styles.editFieldRow}>
-                  <label className={styles.titleLabel}>Cover:</label>
-                  <div className={styles.editCoverPicker}>
-                    <select
-                      value={editCoverPhotoId ?? ''}
-                      onChange={(e) => setEditCoverPhotoId(e.target.value ? e.target.value : null)}
-                      className={styles.editSelect}
-                    >
-                      <option value="">-- No Cover Photo --</option>
-                      {photos.map((photo, idx) => (
-                        <option key={photo.id} value={photo.id}>
-                          {photo.name ? `${photo.name} (#${idx + 1})` : `Photo #${idx + 1}`}
-                        </option>
-                      ))}
-                    </select>
+            <div className={styles.albumTitleGroup}>
+              <div className={styles.titleLineHeader}>
+                <div>
+                  <div className={styles.titleLine}>
+                    <span className={styles.titleLabel}>Album:</span> {displayName || 'Untitled Album'}
+                  </div>
+                  <div className={styles.titleLine}>
+                    <span className={styles.titleLabel}>Client:</span> {displayClientName || 'None'}
                   </div>
                 </div>
-                {infoError && <div role="alert" className={styles.editError}>{infoError}</div>}
-                <div className={styles.editBtnRow}>
-                  <button type="submit" disabled={savingInfo} className={styles.saveInfoBtn}>
-                    {savingInfo ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsEditingInfo(false)
-                      setInfoError(null)
-                      setEditName(displayName)
-                      setEditClientName(displayClientName)
-                      setEditCoverPhotoId(albumInfo.coverPhotoId ?? null)
-                    }}
-                    disabled={savingInfo}
-                    className={styles.cancelInfoBtn}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className={styles.albumTitleGroup}>
-                <div className={styles.titleLineHeader}>
-                  <div>
-                    <div className={styles.titleLine}>
-                      <span className={styles.titleLabel}>Album:</span> {displayName || 'Untitled Album'}
-                    </div>
-                    <div className={styles.titleLine}>
-                      <span className={styles.titleLabel}>Client:</span> {displayClientName || 'None'}
-                    </div>
+                {albumInfo.id && (
+                  <div style={{ position: 'relative', display: 'inline-flex', marginLeft: 12 }}>
+                    <AlbumActionMenu
+                      onEdit={() => {
+                        setIsDeletingAlbum(false)
+                        setIsEditingInfo(true)
+                      }}
+                      onCopyLink={handleCopyShareLink}
+                      copied={copied}
+                      onDelete={() => {
+                        setIsEditingInfo(false)
+                        setIsDeletingAlbum(true)
+                      }}
+                      direction="down"
+                    />
                   </div>
-                  {albumInfo.id && (
-                    <div style={{ position: 'relative', display: 'inline-flex', marginLeft: 12 }}>
-                      <AlbumActionMenu
-                        onEdit={() => {
-                          setIsDeletingAlbum(false)
-                          setIsEditingInfo(true)
-                        }}
-                        onCopyLink={handleCopyShareLink}
-                        copied={copied}
-                        onDelete={() => {
-                          setIsEditingInfo(false)
-                          setIsDeletingAlbum(true)
-                        }}
-                        direction="down"
-                      />
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
-            )}
+            </div>
             <div className={styles.bannerMeta}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 <CalendarOutlineIcon size={15} />
@@ -499,6 +437,89 @@ export function PhotographerGallery({
             </div>
           )}
         </div>
+      )}
+
+      {/* Edit Album Popup Modal */}
+      {typeof document !== 'undefined' && isEditingInfo && createPortal(
+        <div
+          className={styles.shareModalOverlay}
+          onClick={() => {
+            setIsEditingInfo(false)
+            setInfoError(null)
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit details modal"
+        >
+          <div className={styles.shareModalCard} style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.shareModalHeader}>
+              <div>
+                <h2 className={styles.shareModalTitle}>Edit Album</h2>
+                <p className={styles.shareModalSubtitle}>Update album title, client name, and cover photo.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditingInfo(false)
+                  setInfoError(null)
+                  setEditName(displayName)
+                  setEditClientName(displayClientName)
+                  setEditCoverPhotoId(albumInfo?.coverPhotoId ?? null)
+                }}
+                className={styles.shareModalCloseBtn}
+                aria-label="Close edit modal"
+              >
+                <CloseOutlineIcon size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveInfo} style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', marginTop: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#a0a0ab' }}>Album:</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                  className={styles.editInput}
+                  placeholder="Album title"
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#a0a0ab' }}>Client:</label>
+                <input
+                  type="text"
+                  value={editClientName}
+                  onChange={(e) => setEditClientName(e.target.value)}
+                  className={styles.editInput}
+                  placeholder="Client name"
+                />
+              </div>
+              {infoError && <div role="alert" className={styles.editError}>{infoError}</div>}
+              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                <button type="submit" disabled={savingInfo} className={styles.saveInfoBtn} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: '#ff5c5c', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
+                  {savingInfo ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditingInfo(false)
+                    setInfoError(null)
+                    setEditName(displayName)
+                    setEditClientName(displayClientName)
+                    setEditCoverPhotoId(albumInfo?.coverPhotoId ?? null)
+                  }}
+                  disabled={savingInfo}
+                  className={styles.cancelInfoBtn}
+                  style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: '1px solid #3e3e4a', background: 'transparent', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* Share to client Popup Modal with blurred background overlay */}
