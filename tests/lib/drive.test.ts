@@ -326,7 +326,7 @@ describe('canEditFolder', () => {
     expect(await canEditFolder(drive, 'folder_1')).toBe(true)
     expect(filesGet).toHaveBeenCalledWith({
       fileId: 'folder_1',
-      fields: 'mimeType,trashed,capabilities(canEdit,canAddChildren,canOrganize)',
+      fields: 'mimeType,trashed,capabilities',
       supportsAllDrives: true,
     })
   })

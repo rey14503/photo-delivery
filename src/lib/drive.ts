@@ -145,15 +145,14 @@ export async function canEditFolder(drive: drive_v3.Drive, folderId: string): Pr
   try {
     const res = await drive.files.get({
       fileId: folderId,
-      fields: 'mimeType,trashed,capabilities(canEdit,canAddChildren,canOrganize)',
+      fields: 'mimeType,trashed,capabilities',
       supportsAllDrives: true,
     })
     const { mimeType, trashed, capabilities } = res.data
     console.log('[canEditFolder] folderId:', folderId, 'capabilities:', capabilities)
     const hasPermission =
       capabilities?.canEdit === true ||
-      capabilities?.canAddChildren === true ||
-      capabilities?.canOrganize === true
+      capabilities?.canAddChildren === true
     return (
       mimeType === 'application/vnd.google-apps.folder' &&
       trashed !== true &&
