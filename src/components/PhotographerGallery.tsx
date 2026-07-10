@@ -24,6 +24,7 @@ import {
   WarningOutlineIcon,
   PhoneOutlineIcon,
   UnlockIcon,
+  LockIcon,
   ClipboardListIcon,
   TxtFileIcon,
   ZipBoxIcon,
@@ -102,6 +103,23 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
       if (res.ok) setIsLocked(false)
     } finally {
       setUnlocking(false)
+    }
+  }
+
+  const [locking, setLocking] = useState(false)
+
+  async function handleLockSelection() {
+    if (!albumId) return
+    setLocking(true)
+    try {
+      const res = await fetch(`/api/albums/${albumId}/lock-selection`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      if (res.ok) setIsLocked(true)
+    } finally {
+      setLocking(false)
     }
   }
 
@@ -512,7 +530,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   <span>Share</span>
                 </button>
 
-                {isLocked && (
+                {isLocked ? (
                   <button
                     type="button"
                     onClick={handleUnlockSelection}
@@ -521,6 +539,29 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   >
                     <UnlockIcon size={16} />
                     {unlocking ? 'Unlocking...' : 'Unlock Client Selection'}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleLockSelection}
+                    disabled={locking}
+                    className={styles.lockBtn || styles.unlockBtn}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '8px',
+                      backgroundColor: '#ef4444',
+                      color: '#ffffff',
+                      border: '1px solid #dc2626',
+                      fontWeight: 600,
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <LockIcon size={16} />
+                    {locking ? 'Locking...' : 'Lock Client Selection'}
                   </button>
                 )}
 
