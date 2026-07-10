@@ -26,6 +26,7 @@ import {
   UnlockIcon,
   ClipboardListIcon,
   TxtFileIcon,
+  ZipBoxIcon,
 } from './PhotoIcons'
 import { AlbumActionMenu } from './AlbumActionMenu'
 import styles from './PhotographerGallery.module.css'
@@ -524,6 +525,43 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                 )}
 
                 <div className={styles.lightroomActionsGroup}>
+                  {albumId && (
+                    <a
+                      href={`/api/albums/${albumId}/download-all`}
+                      className={styles.toolbarActionBtn}
+                      style={{ textDecoration: 'none' }}
+                      title="Download all photos as ZIP"
+                    >
+                      <ZipBoxIcon size={16} />
+                      Download All Photos
+                    </a>
+                  )}
+                  {clientLikedPhotosCount > 0 && albumId && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const selectedIds = photos.filter((p) => p.clientLikers.length > 0).map((p) => p.id)
+                        const res = await fetch(`/api/albums/${albumId}/download-selected`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ shareToken: albumInfo.shareToken, photoIds: selectedIds }),
+                        })
+                        if (res.ok) {
+                          const blob = await res.blob()
+                          const url = URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = `${(albumInfo.name || 'album').replace(/[^a-zA-Z0-9-_]/g, '_')}-selected.zip`
+                          a.click()
+                          URL.revokeObjectURL(url)
+                        }
+                      }}
+                      className={styles.downloadSelectedZipBtn || styles.toolbarActionBtn}
+                    >
+                      <ZipBoxIcon size={16} />
+                      Download Selected ({clientLikedPhotosCount}) ZIP
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={handleCopyFilenames}

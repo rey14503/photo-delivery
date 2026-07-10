@@ -122,6 +122,39 @@ describe('ClientGallery', () => {
     expect(downloadPhoto).toHaveAttribute('href', '/api/photos/p2/download')
   })
 
+  it('shows and handles Download Selected ZIP button when photos are selected', async () => {
+    const mockBlob = new Blob(['zip'], { type: 'application/zip' })
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      blob: async () => mockBlob,
+    } as never)
+    const mockCreateObjectURL = vi.fn().mockReturnValue('blob:http://localhost/zip')
+    const mockRevokeObjectURL = vi.fn()
+    global.URL.createObjectURL = mockCreateObjectURL
+    global.URL.revokeObjectURL = mockRevokeObjectURL
+
+    render(
+      <ClientGallery
+        photos={[{ ...photos[0], likedByMe: true }]}
+        canDownload={true}
+        albumId="album_1"
+        shareToken="tok_abc"
+      />
+    )
+
+    const downloadSelectedBtn = screen.getByRole('button', { name: /download selected \(1\) zip/i })
+    expect(downloadSelectedBtn).toBeInTheDocument()
+
+    fireEvent.click(downloadSelectedBtn)
+
+    expect(global.fetch).toHaveBeenCalledWith('/api/albums/album_1/download-selected', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shareToken: 'tok_abc', photoIds: ['p1'] }),
+    })
+  })
+
+
   it('toggles like via the quick icon on the tile, posting to the like endpoint', () => {
     vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as never)
     render(<ClientGallery photos={photos} canDownload={false} />)

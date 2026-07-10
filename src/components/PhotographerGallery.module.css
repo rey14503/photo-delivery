@@ -583,6 +583,28 @@
   transform: translateY(-1px);
 }
 
+.downloadSelectedZipBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md, 10px);
+  background-color: var(--card-bg, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.16));
+  color: var(--text-main, #ffffff);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.downloadSelectedZipBtn:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+}
+
 .copyFeedbackBadge {
   display: inline-flex;
   align-items: center;

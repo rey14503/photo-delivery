@@ -15,6 +15,7 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
   InfoOutlineIcon,
+  ZipBoxIcon,
 } from './PhotoIcons'
 import styles from './ClientGallery.module.css'
 
@@ -130,9 +131,37 @@ export function ClientGallery(props: ClientGalleryProps) {
 
         <div className={styles.bannerRight}>
           {canDownload && albumId ? (
-            <a href={`/api/albums/${albumId}/download-all`} className={styles.downloadAllBtn} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <BoltOutlineIcon size={16} /> Download all ({selectedCount > 0 ? `${selectedCount} selected` : 'ZIP'})
-            </a>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {selectedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const selectedIds = photos.filter((p) => p.likedByMe || p.liked).map((p) => p.id)
+                    const res = await fetch(`/api/albums/${albumId}/download-selected`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ shareToken, photoIds: selectedIds }),
+                    })
+                    if (res.ok) {
+                      const blob = await res.blob()
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = 'selected-photos.zip'
+                      a.click()
+                      URL.revokeObjectURL(url)
+                    }
+                  }}
+                  className={styles.downloadSelectedZipBtn}
+                >
+                  <ZipBoxIcon size={16} />
+                  Download Selected ({selectedCount}) ZIP
+                </button>
+              )}
+              <a href={`/api/albums/${albumId}/download-all`} className={styles.downloadAllBtn} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <BoltOutlineIcon size={16} /> Download all ({selectedCount > 0 ? `${selectedCount} selected` : 'ZIP'})
+              </a>
+            </div>
           ) : !canDownload ? (
             <div className={styles.disabledNotice}>
               <div className={styles.disabledTitle} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

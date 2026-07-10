@@ -112,6 +112,27 @@
   transform: translateY(-1px);
 }
 
+.downloadSelectedZipBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  background-color: var(--card-bg, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.2));
+  color: var(--text-main, #ffffff);
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.downloadSelectedZipBtn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
 .disabledNotice {
   border-radius: 12px;
   border: 1px solid var(--warning-border);
