@@ -463,6 +463,30 @@ describe('listFolderFiles', () => {
 
     expect(await listFolderFiles(drive, 'empty_folder')).toEqual([])
   })
+
+  it('recursively fetches files from subfolders', async () => {
+    filesList
+      .mockResolvedValueOnce({
+        data: {
+          files: [
+            { id: 'subfolder_1', name: 'Part 2', mimeType: 'application/vnd.google-apps.folder' },
+            { id: 'f1', name: 'IMG_0001.jpg', mimeType: 'image/jpeg' },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          files: [{ id: 'f2', name: 'IMG_0002.jpg', mimeType: 'image/jpeg' }],
+        },
+      })
+    const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
+
+    const files = await listFolderFiles(drive, 'folder_1')
+    expect(files).toEqual([
+      { id: 'f2', name: 'IMG_0002.jpg', mimeType: 'image/jpeg' },
+      { id: 'f1', name: 'IMG_0001.jpg', mimeType: 'image/jpeg' },
+    ])
+  })
 })
 
 describe('driveFolderIsGone', () => {

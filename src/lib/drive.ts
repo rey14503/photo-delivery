@@ -183,14 +183,15 @@ export async function findOrCreateFolder(
   return createFolder(drive, name, parentId)
 }
 
-const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg']
+const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/jfif']
 
 export function isSupportedImageMimeType(mimeType: string, filename?: string): boolean {
-  if (filename && /\.(jpe?g)$/i.test(filename)) {
+  if (filename && /\.(jpe?g|jfif|pjpeg)$/i.test(filename)) {
     return true
   }
   if (!mimeType) return false
-  return SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType.toLowerCase())
+  const lower = mimeType.toLowerCase()
+  return SUPPORTED_IMAGE_MIME_TYPES.includes(lower) || lower === 'image/jpeg' || lower === 'image/jpg'
 }
 
 export interface DriveFolderFile {
@@ -202,8 +203,10 @@ export interface DriveFolderFile {
 
 export async function listFolderFiles(
   drive: drive_v3.Drive,
-  folderId: string
+  folderId: string,
+  depth = 0
 ): Promise<DriveFolderFile[]> {
+  if (depth > 5) return []
   const allFiles: DriveFolderFile[] = []
   let pageToken: string | undefined
 
@@ -219,12 +222,22 @@ export async function listFolderFiles(
     const files = res.data.files ?? []
     for (const file of files) {
       if (file.id && file.name && file.mimeType) {
-        allFiles.push({
-          id: file.id,
-          name: file.name,
-          mimeType: file.mimeType,
-          thumbnailLink: file.thumbnailLink ?? undefined,
-        })
+        if (
+          file.mimeType === 'application/vnd.google-apps.folder' &&
+          file.name !== 'Selected' &&
+          file.name !== 'shortcuts' &&
+          file.name !== 'Deliveries'
+        ) {
+          const subFiles = await listFolderFiles(drive, file.id, depth + 1)
+          allFiles.push(...subFiles)
+        } else {
+          allFiles.push({
+            id: file.id,
+            name: file.name,
+            mimeType: file.mimeType,
+            thumbnailLink: file.thumbnailLink ?? undefined,
+          })
+        }
       }
     }
     pageToken = res.data.nextPageToken ?? undefined
