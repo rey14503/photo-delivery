@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import { resolveActor } from '@/lib/actor'
+import { albumUnlockCookieName, isUnlocked } from '@/lib/album-unlock'
 
 export async function POST(
   req: Request,
@@ -15,11 +16,20 @@ export async function POST(
     const album = await prisma.album.findUnique({ where: { id: albumId } })
     if (!album) return NextResponse.json({ error: 'Album not found' }, { status: 404 })
 
-    const session = await getServerSession(authOptions)
-    const isOwner = session?.user?.id && session.user.id === album.ownerId
-    const isClientWithToken = shareToken && shareToken === album.shareToken
+    const actor = await resolveActor(album)
+    const isPhotographer = actor?.type === 'PHOTOGRAPHER'
+    const isClientActor = actor?.type === 'CLIENT'
+    let isClientWithToken = Boolean(shareToken && shareToken === album.shareToken)
 
-    if (!isOwner && !isClientWithToken) {
+    if (isClientWithToken && album.passwordHash && !isPhotographer && !isClientActor) {
+      const cookieStore = await cookies()
+      const unlockCookie = cookieStore.get(albumUnlockCookieName(album.id))?.value
+      if (!isUnlocked(album.id, unlockCookie)) {
+        isClientWithToken = false
+      }
+    }
+
+    if (!isPhotographer && !isClientActor && !isClientWithToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

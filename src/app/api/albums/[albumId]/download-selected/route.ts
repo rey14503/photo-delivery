@@ -53,6 +53,10 @@ export async function POST(
     orderBy: { displayOrder: 'asc' },
   })
 
+  if (photos.length === 0) {
+    return NextResponse.json({ error: 'No valid photos found for download' }, { status: 404 })
+  }
+
   try {
     const drive = getDriveClientForUser(album.owner)
     const zip = new JSZip()

@@ -159,4 +159,23 @@ describe('POST /api/photos/[photoId]/like', () => {
     expect(res.status).toBe(200)
     expect(deleteFile).not.toHaveBeenCalled()
   })
+
+  it('returns 403 when selectionLocked is true and actor type is CLIENT', async () => {
+    const lockedPhoto = {
+      ...photoRow(),
+      album: {
+        ...photoRow().album,
+        selectionLocked: true,
+      },
+    }
+    vi.mocked(prisma.photo.findUnique).mockResolvedValue(lockedPhoto as never)
+    vi.mocked(resolveActor).mockResolvedValue({ type: 'CLIENT', name: 'Jane Doe' })
+
+    const res = await POST({} as never, routeParams('photo_1'))
+    const data = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(data).toEqual({ error: 'Album proofing selection is locked' })
+  })
 })
+

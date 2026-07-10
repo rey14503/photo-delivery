@@ -118,4 +118,27 @@ describe('Download Selected ZIP API', () => {
     expect(res.status).toBe(200)
     expect(res.headers.get('Content-Type')).toContain('zip')
   })
+
+  it('returns 404 when photoIds match 0 photos', async () => {
+    vi.mocked(prisma.album.findUnique).mockResolvedValue({
+      id: 'alb_1',
+      shareToken: 'tok_abc',
+      downloadEnabled: true,
+      owner: { id: 'usr_1', encryptedRefreshToken: 'xyz' },
+    } as never)
+    vi.mocked(resolveActor).mockResolvedValue({ type: 'CLIENT', name: 'Jane Doe' })
+    vi.mocked(prisma.photo.findMany).mockResolvedValue([])
+
+    const req = new Request('http://localhost/api/albums/alb_1/download-selected', {
+      method: 'POST',
+      body: JSON.stringify({ shareToken: 'tok_abc', photoIds: ['non_existent_id'] }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    const res = await POST(req as never, { params: Promise.resolve({ albumId: 'alb_1' }) })
+    const data = await res.json()
+
+    expect(res.status).toBe(404)
+    expect(data).toEqual({ error: 'No valid photos found for download' })
+  })
 })
+

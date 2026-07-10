@@ -21,6 +21,10 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  if (photo.album.selectionLocked && actor.type === 'CLIENT') {
+    return NextResponse.json({ error: 'Album proofing selection is locked' }, { status: 403 })
+  }
+
   const actorKey = actorKeyFor(actor)
 
   try {
