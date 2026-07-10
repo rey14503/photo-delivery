@@ -449,6 +449,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                         setIsDeletingAlbum(true)
                       }}
                       direction="down"
+                      align="left"
                     />
                   </div>
                 )}

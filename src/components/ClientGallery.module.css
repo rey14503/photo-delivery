@@ -6,7 +6,7 @@
 
 .banner {
   border-radius: var(--radius-lg, 20px);
-  overflow: hidden;
+  overflow: visible;
   background-color: var(--card-bg);
   border: 1px solid var(--border-subtle);
   color: var(--text-main);

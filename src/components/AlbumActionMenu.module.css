@@ -36,8 +36,7 @@
 
 .menu {
   position: absolute;
-  right: 0;
-  z-index: 80;
+  z-index: 999;
   min-width: 210px;
   border-radius: 10px;
   background-color: var(--card-bg, #181820);
@@ -46,6 +45,16 @@
   padding: 6px 0;
   list-style: none;
   margin: 0;
+}
+
+.menuAlignLeft {
+  left: 0;
+  right: auto;
+}
+
+.menuAlignRight {
+  right: 0;
+  left: auto;
 }
 
 .menuDown {

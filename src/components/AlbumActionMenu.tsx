@@ -16,6 +16,7 @@ export interface AlbumActionMenuProps {
   copied?: boolean
   onDelete: () => void
   direction?: 'up' | 'down'
+  align?: 'left' | 'right'
 }
 
 export function AlbumActionMenu({
@@ -24,6 +25,7 @@ export function AlbumActionMenu({
   copied = false,
   onDelete,
   direction = 'down',
+  align = 'left',
 }: AlbumActionMenuProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -68,7 +70,7 @@ export function AlbumActionMenu({
       {open && (
         <ul
           role="menu"
-          className={`${styles.menu} ${direction === 'up' ? styles.menuUp : styles.menuDown}`}
+          className={`${styles.menu} ${direction === 'up' ? styles.menuUp : styles.menuDown} ${align === 'right' ? styles.menuAlignRight : styles.menuAlignLeft}`}
           onClick={(e) => e.stopPropagation()}
         >
           <li role="none" className={styles.menuItemWrapper}>
