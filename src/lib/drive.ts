@@ -183,17 +183,14 @@ export async function findOrCreateFolder(
   return createFolder(drive, name, parentId)
 }
 
-const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/tiff']
+const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg']
 
 export function isSupportedImageMimeType(mimeType: string, filename?: string): boolean {
-  if (filename && /\.(jpe?g|png|webp|heic|heif|tiff?|bmp|gif|avif|arw|cr[23]|nef|nrw|dng|orf|rw2|pef|srw|raw)$/i.test(filename)) {
+  if (filename && /\.(jpe?g)$/i.test(filename)) {
     return true
   }
   if (!mimeType) return false
-  if (mimeType.startsWith('image/') && !mimeType.includes('shortcut') && !mimeType.includes('icon')) {
-    return true
-  }
-  return SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType)
+  return SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType.toLowerCase())
 }
 
 export interface DriveFolderFile {

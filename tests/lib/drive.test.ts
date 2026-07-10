@@ -412,15 +412,16 @@ describe('findOrCreateFolder', () => {
 })
 
 describe('isSupportedImageMimeType', () => {
-  it('returns true for jpeg, png, and webp', () => {
+  it('returns true for jpeg and jpg (by mime or extension)', () => {
     expect(isSupportedImageMimeType('image/jpeg')).toBe(true)
-    expect(isSupportedImageMimeType('image/png')).toBe(true)
-    expect(isSupportedImageMimeType('image/webp')).toBe(true)
+    expect(isSupportedImageMimeType('image/jpg')).toBe(true)
+    expect(isSupportedImageMimeType('application/octet-stream', 'IMG_0001.JPG')).toBe(true)
   })
 
-  it('returns true for RAW and image extensions, and false for sidecars/videos/other mime types', () => {
-    expect(isSupportedImageMimeType('image/x-sony-arw', 'IMG_0001.ARW')).toBe(true)
-    expect(isSupportedImageMimeType('application/octet-stream', 'IMG_0001.CR2')).toBe(true)
+  it('returns false for non-JPEG formats (RAW, PNG, WEBP, sidecars, videos)', () => {
+    expect(isSupportedImageMimeType('image/png')).toBe(false)
+    expect(isSupportedImageMimeType('image/webp')).toBe(false)
+    expect(isSupportedImageMimeType('image/x-sony-arw', 'IMG_0001.ARW')).toBe(false)
     expect(isSupportedImageMimeType('application/octet-stream', 'doc.pdf')).toBe(false)
     expect(isSupportedImageMimeType('video/mp4')).toBe(false)
   })
