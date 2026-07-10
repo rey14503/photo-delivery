@@ -79,26 +79,50 @@ export async function POST(request: NextRequest) {
 
     let displayOrder = await prisma.photo.count({ where: { albumId: album.id } })
     let firstPhotoId: string | null = null
-    for (const file of imageFiles) {
-      const { buffer } = await downloadOriginal(drive, file.id)
-      const { thumbnail, preview } = await processImage(buffer)
-      const [thumbnailUrl, previewUrl] = await Promise.all([
-        uploadToBlob(`drive-files/${file.id}/v1/thumb.jpg`, thumbnail, 'image/jpeg'),
-        uploadToBlob(`drive-files/${file.id}/v1/preview.jpg`, preview, 'image/jpeg'),
-      ])
+    const BATCH_SIZE = 10
 
-      const createdPhoto = await prisma.photo.create({
-        data: {
-          albumId: album.id,
-          driveFileId: file.id,
-          originalName: file.name,
-          displayOrder,
-          thumbnailUrl,
-          previewUrl,
-        },
-      })
-      if (!firstPhotoId) firstPhotoId = createdPhoto.id
-      displayOrder += 1
+    for (let i = 0; i < imageFiles.length; i += BATCH_SIZE) {
+      const batch = imageFiles.slice(i, i + BATCH_SIZE)
+      const batchResults = await Promise.all(
+        batch.map(async (file, idx) => {
+          try {
+            const { buffer } = await downloadOriginal(drive, file.id)
+            const { thumbnail, preview } = await processImage(buffer)
+            const [thumbnailUrl, previewUrl] = await Promise.all([
+              uploadToBlob(`drive-files/${file.id}/v1/thumb.jpg`, thumbnail, 'image/jpeg'),
+              uploadToBlob(`drive-files/${file.id}/v1/preview.jpg`, preview, 'image/jpeg'),
+            ])
+            return {
+              albumId: album.id,
+              driveFileId: file.id,
+              originalName: file.name,
+              displayOrder: displayOrder + idx,
+              thumbnailUrl,
+              previewUrl,
+            }
+          } catch (err: any) {
+            console.error(`[importPhoto] Error importing photo ${file.name} (${file.id}):`, err?.message || err)
+            return null
+          }
+        })
+      )
+
+      for (const item of batchResults) {
+        if (item) {
+          const createdPhoto = await prisma.photo.create({
+            data: {
+              albumId: item.albumId,
+              driveFileId: item.driveFileId,
+              originalName: item.originalName,
+              displayOrder: item.displayOrder,
+              thumbnailUrl: item.thumbnailUrl,
+              previewUrl: item.previewUrl,
+            },
+          })
+          if (!firstPhotoId) firstPhotoId = createdPhoto.id
+        }
+      }
+      displayOrder += batch.length
     }
 
     if (firstPhotoId) {

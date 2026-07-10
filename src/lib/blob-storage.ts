@@ -10,6 +10,7 @@ export async function uploadToBlob(
     access: 'public',
     contentType,
     addRandomSuffix: false,
+    allowOverwrite: true,
     token: requireEnv('BLOB_READ_WRITE_TOKEN'),
   })
   return blob.url
