@@ -261,7 +261,7 @@ export function ClientGallery(props: ClientGalleryProps) {
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>Confirm Final Selection</h3>
             <p className={styles.modalText}>
-              Are you sure you want to submit your selection of {selectedCount} photo(s)? Once submitted, you won't be able to add or remove selections unless the photographer unlocks the album.
+              Are you sure you want to submit your selection of {selectedCount} photo(s)? Once submitted, you won&apos;t be able to add or remove selections unless the photographer unlocks the album.
             </p>
             <div className={styles.modalActions}>
               <button
