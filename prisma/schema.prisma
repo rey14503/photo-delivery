@@ -38,6 +38,8 @@ model Album {
   downloadEnabled  Boolean  @default(false)
   coverPhotoId     String?
   coverPhoto       Photo?   @relation("AlbumCoverPhoto", fields: [coverPhotoId], references: [id])
+  selectionLocked  Boolean  @default(false)
+  selectionSubmittedAt DateTime?
   createdAt        DateTime @default(now())
   photos           Photo[]
 }
