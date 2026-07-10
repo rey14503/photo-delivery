@@ -199,7 +199,7 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
 
         {/* 2. Enable Original Download Toggle */}
         <div className={styles.settingRow}>
-          <span className={styles.settingLabel}>Allow original photo downloads</span>
+          <span className={styles.settingLabel}>Allow photo downloads</span>
           <button
             type="button"
             aria-pressed={downloadEnabled}
