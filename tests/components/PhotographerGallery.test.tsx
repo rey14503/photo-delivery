@@ -228,4 +228,40 @@ describe('PhotographerGallery', () => {
 
     expect(fetchMock).toHaveBeenCalledWith('/api/albums/alb_123/unlock-selection', expect.any(Object))
   })
+
+  it('copies selected filenames to clipboard and triggers .TXT download for Lightroom workflow', async () => {
+    const writeTextMock = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
+
+    const createObjectURLMock = vi.fn().mockReturnValue('blob:mock-url')
+    const revokeObjectURLMock = vi.fn()
+    global.URL.createObjectURL = createObjectURLMock
+    global.URL.revokeObjectURL = revokeObjectURLMock
+
+    render(
+      <PhotographerGallery
+        albumId="alb_123"
+        albumName="Wedding Album"
+        clientName="John Doe"
+        shareToken="tok_abc"
+        initialPhotos={[
+          { ...basePhoto, id: 'p1', name: 'IMG_0123.CR2', clientLikers: ['John Doe'] },
+          { ...basePhoto, id: 'p2', name: 'IMG_0145.CR2', clientLikers: ['John Doe'] },
+        ]}
+      />
+    )
+
+    const copyBtn = screen.getByRole('button', { name: /copy selected filenames/i })
+    await act(async () => {
+      fireEvent.click(copyBtn)
+    })
+    expect(writeTextMock).toHaveBeenCalledWith('IMG_0123.CR2, IMG_0145.CR2')
+
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const exportBtn = screen.getByRole('button', { name: /export lightroom list \(.txt\)/i })
+    fireEvent.click(exportBtn)
+    expect(createObjectURLMock).toHaveBeenCalled()
+    expect(clickSpy).toHaveBeenCalled()
+    clickSpy.mockRestore()
+  })
 })

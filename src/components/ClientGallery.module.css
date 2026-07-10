@@ -398,3 +398,50 @@
   cursor: not-allowed;
 }
 
+.zoomControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-surface, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.14));
+  padding: 6px 12px;
+  border-radius: var(--radius-md, 10px);
+}
+
+.zoomSlider {
+  width: 90px;
+  accent-color: var(--accent, #3b82f6);
+  cursor: pointer;
+}
+
+.zoomIcon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted, #a1a1aa);
+}
+
+.gridZoom1 > li:not(.flexSpacer) {
+  flex-basis: 140px !important;
+  height: 140px !important;
+}
+
+.gridZoom2 > li:not(.flexSpacer) {
+  flex-basis: 180px !important;
+  height: 180px !important;
+}
+
+.gridZoom3 > li:not(.flexSpacer) {
+  flex-basis: 240px !important;
+  height: 240px !important;
+}
+
+.gridZoom4 > li:not(.flexSpacer) {
+  flex-basis: 320px !important;
+  height: 320px !important;
+}
+
+.gridZoom5 > li:not(.flexSpacer) {
+  flex-basis: 420px !important;
+  height: 420px !important;
+}
+

@@ -12,6 +12,9 @@ import {
   SearchOutlineIcon,
   BoltOutlineIcon,
   StarIcon,
+  ZoomInIcon,
+  ZoomOutIcon,
+  InfoOutlineIcon,
 } from './PhotoIcons'
 import styles from './ClientGallery.module.css'
 
@@ -60,6 +63,7 @@ export function ClientGallery(props: ClientGalleryProps) {
   }))
 
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const [gridZoom, setGridZoom] = useState(3)
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'recommended' | 'liked' | 'comments'>('all')
 
@@ -185,6 +189,21 @@ export function ClientGallery(props: ClientGalleryProps) {
             With Feedback ({photos.filter((p) => p.comments && p.comments.length > 0).length})
           </button>
         </div>
+
+        <div className={styles.zoomControl}>
+          <span title="Zoom out" className={styles.zoomIcon}><ZoomOutIcon size={16} /></span>
+          <input
+            type="range"
+            min={1}
+            max={5}
+            step={1}
+            value={gridZoom}
+            onChange={(e) => setGridZoom(Number(e.target.value))}
+            aria-label="Grid zoom level"
+            className={styles.zoomSlider}
+          />
+          <span title="Zoom in" className={styles.zoomIcon}><ZoomInIcon size={16} /></span>
+        </div>
       </div>
 
       {/* Grid List or Empty State */}
@@ -199,7 +218,7 @@ export function ClientGallery(props: ClientGalleryProps) {
           </div>
         </div>
       ) : (
-        <ul className={styles.grid}>
+        <ul className={`${styles.grid} ${styles[`gridZoom${gridZoom}`] || ''}`}>
           {processedPhotos.map((photo) => {
             const actualIndex = photos.findIndex((p) => p.id === photo.id)
             return (
@@ -356,6 +375,7 @@ function ClientPhotoLightbox({
   toggling?: boolean
   selectionLocked?: boolean
 }) {
+  const [showInfo, setShowInfo] = useState(false)
   const { submitting, error, toggle } = useLikeToggle(photo.id)
   const isToggling = Boolean(submitting || toggling)
   const likeLabel = selectionLocked
@@ -386,6 +406,14 @@ function ClientPhotoLightbox({
         onPrevious={onPrevious}
         onNext={onNext}
         onClose={onClose}
+        showInfo={showInfo}
+        onToggleInfo={() => setShowInfo(!showInfo)}
+        photoInfoDetails={{
+          filename: photo.name || photo.id,
+          resolution: '3840 x 2160',
+          fileSize: '4.2 MB',
+          uploadedDate: '2026-07-10',
+        }}
       />
       {error && <p role="alert">{error}</p>}
     </>

@@ -64,10 +64,21 @@
   flex-shrink: 0;
 }
 
-.closeButton {
+.topBarControls {
   position: absolute;
   top: 16px;
   right: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 30;
+}
+
+.closeButton,
+.infoButton {
+  position: relative;
+  top: auto;
+  right: auto;
   width: 42px;
   height: 42px;
   padding: 0;
@@ -84,7 +95,8 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 
-.closeButton:hover {
+.closeButton:hover,
+.infoButton:hover {
   background-color: var(--accent) !important;
   border-color: var(--accent) !important;
   color: #ffffff !important;
@@ -213,10 +225,77 @@
     max-height: calc(100vh - 120px);
   }
 
-  .commentsPanel {
+  .commentsPanel,
+  .infoPanel {
     position: absolute;
     inset: 0;
     width: 100%;
     z-index: 30;
   }
+}
+
+.infoPanel {
+  width: 340px;
+  flex-shrink: 0;
+  background-color: var(--bg-surface, #1e1e24);
+  border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 25;
+  color: #f3f4f6;
+}
+
+.infoPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+}
+
+.infoPanelHeader h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.infoPanelHeader button {
+  background: none;
+  border: none;
+  color: var(--text-muted, #a1a1aa);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 4px;
+}
+
+.infoPanelHeader button:hover {
+  color: #ffffff;
+}
+
+.infoPanelContent {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.infoRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.88rem;
+}
+
+.infoRow span {
+  color: var(--text-muted, #a1a1aa);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.infoRow strong {
+  color: #ffffff;
+  font-weight: 500;
+  word-break: break-all;
 }

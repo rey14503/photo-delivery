@@ -24,6 +24,8 @@ import {
   WarningOutlineIcon,
   PhoneOutlineIcon,
   UnlockIcon,
+  ClipboardListIcon,
+  TxtFileIcon,
 } from './PhotoIcons'
 import { AlbumActionMenu } from './AlbumActionMenu'
 import styles from './PhotographerGallery.module.css'
@@ -100,6 +102,42 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
     } finally {
       setUnlocking(false)
     }
+  }
+
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null)
+
+  function getSelectedFilenamesList(): string[] {
+    const clientSelected = photos.filter((p) => p.clientLikers.length > 0)
+    const targetPhotos = clientSelected.length > 0 ? clientSelected : photos.filter((p) => p.suggestedByMe)
+    return targetPhotos.map((p) => p.name && p.name.trim() ? p.name.trim() : p.id)
+  }
+
+  async function handleCopyFilenames() {
+    const list = getSelectedFilenamesList()
+    if (list.length === 0) {
+      setCopyFeedback('No selected photos to copy')
+      setTimeout(() => setCopyFeedback(null), 3000)
+      return
+    }
+    const str = list.join(', ')
+    await navigator.clipboard?.writeText(str)
+    setCopyFeedback(`Copied ${list.length} filenames to clipboard!`)
+    setTimeout(() => setCopyFeedback(null), 3000)
+  }
+
+  function handleExportTxt() {
+    const list = getSelectedFilenamesList()
+    if (list.length === 0) return
+    const content = list.join('\n')
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${(displayName || props.albumName || 'album').replace(/[^a-zA-Z0-9-_]/g, '_')}-selected-filenames.txt`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   const [showAlbumMenu, setShowAlbumMenu] = useState(false)
@@ -484,6 +522,28 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                     {unlocking ? 'Unlocking...' : 'Unlock Client Selection'}
                   </button>
                 )}
+
+                <div className={styles.lightroomActionsGroup}>
+                  <button
+                    type="button"
+                    onClick={handleCopyFilenames}
+                    className={styles.toolbarActionBtn}
+                    title="Copy comma-separated filenames for Lightroom filter"
+                  >
+                    <ClipboardListIcon size={16} />
+                    Copy Selected Filenames
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportTxt}
+                    className={styles.toolbarActionBtn}
+                    title="Download .txt list of filenames for editing"
+                  >
+                    <TxtFileIcon size={16} />
+                    Export Lightroom List (.TXT)
+                  </button>
+                  {copyFeedback && <span className={styles.copyFeedbackBadge}>{copyFeedback}</span>}
+                </div>
               </div>
             </div>
           )}

@@ -196,4 +196,36 @@ describe('ClientGallery', () => {
     const likeBtn = screen.getByRole('button', { name: 'Select photo' })
     expect(likeBtn).toBeDisabled()
   })
+
+  it('renders grid zoom slider and updates grid class when changed', () => {
+    render(<ClientGallery photos={photos} canDownload={false} />)
+
+    const slider = screen.getByLabelText('Grid zoom level') as HTMLInputElement
+    expect(slider).toBeInTheDocument()
+    expect(slider.value).toBe('3')
+
+    const grid = screen.getByRole('list')
+    expect(grid.className).toContain('gridZoom3')
+
+    fireEvent.change(slider, { target: { value: '1' } })
+    expect(slider.value).toBe('1')
+    expect(grid.className).toContain('gridZoom1')
+  })
+
+  it('renders info button in ClientPhotoLightbox header and toggles metadata panel', () => {
+    render(<ClientGallery photos={[basePhoto]} canDownload={false} />)
+
+    fireEvent.click(screen.getAllByRole('button', { name: /open photo/i })[0])
+
+    const infoBtn = screen.getByRole('button', { name: /toggle photo info/i })
+    expect(infoBtn).toBeInTheDocument()
+
+    fireEvent.click(infoBtn)
+
+    expect(screen.getByText('EXIF & Metadata')).toBeInTheDocument()
+    expect(screen.getByText('base_p1')).toBeInTheDocument()
+    expect(screen.getByText('3840 x 2160')).toBeInTheDocument()
+    expect(screen.getByText('4.2 MB')).toBeInTheDocument()
+  })
 })
+
