@@ -16,6 +16,7 @@ import {
   ZoomOutIcon,
   InfoOutlineIcon,
   ZipBoxIcon,
+  LockIcon,
 } from './PhotoIcons'
 import styles from './ClientGallery.module.css'
 
@@ -285,8 +286,9 @@ export function ClientGallery(props: ClientGalleryProps) {
       {(selectedCount > 0 || isSelectionLocked) && (
         <div className={styles.floatingBar}>
           {isSelectionLocked ? (
-            <div className={styles.floatingBarLocked}>
-              <span>🔒 Selection Submitted — Thank you! Your photographer is reviewing your selected photos.</span>
+            <div className={styles.floatingBarLocked} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <LockIcon size={16} />
+              <span>Selection Submitted — Thank you! Your photographer is reviewing your selected photos.</span>
             </div>
           ) : (
             <div className={styles.floatingBarActive}>

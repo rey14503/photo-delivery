@@ -27,6 +27,7 @@ import {
   LockIcon,
   ShareNetworkIcon,
   UploadTrayIcon,
+  HourglassOutlineIcon,
   ClipboardListIcon,
   TxtFileIcon,
   ZipBoxIcon,
@@ -411,10 +412,14 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
               <span className={styles.modeBadge}>Photographer Mode</span>
               {isLocked ? (
                 <span className={styles.submittedBadge}>
-                  ✅ CLIENT SUBMITTED ({clientLikedPhotosCount} PHOTOS)
+                  <CheckOutlineIcon size={14} />
+                  <span>CLIENT SUBMITTED ({clientLikedPhotosCount} PHOTOS)</span>
                 </span>
               ) : (
-                <span className={styles.proofingBadge}>⏳ PROOFING IN PROGRESS</span>
+                <span className={styles.proofingBadge}>
+                  <HourglassOutlineIcon size={14} />
+                  <span>PROOFING IN PROGRESS</span>
+                </span>
               )}
               {albumInfo.photographerName && (
                 <span className={styles.idText}>• by {albumInfo.photographerName}</span>
