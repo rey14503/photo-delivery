@@ -15,39 +15,57 @@ import {
 } from './PhotoIcons'
 import styles from './ClientGallery.module.css'
 
-interface GalleryPhoto {
+export interface GalleryPhoto {
   id: string
   thumbnailUrl: string
   previewUrl: string
   name?: string
-  version: number
-  likedByMe: boolean
-  suggestedByPhotographer: boolean
-  comments: ThreadComment[]
+  version?: number
+  likedByMe?: boolean
+  liked?: boolean
+  suggestedByPhotographer?: boolean
+  comments?: ThreadComment[]
 }
 
 export interface ClientGalleryAlbumInfo {
   title?: string
+  actorName?: string
   clientActorName?: string
   photographerName?: string
   location?: string
   date?: string
 }
 
-export function ClientGallery({
-  photos,
-  canDownload,
-  albumId,
-  albumInfo,
-}: {
-  photos: GalleryPhoto[]
-  canDownload: boolean
+export interface ClientGalleryProps {
   albumId?: string
+  shareToken?: string
+  initialPhotos?: GalleryPhoto[]
+  photos?: GalleryPhoto[]
+  canDownload?: boolean
   albumInfo?: ClientGalleryAlbumInfo
-}) {
+  selectionLocked?: boolean
+}
+
+export function ClientGallery(props: ClientGalleryProps) {
+  const rawPhotos = props.photos ?? props.initialPhotos ?? []
+  const canDownload = props.canDownload ?? false
+  const { albumId, shareToken, albumInfo } = props
+
+  const photos = rawPhotos.map((p) => ({
+    ...p,
+    version: p.version ?? 1,
+    likedByMe: Boolean((p.liked !== undefined ? p.liked : p.likedByMe) ?? false),
+    suggestedByPhotographer: p.suggestedByPhotographer ?? false,
+    comments: p.comments ?? [],
+  }))
+
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'recommended' | 'liked' | 'comments'>('all')
+
+  const [isSelectionLocked, setIsSelectionLocked] = useState(Boolean(props.selectionLocked))
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
+  const [submittingLock, setSubmittingLock] = useState(false)
 
   let processedPhotos = [...photos]
 
@@ -63,10 +81,28 @@ export function ClientGallery({
   } else if (filter === 'liked') {
     processedPhotos = processedPhotos.filter((p) => p.likedByMe)
   } else if (filter === 'comments') {
-    processedPhotos = processedPhotos.filter((p) => p.comments.length > 0)
+    processedPhotos = processedPhotos.filter((p) => p.comments && p.comments.length > 0)
   }
 
   const selectedCount = photos.filter((p) => p.likedByMe).length
+
+  async function handleConfirmSubmit() {
+    if (!albumId) return
+    setSubmittingLock(true)
+    try {
+      const res = await fetch(`/api/albums/${albumId}/lock-selection`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shareToken }),
+      })
+      if (res.ok) {
+        setIsSelectionLocked(true)
+        setShowSubmitConfirm(false)
+      }
+    } finally {
+      setSubmittingLock(false)
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -146,7 +182,7 @@ export function ClientGallery({
             onClick={() => setFilter('comments')}
             className={`${styles.filterBtn} ${filter === 'comments' ? styles.filterBtnActive : ''}`}
           >
-            With Feedback ({photos.filter((p) => p.comments.length > 0).length})
+            With Feedback ({photos.filter((p) => p.comments && p.comments.length > 0).length})
           </button>
         </div>
       </div>
@@ -173,6 +209,8 @@ export function ClientGallery({
                   canDownload={canDownload}
                   photographerName={albumInfo?.photographerName}
                   onOpen={() => setOpenIndex(actualIndex)}
+                  toggling={isSelectionLocked}
+                  selectionLocked={isSelectionLocked}
                 />
               </li>
             )
@@ -190,7 +228,60 @@ export function ClientGallery({
           onPrevious={() => setOpenIndex(openIndex - 1)}
           onNext={() => setOpenIndex(openIndex + 1)}
           onClose={() => setOpenIndex(null)}
+          toggling={isSelectionLocked}
+          selectionLocked={isSelectionLocked}
         />
+      )}
+
+      {/* Floating Selection Bar */}
+      {(selectedCount > 0 || isSelectionLocked) && (
+        <div className={styles.floatingBar}>
+          {isSelectionLocked ? (
+            <div className={styles.floatingBarLocked}>
+              <span>🔒 Selection Submitted — Thank you! Your photographer is reviewing your selected photos.</span>
+            </div>
+          ) : (
+            <div className={styles.floatingBarActive}>
+              <span className={styles.floatingBarText}>Selected: {selectedCount} photo(s)</span>
+              <button
+                type="button"
+                onClick={() => setShowSubmitConfirm(true)}
+                className={styles.submitSelectionBtn}
+              >
+                Submit Final Selection
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Confirm Submit Modal */}
+      {showSubmitConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setShowSubmitConfirm(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Confirm Final Selection</h3>
+            <p className={styles.modalText}>
+              Are you sure you want to submit your selection of {selectedCount} photo(s)? Once submitted, you won't be able to add or remove selections unless the photographer unlocks the album.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                onClick={() => setShowSubmitConfirm(false)}
+                className={styles.modalCancelBtn}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSubmit}
+                disabled={submittingLock}
+                className={styles.modalConfirmBtn}
+              >
+                {submittingLock ? 'Submitting...' : 'Confirm & Submit'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -201,29 +292,40 @@ function ClientPhotoTile({
   canDownload,
   photographerName,
   onOpen,
+  toggling,
+  selectionLocked,
 }: {
   photo: GalleryPhoto
   canDownload: boolean
   photographerName?: string
   onOpen: () => void
+  toggling?: boolean
+  selectionLocked?: boolean
 }) {
   const { submitting, error, toggle } = useLikeToggle(photo.id)
+  const isToggling = Boolean(submitting || toggling)
+  const likeLabel = selectionLocked
+    ? 'Select photo'
+    : photo.likedByMe
+      ? 'Unselect this photo'
+      : 'Select this photo'
+
   return (
     <>
       <PhotoTile
         thumbnailUrl={photo.thumbnailUrl}
         name={photo.name}
         photographerName={photographerName}
-        version={photo.version}
+        version={photo.version ?? 1}
         statusNote={photo.suggestedByPhotographer ? 'Suggested by photographer' : undefined}
-        liked={photo.likedByMe}
+        liked={Boolean(photo.likedByMe)}
         likeIcon="heart"
-        likeLabel={photo.likedByMe ? 'Unselect this photo' : 'Select this photo'}
-        onToggleLike={toggle}
-        toggling={submitting}
+        likeLabel={likeLabel}
+        onToggleLike={selectionLocked ? () => {} : toggle}
+        toggling={isToggling}
         showDownload={canDownload}
         downloadHref={`/api/photos/${photo.id}/download`}
-        commentCount={photo.comments.length}
+        commentCount={photo.comments?.length ?? 0}
         showReplace={false}
         onReplace={() => {}}
         onOpen={onOpen}
@@ -241,6 +343,8 @@ function ClientPhotoLightbox({
   onPrevious,
   onNext,
   onClose,
+  toggling,
+  selectionLocked,
 }: {
   photo: GalleryPhoto
   canDownload: boolean
@@ -249,8 +353,17 @@ function ClientPhotoLightbox({
   onPrevious: () => void
   onNext: () => void
   onClose: () => void
+  toggling?: boolean
+  selectionLocked?: boolean
 }) {
   const { submitting, error, toggle } = useLikeToggle(photo.id)
+  const isToggling = Boolean(submitting || toggling)
+  const likeLabel = selectionLocked
+    ? 'Select photo'
+    : photo.likedByMe
+      ? 'Unselect this photo'
+      : 'Select this photo'
+
   return (
     <>
       <PhotoLightbox
@@ -258,14 +371,14 @@ function ClientPhotoLightbox({
         previewUrl={photo.previewUrl}
         name={photo.name}
         statusNote={photo.suggestedByPhotographer ? 'Suggested by photographer' : undefined}
-        liked={photo.likedByMe}
+        liked={Boolean(photo.likedByMe)}
         likeIcon="heart"
-        likeLabel={photo.likedByMe ? 'Unselect this photo' : 'Select this photo'}
-        onToggleLike={toggle}
-        toggling={submitting}
+        likeLabel={likeLabel}
+        onToggleLike={selectionLocked ? () => {} : toggle}
+        toggling={isToggling}
         showDownload={canDownload}
         downloadHref={`/api/photos/${photo.id}/download`}
-        comments={photo.comments}
+        comments={photo.comments ?? []}
         showReplace={false}
         onReplace={() => {}}
         hasPrevious={hasPrevious}

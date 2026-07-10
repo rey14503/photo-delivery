@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { ClientGallery } from '@/components/ClientGallery'
 
 const refreshMock = vi.fn()
@@ -42,6 +42,16 @@ const photos = [
     comments: [],
   },
 ]
+
+const basePhoto = {
+  id: 'base_p1',
+  thumbnailUrl: 'https://blob/base-thumb.jpg',
+  previewUrl: 'https://blob/base-preview.jpg',
+  version: 1,
+  likedByMe: false,
+  suggestedByPhotographer: false,
+  comments: [],
+}
 
 describe('ClientGallery', () => {
   it('renders a tile for every photo and no lightbox initially', () => {
@@ -144,5 +154,46 @@ describe('ClientGallery', () => {
     expect(within(dialog).getByRole('menuitem', { name: /download/i })).toBeTruthy()
     expect(within(dialog).getByRole('menuitem', { name: /view comments \(1\)/i })).toBeTruthy()
     expect(within(dialog).queryByRole('menuitem', { name: /replace/i })).toBeNull()
+  })
+
+  it('renders floating selection bar when photos are selected, triggers confirmation modal and lock selection', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ success: true }) })
+    global.fetch = fetchMock
+
+    render(
+      <ClientGallery
+        albumId="alb_123"
+        shareToken="tok_123"
+        initialPhotos={[{ ...basePhoto, id: 'photo_1', liked: true }]}
+        selectionLocked={false}
+      />
+    )
+
+    expect(screen.getByText('Selected: 1 photo(s)')).toBeInTheDocument()
+    const submitBtn = screen.getByRole('button', { name: /submit final selection/i })
+    fireEvent.click(submitBtn)
+
+    expect(screen.getByText(/Are you sure you want to submit your selection of 1 photo/i)).toBeInTheDocument()
+    const confirmBtn = screen.getByRole('button', { name: /confirm & submit/i })
+    await act(async () => {
+      fireEvent.click(confirmBtn)
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/albums/alb_123/lock-selection', expect.any(Object))
+  })
+
+  it('disables like button on ClientPhotoTile and shows submitted banner when selectionLocked is true', () => {
+    render(
+      <ClientGallery
+        albumId="alb_123"
+        shareToken="tok_123"
+        initialPhotos={[{ ...basePhoto, id: 'photo_1', liked: true }]}
+        selectionLocked={true}
+      />
+    )
+
+    expect(screen.getByText(/Selection Submitted/i)).toBeInTheDocument()
+    const likeBtn = screen.getByRole('button', { name: 'Select photo' })
+    expect(likeBtn).toBeDisabled()
   })
 })

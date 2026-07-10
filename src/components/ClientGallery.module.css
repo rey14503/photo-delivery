@@ -260,3 +260,141 @@
   align-items: center;
   gap: 12px;
 }
+
+/* Floating Selection Bar */
+.floatingBar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: calc(100% - 48px);
+  max-width: 680px;
+}
+
+.floatingBarActive, .floatingBarLocked {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-radius: var(--radius-lg, 16px);
+  background: rgba(30, 30, 36, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgba(0, 0, 0, 0.5));
+  color: var(--text-main, #ffffff);
+  gap: 16px;
+}
+
+.floatingBarLocked {
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  font-weight: 600;
+}
+
+.floatingBarText {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.submitSelectionBtn {
+  background: var(--accent, #ff5722);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.submitSelectionBtn:hover {
+  background: var(--accent-hover, #e64a19);
+  transform: translateY(-1px);
+}
+
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 24px;
+}
+
+.modalCard {
+  background: var(--card-bg, #18181b);
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgba(0, 0, 0, 0.5));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main, #ffffff);
+  margin: 0;
+}
+
+.modalText {
+  font-size: 0.95rem;
+  color: var(--text-muted, #a1a1aa);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modalCancelBtn {
+  background: transparent;
+  color: var(--text-muted, #a1a1aa);
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.15));
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modalCancelBtn:hover {
+  background: var(--bg-subtle-hover, rgba(255, 255, 255, 0.05));
+  color: var(--text-main, #ffffff);
+}
+
+.modalConfirmBtn {
+  background: var(--accent, #ff5722);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modalConfirmBtn:hover:not(:disabled) {
+  background: var(--accent-hover, #e64a19);
+}
+
+.modalConfirmBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

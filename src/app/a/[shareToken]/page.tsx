@@ -81,7 +81,7 @@ export default async function SharePage({
 
   return (
     <main className={styles.page}>
-      <ClientGallery photos={photos} canDownload={canDownload} albumId={album.id} albumInfo={albumInfo} />
+      <ClientGallery photos={photos} canDownload={canDownload} albumId={album.id} shareToken={shareToken} albumInfo={albumInfo} selectionLocked={album.selectionLocked} />
     </main>
   )
 }
