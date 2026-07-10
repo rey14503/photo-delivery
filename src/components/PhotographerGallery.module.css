@@ -289,19 +289,23 @@
 }
 
 .shareMainBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
-  border-radius: var(--radius-md, 12px);
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--radius-md, 10px);
   background: linear-gradient(135deg, var(--accent, #ff5722), #e64a19);
   color: #ffffff;
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 600;
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(255, 87, 34, 0.35);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .shareMainBtn:hover {
@@ -502,8 +506,10 @@
 .topActionBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
+  height: 38px;
+  padding: 0 14px;
   border-radius: var(--radius-md, 10px);
   background-color: var(--bg-surface, rgba(255, 255, 255, 0.07));
   border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.14));
@@ -513,6 +519,8 @@
   cursor: pointer;
   transition: all 0.18s ease;
   user-select: none;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .topActionBtn:hover:not(:disabled) {
@@ -530,8 +538,10 @@
 .unlockBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
+  height: 38px;
+  padding: 0 14px;
   border-radius: var(--radius-md, 10px);
   background-color: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
@@ -541,6 +551,8 @@
   cursor: pointer;
   transition: all 0.18s ease;
   user-select: none;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .unlockBtn:hover:not(:disabled) {
@@ -550,6 +562,37 @@
 }
 
 .unlockBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lockBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--radius-md, 10px);
+  background-color: #ef4444;
+  border: 1px solid #dc2626;
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.lockBtn:hover:not(:disabled) {
+  background-color: #dc2626;
+  border-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.lockBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -564,8 +607,10 @@
 .toolbarActionBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
+  height: 38px;
+  padding: 0 14px;
   border-radius: var(--radius-md, 10px);
   background-color: var(--card-bg, rgba(255, 255, 255, 0.07));
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.16));
@@ -575,6 +620,8 @@
   cursor: pointer;
   transition: all 0.18s ease;
   user-select: none;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .toolbarActionBtn:hover {
@@ -586,8 +633,10 @@
 .downloadSelectedZipBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
+  height: 38px;
+  padding: 0 14px;
   border-radius: var(--radius-md, 10px);
   background-color: var(--card-bg, rgba(255, 255, 255, 0.07));
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.16));
@@ -597,6 +646,8 @@
   cursor: pointer;
   transition: all 0.18s ease;
   user-select: none;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .downloadSelectedZipBtn:hover {
@@ -620,8 +671,10 @@
 .topToggleBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 6px 14px;
+  height: 38px;
+  padding: 0 14px;
   border-radius: var(--radius-md, 10px);
   background-color: var(--bg-surface, rgba(255, 255, 255, 0.07));
   border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.14));
@@ -630,6 +683,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.18s ease;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .topToggleBtn:hover:not(:disabled) {
