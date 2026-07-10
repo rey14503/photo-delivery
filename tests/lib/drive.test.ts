@@ -81,6 +81,7 @@ describe('createFolder', () => {
     expect(filesCreate).toHaveBeenCalledWith({
       requestBody: { name: 'My Album', mimeType: 'application/vnd.google-apps.folder' },
       fields: 'id',
+      supportsAllDrives: true,
     })
   })
 
@@ -98,6 +99,7 @@ describe('createFolder', () => {
         parents: ['folder_1'],
       },
       fields: 'id',
+      supportsAllDrives: true,
     })
   })
 })
@@ -119,6 +121,7 @@ describe('createAlbumFolders', () => {
         parents: ['album_folder'],
       },
       fields: 'id',
+      supportsAllDrives: true,
     })
   })
 })
@@ -216,10 +219,10 @@ describe('downloadOriginal', () => {
     expect(result.mimeType).toBe('image/jpeg')
     expect(result.name).toBe('IMG_0001.jpg')
     expect(Buffer.from(result.buffer).toString()).toBe('fake-bytes')
-    expect(filesGet).toHaveBeenNthCalledWith(1, { fileId: 'drive_file_1', fields: 'name,mimeType' })
+    expect(filesGet).toHaveBeenNthCalledWith(1, { fileId: 'drive_file_1', fields: 'name,mimeType', supportsAllDrives: true })
     expect(filesGet).toHaveBeenNthCalledWith(
       2,
-      { fileId: 'drive_file_1', alt: 'media' },
+      { fileId: 'drive_file_1', alt: 'media', supportsAllDrives: true },
       { responseType: 'arraybuffer' }
     )
   })
@@ -323,7 +326,8 @@ describe('canEditFolder', () => {
     expect(await canEditFolder(drive, 'folder_1')).toBe(true)
     expect(filesGet).toHaveBeenCalledWith({
       fileId: 'folder_1',
-      fields: 'mimeType,trashed,capabilities(canEdit)',
+      fields: 'mimeType,trashed,capabilities(canEdit,canAddChildren,canOrganize)',
+      supportsAllDrives: true,
     })
   })
 
@@ -382,6 +386,8 @@ describe('findOrCreateFolder', () => {
     expect(filesList).toHaveBeenCalledWith({
       q: "'parent_folder' in parents and name = 'Selected' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
       fields: 'files(id)',
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     })
   })
 
@@ -400,6 +406,7 @@ describe('findOrCreateFolder', () => {
         parents: ['parent_folder'],
       },
       fields: 'id',
+      supportsAllDrives: true,
     })
   })
 })
@@ -441,6 +448,8 @@ describe('listFolderFiles', () => {
     expect(filesList).toHaveBeenCalledWith({
       q: "'folder_1' in parents and trashed = false",
       fields: 'files(id,name,mimeType)',
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     })
   })
 
@@ -458,7 +467,7 @@ describe('driveFolderIsGone', () => {
     const drive = getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
 
     expect(await driveFolderIsGone(drive, 'folder_1')).toBe(true)
-    expect(filesGet).toHaveBeenCalledWith({ fileId: 'folder_1', fields: 'trashed' })
+    expect(filesGet).toHaveBeenCalledWith({ fileId: 'folder_1', fields: 'trashed', supportsAllDrives: true })
   })
 
   it('returns true when the Drive API responds with a 404 not-found error', async () => {

@@ -31,6 +31,7 @@ export async function createFolder(
       ...(parentId ? { parents: [parentId] } : {}),
     },
     fields: 'id',
+    supportsAllDrives: true,
   })
   if (!res.data.id) {
     throw new Error('Drive did not return a folder id')
@@ -110,9 +111,9 @@ export async function downloadOriginal(
   drive: drive_v3.Drive,
   fileId: string
 ): Promise<{ buffer: Buffer; mimeType: string; name: string }> {
-  const metadata = await drive.files.get({ fileId, fields: 'name,mimeType' })
+  const metadata = await drive.files.get({ fileId, fields: 'name,mimeType', supportsAllDrives: true })
   const content = await drive.files.get(
-    { fileId, alt: 'media' },
+    { fileId, alt: 'media', supportsAllDrives: true },
     { responseType: 'arraybuffer' }
   )
   return {
@@ -144,14 +145,22 @@ export async function canEditFolder(drive: drive_v3.Drive, folderId: string): Pr
   try {
     const res = await drive.files.get({
       fileId: folderId,
-      fields: 'mimeType,trashed,capabilities(canEdit)',
+      fields: 'mimeType,trashed,capabilities(canEdit,canAddChildren,canOrganize)',
+      supportsAllDrives: true,
     })
+    const { mimeType, trashed, capabilities } = res.data
+    console.log('[canEditFolder] folderId:', folderId, 'capabilities:', capabilities)
+    const hasPermission =
+      capabilities?.canEdit === true ||
+      capabilities?.canAddChildren === true ||
+      capabilities?.canOrganize === true
     return (
-      res.data.mimeType === 'application/vnd.google-apps.folder' &&
-      res.data.trashed !== true &&
-      res.data.capabilities?.canEdit === true
+      mimeType === 'application/vnd.google-apps.folder' &&
+      trashed !== true &&
+      hasPermission
     )
-  } catch {
+  } catch (error: any) {
+    console.error('[canEditFolder] Error checking folderId:', folderId, error?.message || error)
     return false
   }
 }
@@ -165,6 +174,8 @@ export async function findOrCreateFolder(
   const res = await drive.files.list({
     q: `'${parentId}' in parents and name = '${escapedName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
     fields: 'files(id)',
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
   })
   const existing = res.data.files?.[0]
   if (existing?.id) {
@@ -192,6 +203,8 @@ export async function listFolderFiles(
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed = false`,
     fields: 'files(id,name,mimeType)',
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
   })
   const files = res.data.files ?? []
   return files
@@ -204,7 +217,7 @@ export async function driveFolderIsGone(
   folderId: string
 ): Promise<boolean> {
   try {
-    const res = await drive.files.get({ fileId: folderId, fields: 'trashed' })
+    const res = await drive.files.get({ fileId: folderId, fields: 'trashed', supportsAllDrives: true })
     console.log('[driveFolderIsGone] folderId:', folderId, 'trashed:', res.data.trashed)
     return res.data.trashed === true
   } catch (error: any) {
