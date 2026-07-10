@@ -469,7 +469,23 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
             <div className={styles.bannerRight}>
               <div className={styles.topActionBar}>
                 {/* 1. Quick Upload Icon Button */}
-                <label className={styles.topActionBtn} title="Quick upload delivery photos" style={{ cursor: uploadingPhotos ? 'not-allowed' : 'pointer' }}>
+                <label
+                  className={styles.topActionBtn}
+                  title="Quick upload delivery photos"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    height: '38px',
+                    minHeight: '38px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    boxSizing: 'border-box',
+                    whiteSpace: 'nowrap',
+                    cursor: uploadingPhotos ? 'not-allowed' : 'pointer',
+                  }}
+                >
                   <UploadTrayIcon size={16} />
                   <span>{uploadingPhotos ? 'Uploading...' : 'Upload'}</span>
                   <input
@@ -491,6 +507,18 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   className={`${styles.topToggleBtn} ${downloadsOn ? styles.topToggleBtnActive : ''}`}
                   title={downloadsOn ? 'Client downloads: ON' : 'Client downloads: OFF'}
                   aria-label="Toggle client photo downloads"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    height: '38px',
+                    minHeight: '38px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    boxSizing: 'border-box',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -510,6 +538,18 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   className={`${styles.topActionBtn} ${hasPass ? styles.topActionBtnSecured : ''}`}
                   title={hasPass ? 'Album protected by secret password' : 'Configure album password'}
                   aria-label="Configure album password"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    height: '38px',
+                    minHeight: '38px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    boxSizing: 'border-box',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -524,6 +564,18 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   onClick={() => setShowQr(true)}
                   className={styles.shareMainBtn}
                   aria-label="Toggle QR code / Share album"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    height: '38px',
+                    minHeight: '38px',
+                    padding: '0 16px',
+                    borderRadius: '10px',
+                    boxSizing: 'border-box',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   <ShareNetworkIcon size={17} />
                   <span>Share</span>
@@ -535,19 +587,55 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                     onClick={handleUnlockSelection}
                     disabled={unlocking}
                     className={styles.unlockBtn}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      height: '38px',
+                      minHeight: '38px',
+                      padding: '0 14px',
+                      borderRadius: '10px',
+                      backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.35)',
+                      color: '#ef4444',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
+                      boxSizing: 'border-box',
+                      whiteSpace: 'nowrap',
+                      cursor: unlocking ? 'not-allowed' : 'pointer',
+                    }}
                   >
                     <UnlockIcon size={16} />
-                    {unlocking ? 'Unlocking...' : 'Unlock Client Selection'}
+                    <span>{unlocking ? 'Unlocking...' : 'Unlock Client Selection'}</span>
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleLockSelection}
                     disabled={locking}
-                    className={styles.lockBtn}
+                    className={styles.lockBtn || styles.unlockBtn}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      height: '38px',
+                      minHeight: '38px',
+                      padding: '0 14px',
+                      borderRadius: '10px',
+                      backgroundColor: '#ef4444',
+                      border: '1px solid #dc2626',
+                      color: '#ffffff',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
+                      boxSizing: 'border-box',
+                      whiteSpace: 'nowrap',
+                      cursor: locking ? 'not-allowed' : 'pointer',
+                    }}
                   >
                     <LockIcon size={16} />
-                    {locking ? 'Locking...' : 'Lock Client Selection'}
+                    <span>{locking ? 'Locking...' : 'Lock Client Selection'}</span>
                   </button>
                 )}
 
@@ -556,7 +644,19 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                     <a
                       href={`/api/albums/${albumId}/download-all`}
                       className={styles.toolbarActionBtn}
-                      style={{ textDecoration: 'none' }}
+                      style={{
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        height: '38px',
+                        minHeight: '38px',
+                        padding: '0 14px',
+                        borderRadius: '10px',
+                        boxSizing: 'border-box',
+                        whiteSpace: 'nowrap',
+                      }}
                       title="Download all photos as ZIP"
                     >
                       <ZipBoxIcon size={16} />
@@ -584,6 +684,18 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                         }
                       }}
                       className={styles.downloadSelectedZipBtn || styles.toolbarActionBtn}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        height: '38px',
+                        minHeight: '38px',
+                        padding: '0 14px',
+                        borderRadius: '10px',
+                        boxSizing: 'border-box',
+                        whiteSpace: 'nowrap',
+                      }}
                     >
                       <ZipBoxIcon size={16} />
                       Download Selected ({clientLikedPhotosCount}) ZIP
@@ -594,6 +706,18 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                     onClick={handleCopyFilenames}
                     className={styles.toolbarActionBtn}
                     title="Copy comma-separated filenames for Lightroom filter"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      height: '38px',
+                      minHeight: '38px',
+                      padding: '0 14px',
+                      borderRadius: '10px',
+                      boxSizing: 'border-box',
+                      whiteSpace: 'nowrap',
+                    }}
                   >
                     <ClipboardListIcon size={16} />
                     Copy Selected Filenames
@@ -603,9 +727,21 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                     onClick={handleExportTxt}
                     className={styles.toolbarActionBtn}
                     title="Download .txt list of filenames for editing"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      height: '38px',
+                      minHeight: '38px',
+                      padding: '0 14px',
+                      borderRadius: '10px',
+                      boxSizing: 'border-box',
+                      whiteSpace: 'nowrap',
+                    }}
                   >
                     <TxtFileIcon size={16} />
-                    Export Lightroom List (.TXT)
+                    <span>Export Lightroom List (.TXT)</span>
                   </button>
                   {copyFeedback && <span className={styles.copyFeedbackBadge}>{copyFeedback}</span>}
                 </div>
