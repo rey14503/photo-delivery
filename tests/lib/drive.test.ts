@@ -447,7 +447,7 @@ describe('listFolderFiles', () => {
     ])
     expect(filesList).toHaveBeenCalledWith({
       q: "'folder_1' in parents and trashed = false",
-      fields: 'files(id,name,mimeType)',
+      fields: 'files(id,name,mimeType,thumbnailLink)',
       supportsAllDrives: true,
       includeItemsFromAllDrives: true,
     })

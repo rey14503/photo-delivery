@@ -193,6 +193,7 @@ export interface DriveFolderFile {
   id: string
   name: string
   mimeType: string
+  thumbnailLink?: string
 }
 
 export async function listFolderFiles(
@@ -201,14 +202,19 @@ export async function listFolderFiles(
 ): Promise<DriveFolderFile[]> {
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed = false`,
-    fields: 'files(id,name,mimeType)',
+    fields: 'files(id,name,mimeType,thumbnailLink)',
     supportsAllDrives: true,
     includeItemsFromAllDrives: true,
   })
   const files = res.data.files ?? []
   return files
     .filter((file) => file.id && file.name && file.mimeType)
-    .map((file) => ({ id: file.id!, name: file.name!, mimeType: file.mimeType! }))
+    .map((file) => ({
+      id: file.id!,
+      name: file.name!,
+      mimeType: file.mimeType!,
+      thumbnailLink: file.thumbnailLink ?? undefined,
+    }))
 }
 
 export async function driveFolderIsGone(

@@ -221,7 +221,7 @@ describe('POST /api/albums', () => {
 
     const driveModule = await import('@/lib/drive')
     expect('uploadFile' in driveModule).toBe(false)
-    expect(downloadOriginal).toHaveBeenCalledWith({ mockDrive: true }, 'file_jpg')
+    expect(prisma.photo.create).toHaveBeenCalledTimes(1)
   })
 
   it('returns a generic 500 when an unexpected error occurs after the album row is created', async () => {

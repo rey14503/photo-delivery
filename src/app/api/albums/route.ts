@@ -10,10 +10,7 @@ import {
   findOrCreateFolder,
   isSupportedImageMimeType,
   listFolderFiles,
-  downloadOriginal,
 } from '@/lib/drive'
-import { processImage } from '@/lib/image-processing'
-import { uploadToBlob } from '@/lib/blob-storage'
 import { albumScopeFor } from '@/lib/album-scope'
 
 export async function POST(request: NextRequest) {
@@ -77,52 +74,35 @@ export async function POST(request: NextRequest) {
     const imageFiles = files.filter((file) => isSupportedImageMimeType(file.mimeType))
     const skipped = files.length - imageFiles.length
 
-    let displayOrder = await prisma.photo.count({ where: { albumId: album.id } })
-    let firstPhotoId: string | null = null
-    const BATCH_SIZE = 10
+    const baseDisplayOrder = await prisma.photo.count({ where: { albumId: album.id } })
 
-    for (let i = 0; i < imageFiles.length; i += BATCH_SIZE) {
-      const batch = imageFiles.slice(i, i + BATCH_SIZE)
-      const batchResults = await Promise.all(
-        batch.map(async (file, idx) => {
-          try {
-            const { buffer } = await downloadOriginal(drive, file.id)
-            const { thumbnail, preview } = await processImage(buffer)
-            const [thumbnailUrl, previewUrl] = await Promise.all([
-              uploadToBlob(`drive-files/${file.id}/v1/thumb.jpg`, thumbnail, 'image/jpeg'),
-              uploadToBlob(`drive-files/${file.id}/v1/preview.jpg`, preview, 'image/jpeg'),
-            ])
-            return {
+    let firstPhotoId: string | null = null
+    if (imageFiles.length > 0) {
+      const createdPhotos = await Promise.all(
+        imageFiles.map(async (file, idx) => {
+          const thumbUrl = file.thumbnailLink
+            ? file.thumbnailLink.replace(/=s\d+.*$/, '=s600')
+            : `/api/photos/${file.id}/proxy?albumId=${album.id}&type=thumb`
+          const prevUrl = file.thumbnailLink
+            ? file.thumbnailLink.replace(/=s\d+.*$/, '=s1600')
+            : `/api/photos/${file.id}/proxy?albumId=${album.id}&type=preview`
+
+          return prisma.photo.create({
+            data: {
               albumId: album.id,
               driveFileId: file.id,
               originalName: file.name,
-              displayOrder: displayOrder + idx,
-              thumbnailUrl,
-              previewUrl,
-            }
-          } catch (err: any) {
-            console.error(`[importPhoto] Error importing photo ${file.name} (${file.id}):`, err?.message || err)
-            return null
-          }
+              displayOrder: baseDisplayOrder + idx,
+              thumbnailUrl: thumbUrl,
+              previewUrl: prevUrl,
+            },
+          })
         })
       )
 
-      for (const item of batchResults) {
-        if (item) {
-          const createdPhoto = await prisma.photo.create({
-            data: {
-              albumId: item.albumId,
-              driveFileId: item.driveFileId,
-              originalName: item.originalName,
-              displayOrder: item.displayOrder,
-              thumbnailUrl: item.thumbnailUrl,
-              previewUrl: item.previewUrl,
-            },
-          })
-          if (!firstPhotoId) firstPhotoId = createdPhoto.id
-        }
+      if (createdPhotos.length > 0 && createdPhotos[0]?.id) {
+        firstPhotoId = createdPhotos[0].id
       }
-      displayOrder += batch.length
     }
 
     if (firstPhotoId) {

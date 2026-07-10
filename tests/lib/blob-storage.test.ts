@@ -30,6 +30,7 @@ describe('uploadToBlob', () => {
       access: 'public',
       contentType: 'image/jpeg',
       addRandomSuffix: false,
+      allowOverwrite: true,
       token: 'test-token',
     })
   })
