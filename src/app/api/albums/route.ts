@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     })
 
     const files = await listFolderFiles(drive, folderId)
-    const imageFiles = files.filter((file) => isSupportedImageMimeType(file.mimeType))
+    const imageFiles = files.filter((file) => isSupportedImageMimeType(file.mimeType, file.name))
     const skipped = files.length - imageFiles.length
 
     const baseDisplayOrder = await prisma.photo.count({ where: { albumId: album.id } })

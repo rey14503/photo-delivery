@@ -399,7 +399,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
     <div className={styles.container}>
       {/* Album Specs Card / Banner when albumInfo is passed */}
       {albumInfo && (
-        <div className={styles.banner}>
+        <div className={styles.banner} style={{ overflow: 'visible' }}>
           <div className={styles.bannerLeft}>
             <Link href="/albums" className={styles.backToMenuBtn} aria-label="Back to main menu">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

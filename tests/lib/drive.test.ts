@@ -418,15 +418,16 @@ describe('isSupportedImageMimeType', () => {
     expect(isSupportedImageMimeType('image/webp')).toBe(true)
   })
 
-  it('returns false for RAW, sidecar, video, and other mime types', () => {
-    expect(isSupportedImageMimeType('image/x-sony-arw')).toBe(false)
-    expect(isSupportedImageMimeType('application/octet-stream')).toBe(false)
+  it('returns true for RAW and image extensions, and false for sidecars/videos/other mime types', () => {
+    expect(isSupportedImageMimeType('image/x-sony-arw', 'IMG_0001.ARW')).toBe(true)
+    expect(isSupportedImageMimeType('application/octet-stream', 'IMG_0001.CR2')).toBe(true)
+    expect(isSupportedImageMimeType('application/octet-stream', 'doc.pdf')).toBe(false)
     expect(isSupportedImageMimeType('video/mp4')).toBe(false)
   })
 })
 
 describe('listFolderFiles', () => {
-  it('lists every non-trashed direct child of the folder, unfiltered by type', async () => {
+  it('lists every non-trashed direct child of the folder across pages, unfiltered by type', async () => {
     filesList.mockResolvedValue({
       data: {
         files: [
@@ -447,7 +448,9 @@ describe('listFolderFiles', () => {
     ])
     expect(filesList).toHaveBeenCalledWith({
       q: "'folder_1' in parents and trashed = false",
-      fields: 'files(id,name,mimeType,thumbnailLink)',
+      fields: 'nextPageToken,files(id,name,mimeType,thumbnailLink)',
+      pageSize: 1000,
+      pageToken: undefined,
       supportsAllDrives: true,
       includeItemsFromAllDrives: true,
     })

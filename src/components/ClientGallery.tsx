@@ -113,7 +113,7 @@ export function ClientGallery(props: ClientGalleryProps) {
   return (
     <div className={styles.container}>
       {/* Client Shared Album Banner */}
-      <div className={styles.banner}>
+      <div className={styles.banner} style={{ overflow: 'visible' }}>
         <div className={styles.bannerLeft}>
           <span className={styles.sharedAccessBadge} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <LockOutlineIcon size={14} /> Shared Gallery Access {albumInfo?.clientActorName ? `• ${albumInfo.clientActorName}` : ''}

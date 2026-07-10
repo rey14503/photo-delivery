@@ -183,9 +183,16 @@ export async function findOrCreateFolder(
   return createFolder(drive, name, parentId)
 }
 
-const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/tiff']
 
-export function isSupportedImageMimeType(mimeType: string): boolean {
+export function isSupportedImageMimeType(mimeType: string, filename?: string): boolean {
+  if (filename && /\.(jpe?g|png|webp|heic|heif|tiff?|bmp|gif|avif|arw|cr[23]|nef|nrw|dng|orf|rw2|pef|srw|raw)$/i.test(filename)) {
+    return true
+  }
+  if (!mimeType) return false
+  if (mimeType.startsWith('image/') && !mimeType.includes('shortcut') && !mimeType.includes('icon')) {
+    return true
+  }
   return SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType)
 }
 
@@ -200,21 +207,33 @@ export async function listFolderFiles(
   drive: drive_v3.Drive,
   folderId: string
 ): Promise<DriveFolderFile[]> {
-  const res = await drive.files.list({
-    q: `'${folderId}' in parents and trashed = false`,
-    fields: 'files(id,name,mimeType,thumbnailLink)',
-    supportsAllDrives: true,
-    includeItemsFromAllDrives: true,
-  })
-  const files = res.data.files ?? []
-  return files
-    .filter((file) => file.id && file.name && file.mimeType)
-    .map((file) => ({
-      id: file.id!,
-      name: file.name!,
-      mimeType: file.mimeType!,
-      thumbnailLink: file.thumbnailLink ?? undefined,
-    }))
+  const allFiles: DriveFolderFile[] = []
+  let pageToken: string | undefined
+
+  do {
+    const res = await drive.files.list({
+      q: `'${folderId}' in parents and trashed = false`,
+      fields: 'nextPageToken,files(id,name,mimeType,thumbnailLink)',
+      pageSize: 1000,
+      pageToken,
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+    })
+    const files = res.data.files ?? []
+    for (const file of files) {
+      if (file.id && file.name && file.mimeType) {
+        allFiles.push({
+          id: file.id,
+          name: file.name,
+          mimeType: file.mimeType,
+          thumbnailLink: file.thumbnailLink ?? undefined,
+        })
+      }
+    }
+    pageToken = res.data.nextPageToken ?? undefined
+  } while (pageToken)
+
+  return allFiles
 }
 
 export async function driveFolderIsGone(
