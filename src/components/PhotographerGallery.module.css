@@ -75,6 +75,32 @@
   border: 1px solid var(--accent-border);
 }
 
+.submittedBadge {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono, monospace);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.proofingBadge {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono, monospace);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
 .idText {
   color: var(--text-muted);
   font-size: 0.75rem;
@@ -499,6 +525,33 @@
   background-color: rgba(16, 185, 129, 0.12);
   border-color: rgba(16, 185, 129, 0.35);
   color: var(--success, #10b981);
+}
+
+.unlockBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md, 10px);
+  background-color: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.unlockBtn:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+
+.unlockBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .topToggleBtn {

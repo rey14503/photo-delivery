@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, within, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, within, waitFor, act } from '@testing-library/react'
 import { PhotographerGallery } from '@/components/PhotographerGallery'
 
 const refreshMock = vi.fn()
@@ -13,16 +13,18 @@ beforeEach(() => {
   global.fetch = vi.fn()
 })
 
+const basePhoto = {
+  id: 'p1',
+  thumbnailUrl: 'https://blob/p1-thumb.jpg',
+  previewUrl: 'https://blob/p1-preview.jpg',
+  version: 1,
+  suggestedByMe: false,
+  clientLikers: [],
+  comments: [],
+}
+
 const photos = [
-  {
-    id: 'p1',
-    thumbnailUrl: 'https://blob/p1-thumb.jpg',
-    previewUrl: 'https://blob/p1-preview.jpg',
-    version: 1,
-    suggestedByMe: false,
-    clientLikers: [],
-    comments: [],
-  },
+  { ...basePhoto, id: 'p1' },
   {
     id: 'p2',
     thumbnailUrl: 'https://blob/p2-thumb.jpg',
@@ -201,5 +203,29 @@ describe('PhotographerGallery', () => {
       expect(screen.getByText('New Wedding Album')).toBeTruthy()
       expect(screen.getByText('Charlie & Dave')).toBeTruthy()
     })
+  })
+
+  it('renders CLIENT SUBMITTED badge and Unlock Client Selection button when selectionLocked is true', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ success: true }) })
+    global.fetch = fetchMock
+
+    render(
+      <PhotographerGallery
+        albumId="alb_123"
+        albumName="Wedding Album"
+        clientName="John Doe"
+        shareToken="tok_abc"
+        initialPhotos={[{ ...basePhoto, id: 'p1', clientLikers: ['John Doe'] }]}
+        selectionLocked={true}
+      />
+    )
+
+    expect(screen.getByText(/CLIENT SUBMITTED/i)).toBeInTheDocument()
+    const unlockBtn = screen.getByRole('button', { name: /unlock client selection/i })
+    await act(async () => {
+      fireEvent.click(unlockBtn)
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/albums/alb_123/unlock-selection', expect.any(Object))
   })
 })

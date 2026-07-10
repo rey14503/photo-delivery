@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -23,6 +23,7 @@ import {
   CloseOutlineIcon,
   WarningOutlineIcon,
   PhoneOutlineIcon,
+  UnlockIcon,
 } from './PhotoIcons'
 import { AlbumActionMenu } from './AlbumActionMenu'
 import styles from './PhotographerGallery.module.css'
@@ -48,19 +49,33 @@ export interface PhotographerGalleryAlbumInfo {
   downloadEnabled?: boolean
   hasPassword?: boolean
   coverPhotoId?: string | null
+  selectionLocked?: boolean
 }
 
 function statusNoteFor(photo: PhotographerGalleryPhoto): string | undefined {
   return photo.clientLikers.length > 0 ? `❤ Selected by: ${photo.clientLikers.join(', ')}` : undefined
 }
 
-export function PhotographerGallery({
-  photos,
-  albumInfo,
-}: {
-  photos: PhotographerGalleryPhoto[]
+export interface PhotographerGalleryProps {
+  photos?: PhotographerGalleryPhoto[]
   albumInfo?: PhotographerGalleryAlbumInfo
-}) {
+  albumId?: string
+  albumName?: string
+  clientName?: string
+  shareToken?: string
+  initialPhotos?: PhotographerGalleryPhoto[]
+  selectionLocked?: boolean
+}
+
+export function PhotographerGallery(props: PhotographerGalleryProps) {
+  const photos = props.photos ?? props.initialPhotos ?? []
+  const albumInfo: PhotographerGalleryAlbumInfo = useMemo(() => props.albumInfo ?? {
+    id: props.albumId,
+    name: props.albumName,
+    clientName: props.clientName,
+    shareToken: props.shareToken,
+    selectionLocked: props.selectionLocked,
+  }, [props.albumInfo, props.albumId, props.albumName, props.clientName, props.shareToken, props.selectionLocked])
   const router = useRouter()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -69,6 +84,23 @@ export function PhotographerGallery({
   const [origin, setOrigin] = useState('')
   const [copied, setCopied] = useState(false)
   const [showQr, setShowQr] = useState(false)
+
+  const albumId = props.albumId ?? albumInfo.id
+  const [isLocked, setIsLocked] = useState(Boolean(props.selectionLocked ?? albumInfo.selectionLocked))
+  const [unlocking, setUnlocking] = useState(false)
+
+  const clientLikedPhotosCount = photos.filter((p) => p.clientLikers.length > 0).length
+
+  async function handleUnlockSelection() {
+    if (!albumId) return
+    setUnlocking(true)
+    try {
+      const res = await fetch(`/api/albums/${albumId}/unlock-selection`, { method: 'PATCH' })
+      if (res.ok) setIsLocked(false)
+    } finally {
+      setUnlocking(false)
+    }
+  }
 
   const [showAlbumMenu, setShowAlbumMenu] = useState(false)
   const [isEditingInfo, setIsEditingInfo] = useState(false)
@@ -318,6 +350,13 @@ export function PhotographerGallery({
             </Link>
             <div className={styles.modeBadgeRow}>
               <span className={styles.modeBadge}>Photographer Mode</span>
+              {isLocked ? (
+                <span className={styles.submittedBadge}>
+                  ✅ CLIENT SUBMITTED ({clientLikedPhotosCount} PHOTOS)
+                </span>
+              ) : (
+                <span className={styles.proofingBadge}>⏳ PROOFING IN PROGRESS</span>
+              )}
               {albumInfo.photographerName && (
                 <span className={styles.idText}>• by {albumInfo.photographerName}</span>
               )}
@@ -433,6 +472,18 @@ export function PhotographerGallery({
                   </svg>
                   <span>Share</span>
                 </button>
+
+                {isLocked && (
+                  <button
+                    type="button"
+                    onClick={handleUnlockSelection}
+                    disabled={unlocking}
+                    className={styles.unlockBtn}
+                  >
+                    <UnlockIcon size={16} />
+                    {unlocking ? 'Unlocking...' : 'Unlock Client Selection'}
+                  </button>
+                )}
               </div>
             </div>
           )}

@@ -107,6 +107,7 @@ export default async function AlbumDetailPage({
     downloadEnabled: album.downloadEnabled,
     hasPassword: Boolean(album.passwordHash),
     coverPhotoId: album.coverPhotoId ?? null,
+    selectionLocked: album.selectionLocked,
   }
 
   return (
@@ -114,7 +115,7 @@ export default async function AlbumDetailPage({
       <TopNav userName={session.user.name} userEmail={session.user.email} />
       <main className={styles.page}>
         {/* Photographer Gallery with Integrated Top Management Controls & Share Modal */}
-        <PhotographerGallery photos={photos} albumInfo={albumInfo} />
+        <PhotographerGallery photos={photos} albumInfo={albumInfo} selectionLocked={album.selectionLocked} />
       </main>
     </>
   )
