@@ -17,6 +17,8 @@ model User {
   email                 String   @unique
   name                  String?
   role                  Role     @default(PHOTOGRAPHER)
+  avatarUrl             String?
+  studioName            String?
   encryptedRefreshToken String?
   driveRootFolderId     String?
   createdAt             DateTime @default(now())
