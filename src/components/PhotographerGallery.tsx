@@ -98,7 +98,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
   const { syncNow, syncing, lastSyncedAt } = useAutoSyncAlbum({
     albumId,
     enabled: Boolean(albumId),
-    intervalMs: 30000,
+    intervalMs: 0,
     onSyncSuccess: (res) => {
       if ((res.addedCount && res.addedCount > 0) || (res.deletedCount && res.deletedCount > 0)) {
         router.refresh()

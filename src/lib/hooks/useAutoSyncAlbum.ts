@@ -17,10 +17,14 @@ export interface UseAutoSyncAlbumOptions {
   onSyncSuccess?: (result: SyncResult) => void
 }
 
+export interface SyncNowOptions {
+  silent?: boolean
+}
+
 export function useAutoSyncAlbum({
   albumId,
   enabled = true,
-  intervalMs = 60000,
+  intervalMs = 0,
   onSyncSuccess,
 }: UseAutoSyncAlbumOptions) {
   const [syncing, setSyncing] = useState(false)
@@ -28,11 +32,13 @@ export function useAutoSyncAlbum({
   const [error, setError] = useState<string | null>(null)
   const isSyncingRef = useRef(false)
 
-  const syncNow = useCallback(async () => {
+  const syncNow = useCallback(async (options?: SyncNowOptions) => {
     if (!albumId || isSyncingRef.current) return
 
     isSyncingRef.current = true
-    setSyncing(true)
+    if (!options?.silent) {
+      setSyncing(true)
+    }
     setError(null)
 
     try {
@@ -59,26 +65,30 @@ export function useAutoSyncAlbum({
     }
   }, [albumId, onSyncSuccess])
 
-  // Initial sync on mount & periodic sync
+  // Initial sync on mount & visibility change (silent without spinning UI)
   useEffect(() => {
     if (!enabled || !albumId) return
 
-    syncNow()
+    // Initial check on mount (silent)
+    syncNow({ silent: true })
 
-    const interval = setInterval(() => {
-      syncNow()
-    }, intervalMs)
+    let interval: ReturnType<typeof setInterval> | undefined
+    if (intervalMs && intervalMs > 0) {
+      interval = setInterval(() => {
+        syncNow({ silent: true })
+      }, intervalMs)
+    }
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        syncNow()
+        syncNow({ silent: true })
       }
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      clearInterval(interval)
+      if (interval) clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [albumId, enabled, intervalMs, syncNow])
