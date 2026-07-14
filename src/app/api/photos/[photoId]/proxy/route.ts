@@ -24,10 +24,15 @@ export async function GET(
     return new NextResponse('Photo not found', { status: 404 })
   }
 
-  const currentUrl = type === 'preview' ? photo.previewUrl : photo.thumbnailUrl
+  // If already a valid absolute URL (e.g. Vercel Blob / S3) that is NOT temporary Google Drive CDN, redirect directly
+  const isPermanentBlob =
+    currentUrl &&
+    currentUrl.startsWith('http') &&
+    !currentUrl.includes('googleusercontent.com') &&
+    !currentUrl.includes('drive.google.com') &&
+    !currentUrl.includes('/proxy')
 
-  // If already a valid absolute URL (Vercel blob or Google Drive CDN that is not proxy), redirect to it
-  if (currentUrl && currentUrl.startsWith('http') && !currentUrl.includes('/proxy')) {
+  if (isPermanentBlob) {
     return NextResponse.redirect(currentUrl, { status: 302 })
   }
 
@@ -45,12 +50,8 @@ export async function GET(
       const thumbUrl = fileMeta.data.thumbnailLink.replace(/=s\d+.*$/, '=s600')
       const prevUrl = fileMeta.data.thumbnailLink.replace(/=s\d+.*$/, '=s1600')
 
-      // Update in database so next time it loads instantly
-      await prisma.photo.update({
-        where: { id: photo.id },
-        data: { thumbnailUrl: thumbUrl, previewUrl: prevUrl },
-      })
-
+      // Return a 302 redirect to the fresh, non-expired Drive CDN URL
+      // Note: We intentionally do NOT save googleusercontent URLs into the database because Drive CDN tokens expire after several hours.
       return NextResponse.redirect(type === 'preview' ? prevUrl : thumbUrl, { status: 302 })
     }
 

@@ -48,6 +48,7 @@ export function AlbumCard({ album }: AlbumCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [isCoverHovered, setIsCoverHovered] = useState(false)
+  const [imgError, setImgError] = useState(false)
 
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
   const shareUrl = origin ? `${origin}/a/${album.shareToken}` : `/a/${album.shareToken}`
@@ -115,8 +116,14 @@ export function AlbumCard({ album }: AlbumCardProps) {
         onMouseEnter={() => setIsCoverHovered(true)}
         onMouseLeave={() => setIsCoverHovered(false)}
       >
-        {album.coverUrl ? (
-          <img src={album.coverUrl} alt={album.name} className={styles.coverImage} loading="lazy" />
+        {album.coverUrl && !imgError ? (
+          <img
+            src={album.coverUrl}
+            alt=""
+            className={styles.coverImage}
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
         ) : (
           <div className={styles.coverPlaceholder}>
             <CameraOutlineIcon size={42} />

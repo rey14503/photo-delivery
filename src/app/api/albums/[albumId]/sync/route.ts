@@ -75,12 +75,8 @@ export async function POST(
 
       const createdPhotos = await Promise.all(
         addedFiles.map(async (file, idx) => {
-          const thumbUrl = file.thumbnailLink
-            ? file.thumbnailLink.replace(/=s\d+.*$/, '=s600')
-            : `/api/photos/${file.id}/proxy?albumId=${albumId}&type=thumb`
-          const prevUrl = file.thumbnailLink
-            ? file.thumbnailLink.replace(/=s\d+.*$/, '=s1600')
-            : `/api/photos/${file.id}/proxy?albumId=${albumId}&type=preview`
+          const thumbUrl = `/api/photos/${file.id}/proxy?albumId=${albumId}&type=thumb`
+          const prevUrl = `/api/photos/${file.id}/proxy?albumId=${albumId}&type=preview`
 
           return prisma.photo.create({
             data: {

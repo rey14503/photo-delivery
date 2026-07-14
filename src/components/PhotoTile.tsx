@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { PhotoActionMenu } from './PhotoActionMenu'
 import { LikeIcon, CommentIcon } from './PhotoIcons'
 import { stripExtension } from '@/lib/photo-name'
@@ -42,6 +43,7 @@ export function PhotoTile({
   onReplace,
   onOpen,
 }: PhotoTileProps) {
+  const [imgError, setImgError] = useState(false)
   const displayName = stripExtension(name)
 
   return (
@@ -54,7 +56,29 @@ export function PhotoTile({
           onClick={onOpen}
           className={styles.openButton}
         >
-          <img src={thumbnailUrl} alt={displayName} className={styles.image} />
+          {!imgError ? (
+            <img
+              src={thumbnailUrl}
+              alt=""
+              className={styles.image}
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#2e2e33',
+                color: '#888',
+                fontSize: '0.85rem',
+              }}
+            >
+              Photo
+            </div>
+          )}
         </button>
 
         <div className={styles.overlay}>
