@@ -28,6 +28,7 @@ export function EditProfileModal({
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null)
   const [cropperOpen, setCropperOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [backdropMouseDown, setBackdropMouseDown] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -108,8 +109,22 @@ export function EditProfileModal({
     : 'BK'
 
   const modalContent = (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+    <div
+      className={styles.overlay}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) setBackdropMouseDown(true)
+        else setBackdropMouseDown(false)
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && backdropMouseDown) onClose()
+        setBackdropMouseDown(false)
+      }}
+    >
+      <div
+        className={styles.modal}
+        onClick={e => e.stopPropagation()}
+        onMouseDown={e => e.stopPropagation()}
+      >
         <h2 className={styles.title}>Edit Profile</h2>
         <p className={styles.subtitle}>Update your profile picture and display information for clients</p>
 

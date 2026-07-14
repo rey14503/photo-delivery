@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Cropper from 'react-easy-crop'
 import { getCroppedImg, type PixelCrop } from '@/lib/cropImage'
 import { CloseOutlineIcon } from './PhotoIcons'
@@ -19,16 +20,23 @@ export function AvatarCropper({
   onClose,
   onCropComplete,
 }: AvatarCropperProps) {
+  const [mounted, setMounted] = useState(false)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<PixelCrop | null>(null)
   const [processing, setProcessing] = useState(false)
+  const [backdropMouseDown, setBackdropMouseDown] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
       setCrop({ x: 0, y: 0 })
       setZoom(1)
       setProcessing(false)
+      setBackdropMouseDown(false)
     }
   }, [isOpen, imageSrc])
 
@@ -36,7 +44,7 @@ export function AvatarCropper({
     setCroppedAreaPixels(croppedPixels)
   }, [])
 
-  if (!isOpen || !imageSrc) return null
+  if (!mounted || typeof document === 'undefined' || !isOpen || !imageSrc) return null
 
   const handleApply = async () => {
     if (!croppedAreaPixels) return
@@ -57,14 +65,29 @@ export function AvatarCropper({
     setZoom(Number(clamped.toFixed(2)))
   }
 
-  return (
+  const modalContent = (
     <div
       className={styles.overlay}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) setBackdropMouseDown(true)
+        else setBackdropMouseDown(false)
+      }}
       onClick={(e) => {
-        if (e.target === e.currentTarget && !processing) onClose()
+        e.stopPropagation()
+        if (e.target === e.currentTarget && backdropMouseDown && !processing) {
+          onClose()
+        }
+        setBackdropMouseDown(false)
       }}
     >
-      <div role="dialog" aria-modal="true" aria-label="Update profile picture" className={styles.modal}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Update profile picture"
+        className={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className={styles.header}>
           <h3 className={styles.title}>Update profile picture</h3>
           <button
@@ -154,4 +177,6 @@ export function AvatarCropper({
       </div>
     </div>
   )
+
+  return createPortal(modalContent, document.body)
 }
