@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { signOut } from 'next-auth/react'
 import styles from './UserAccountMenu.module.css'
 import { EditProfileModal } from './EditProfileModal'
+import { GearOutlineIcon, SignOutOutlineIcon } from './PhotoIcons'
 
 export interface UserAccountMenuProps {
   userName?: string | null
@@ -107,30 +108,8 @@ export function UserAccountMenu({
                 setShowEditModal(true)
               }}
             >
-              <span className={styles.menuIcon}>⚙️</span>
+              <GearOutlineIcon size={18} className={styles.menuIconSvg} />
               <span>Chỉnh sửa thông tin / Quản lý Studio</span>
-            </button>
-            <button
-              type="button"
-              className={styles.menuItem}
-              onClick={() => {
-                setOpen(false)
-                alert('Tài khoản Google Drive hiện tại đã được kết nối và hoạt động ổn định.')
-              }}
-            >
-              <span className={styles.menuIcon}>📁</span>
-              <span>Quản lý kết nối Drive</span>
-            </button>
-            <button
-              type="button"
-              className={styles.menuItem}
-              onClick={() => {
-                setOpen(false)
-                alert('Gói dịch vụ: PRO Studio (Tốc độ tối đa, Không giới hạn dung lượng lưu trữ)')
-              }}
-            >
-              <span className={styles.menuIcon}>🎁</span>
-              <span>Dung lượng & Gói dịch vụ</span>
             </button>
           </div>
 
@@ -140,8 +119,8 @@ export function UserAccountMenu({
               className={styles.signOutBtn}
               onClick={() => signOut({ callbackUrl: '/login' })}
             >
-              <span className={styles.menuIcon}>🚪</span>
-              <span>Đăng xuất (`Sign out`)</span>
+              <SignOutOutlineIcon size={18} className={styles.menuIconSvg} />
+              <span>Đăng xuất</span>
             </button>
           </div>
         </div>

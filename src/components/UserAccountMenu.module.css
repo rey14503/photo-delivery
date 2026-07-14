@@ -184,6 +184,11 @@
   font-size: 1.1rem;
 }
 
+.menuIconSvg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
 .footerBox {
   padding: 8px;
   border-top: 1px solid #2e2e33;
