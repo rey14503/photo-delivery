@@ -9,6 +9,7 @@ import { PhotoTile } from './PhotoTile'
 import { PhotoLightbox } from './PhotoLightbox'
 import { useLikeToggle } from '@/lib/hooks/useLikeToggle'
 import { useReplacePhoto } from '@/lib/hooks/useReplacePhoto'
+import { useAutoSyncAlbum } from '@/lib/hooks/useAutoSyncAlbum'
 import type { ThreadComment } from './CommentThread'
 import {
   MoreActionsIcon,
@@ -93,6 +94,16 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
   const [showQr, setShowQr] = useState(false)
 
   const albumId = props.albumId ?? albumInfo.id
+  const { syncNow, syncing, lastSyncedAt } = useAutoSyncAlbum({
+    albumId,
+    enabled: Boolean(albumId),
+    intervalMs: 30000,
+    onSyncSuccess: (res) => {
+      if ((res.addedCount && res.addedCount > 0) || (res.deletedCount && res.deletedCount > 0)) {
+        router.refresh()
+      }
+    },
+  })
   const [isLocked, setIsLocked] = useState(Boolean(props.selectionLocked ?? albumInfo.selectionLocked))
   const [unlocking, setUnlocking] = useState(false)
 
@@ -499,6 +510,32 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                     disabled={uploadingPhotos}
                   />
                 </label>
+
+                {/* 1.5. Manual Sync from Drive Button */}
+                <button
+                  type="button"
+                  onClick={() => syncNow()}
+                  disabled={syncing}
+                  className={styles.topActionBtn}
+                  title={lastSyncedAt ? `Lần đồng bộ gần nhất: ${lastSyncedAt.toLocaleTimeString('vi-VN')}` : 'Đồng bộ ảnh từ Google Drive'}
+                  aria-label="sync photos from google drive"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    height: '38px',
+                    minHeight: '38px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    boxSizing: 'border-box',
+                    whiteSpace: 'nowrap',
+                    cursor: syncing ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <span style={{ display: 'inline-block', animation: syncing ? 'spin 1s linear infinite' : 'none' }}>🔄</span>
+                  <span>{syncing ? 'Đang đồng bộ...' : 'Đồng bộ Drive'}</span>
+                </button>
 
                 {/* 2. Toggle Downloads Pill Switch */}
                 <button
