@@ -112,7 +112,12 @@ export default async function AlbumDetailPage({
 
   return (
     <>
-      <TopNav userName={session.user.name} userEmail={session.user.email} />
+      <TopNav
+        userName={session.user.name}
+        userEmail={session.user.email}
+        avatarUrl={session.user.avatarUrl}
+        studioName={session.user.studioName}
+      />
       <main className={styles.page}>
         {/* Photographer Gallery with Integrated Top Management Controls & Share Modal */}
         <PhotographerGallery photos={photos} albumInfo={albumInfo} selectionLocked={album.selectionLocked} />

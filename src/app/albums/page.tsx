@@ -50,6 +50,8 @@ export default async function AlbumsPage() {
       albums={formattedAlbums}
       userName={session.user.name}
       userEmail={session.user.email}
+      avatarUrl={session.user.avatarUrl}
+      studioName={session.user.studioName}
     />
   )
 }

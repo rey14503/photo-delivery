@@ -11,16 +11,24 @@ export interface AlbumGridProps {
   albums: AlbumCardProps['album'][]
   userName?: string | null
   userEmail?: string | null
+  avatarUrl?: string | null
+  studioName?: string | null
 }
 
-export function AlbumGrid({ albums, userName, userEmail }: AlbumGridProps) {
+export function AlbumGrid({ albums, userName, userEmail, avatarUrl, studioName }: AlbumGridProps) {
   const [modalOpen, setModalOpen] = useState(false)
 
   const totalPhotos = albums.reduce((acc, alb) => acc + alb.photoCount, 0)
 
   return (
     <>
-      <TopNav userName={userName} userEmail={userEmail} onCreateClick={() => setModalOpen(true)} />
+      <TopNav
+        userName={userName}
+        userEmail={userEmail}
+        avatarUrl={avatarUrl}
+        studioName={studioName}
+        onCreateClick={() => setModalOpen(true)}
+      />
       <DashboardToolbar albumCount={albums.length} photoCount={totalPhotos} />
       <main className={styles.container}>
         <div className={styles.grid}>

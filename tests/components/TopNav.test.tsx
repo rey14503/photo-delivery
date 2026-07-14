@@ -18,7 +18,10 @@ describe('TopNav', () => {
     expect(screen.getByText(/Media Box/)).toBeInTheDocument()
     expect(screen.getByText('Khoa Nguyen')).toBeInTheDocument()
 
-    const signOutBtn = screen.getByRole('button', { name: /sign out/i })
+    const triggerBtn = screen.getByRole('button', { name: /open user menu/i })
+    fireEvent.click(triggerBtn)
+
+    const signOutBtn = screen.getByText(/Đăng xuất/i)
     fireEvent.click(signOutBtn)
     expect(signOutMock).toHaveBeenCalledWith({ callbackUrl: '/login' })
   })

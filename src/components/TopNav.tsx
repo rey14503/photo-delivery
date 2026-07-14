@@ -1,18 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { signOut } from 'next-auth/react'
 import styles from './TopNav.module.css'
+import { UserAccountMenu } from './UserAccountMenu'
 
 export interface TopNavProps {
   userName?: string | null
   userEmail?: string | null
+  avatarUrl?: string | null
+  studioName?: string | null
   onCreateClick?: () => void
 }
 
-export function TopNav({ userName, userEmail, onCreateClick }: TopNavProps) {
-  const displayUser = userName || userEmail || 'Photographer'
-
+export function TopNav({ userName, userEmail, avatarUrl, studioName, onCreateClick }: TopNavProps) {
   return (
     <header className={styles.nav}>
       <div className={styles.left}>
@@ -33,15 +33,12 @@ export function TopNav({ userName, userEmail, onCreateClick }: TopNavProps) {
         )}
       </div>
       <div className={styles.right}>
-        <span className={styles.user}>{displayUser}</span>
-        <button
-          type="button"
-          onClick={() => signOut({ callbackUrl: '/login' })}
-          className={styles.signOut}
-          aria-label="Sign out"
-        >
-          Sign out
-        </button>
+        <UserAccountMenu
+          userName={userName}
+          userEmail={userEmail}
+          avatarUrl={avatarUrl}
+          studioName={studioName}
+        />
       </div>
     </header>
   )
