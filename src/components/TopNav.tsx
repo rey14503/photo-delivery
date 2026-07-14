@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import styles from './TopNav.module.css'
 import { UserAccountMenu } from './UserAccountMenu'
+import { FALLBACK_LOGO_DATA_URL } from '@/lib/logo-data'
 
 export interface TopNavProps {
   userName?: string | null
@@ -17,7 +18,16 @@ export function TopNav({ userName, userEmail, avatarUrl, studioName, onCreateCli
     <header className={styles.nav}>
       <div className={styles.left}>
         <Link href="/albums" className={styles.brand}>
-          <img src="/logo.png" alt="BK Media Box Logo" className={styles.logo} />
+          <img
+            src="/logo.png"
+            alt="BK Media Box Logo"
+            className={styles.logo}
+            onError={(e) => {
+              if (e.currentTarget.src !== FALLBACK_LOGO_DATA_URL) {
+                e.currentTarget.src = FALLBACK_LOGO_DATA_URL
+              }
+            }}
+          />
           <span>
             <span className={styles.brandAccent}>BK</span> Media Box
           </span>
