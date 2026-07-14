@@ -36,8 +36,8 @@ describe('AvatarCropper', () => {
         onCropComplete={onCropComplete}
       />
     )
-    expect(screen.getByRole('dialog', { name: 'Adjust & Crop Avatar' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Apply & Upload/i })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Update profile picture' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Save/i })).toBeInTheDocument()
   })
 
   it('calls onClose when Cancel button is clicked', () => {

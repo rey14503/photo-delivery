@@ -94,6 +94,15 @@
   gap: 12px;
 }
 
+.popoverAvatarWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .popoverAvatar {
   width: 52px;
   height: 52px;
@@ -105,8 +114,33 @@
   color: #fff;
   font-size: 1.25rem;
   font-weight: 700;
-  flex-shrink: 0;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.popoverCameraBadge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #3a3b3c;
+  color: #e4e6eb;
+  border: 2px solid var(--bg-base, #202024);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  z-index: 5;
+}
+
+.popoverCameraBadge:hover {
+  background-color: #4e4f50;
+  color: #ffffff;
+  transform: scale(1.08);
 }
 
 .popoverAvatarImg {

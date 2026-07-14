@@ -21,7 +21,6 @@ export function AvatarCropper({
 }: AvatarCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
-  const [rotation, setRotation] = useState(0)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<PixelCrop | null>(null)
   const [processing, setProcessing] = useState(false)
 
@@ -29,7 +28,6 @@ export function AvatarCropper({
     if (isOpen) {
       setCrop({ x: 0, y: 0 })
       setZoom(1)
-      setRotation(0)
       setProcessing(false)
     }
   }, [isOpen, imageSrc])
@@ -44,7 +42,7 @@ export function AvatarCropper({
     if (!croppedAreaPixels) return
     setProcessing(true)
     try {
-      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, rotation)
+      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, 0)
       await onCropComplete(croppedBlob)
       onClose()
     } catch (err) {
@@ -66,18 +64,25 @@ export function AvatarCropper({
         if (e.target === e.currentTarget && !processing) onClose()
       }}
     >
-      <div role="dialog" aria-modal="true" aria-label="Adjust & Crop Avatar" className={styles.modal}>
+      <div role="dialog" aria-modal="true" aria-label="Update profile picture" className={styles.modal}>
         <div className={styles.header}>
-          <h3 className={styles.title}>Adjust & Crop Avatar</h3>
+          <h3 className={styles.title}>Update profile picture</h3>
           <button
             type="button"
             onClick={onClose}
             disabled={processing}
-            aria-label="Close cropper"
+            aria-label="Close"
             className={styles.closeBtn}
           >
-            <CloseOutlineIcon size={16} />
+            <CloseOutlineIcon size={18} />
           </button>
+        </div>
+
+        <div className={styles.hintBar}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/>
+          </svg>
+          <span>Drag to reposition photo</span>
         </div>
 
         <div className={styles.cropContainer}>
@@ -85,10 +90,9 @@ export function AvatarCropper({
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            rotation={rotation}
             aspect={1}
             cropShape="round"
-            showGrid={true}
+            showGrid={false}
             onCropChange={setCrop}
             onCropComplete={onCropCompleteCallback}
             onZoomChange={setZoom}
@@ -96,54 +100,35 @@ export function AvatarCropper({
         </div>
 
         <div className={styles.controls}>
-          <div className={styles.controlRow}>
-            <span className={styles.controlLabel}>Zoom</span>
-            <div className={styles.sliderGroup}>
-              <button
-                type="button"
-                disabled={processing || zoom <= 1}
-                onClick={() => handleZoomChange(zoom - 0.1)}
-                className={styles.zoomBtn}
-                aria-label="Zoom out"
-              >
-                −
-              </button>
-              <input
-                type="range"
-                value={zoom}
-                min={1}
-                max={3}
-                step={0.05}
-                aria-label="Zoom scale"
-                disabled={processing}
-                onChange={(e) => handleZoomChange(Number(e.target.value))}
-                className={styles.slider}
-              />
-              <button
-                type="button"
-                disabled={processing || zoom >= 3}
-                onClick={() => handleZoomChange(zoom + 0.1)}
-                className={styles.zoomBtn}
-                aria-label="Zoom in"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.controlRow}>
-            <span className={styles.controlLabel}>Rotate</span>
+          <div className={styles.sliderGroup}>
             <button
               type="button"
-              disabled={processing}
-              onClick={() => setRotation((r) => (r + 90) % 360)}
-              className={styles.rotateBtn}
+              disabled={processing || zoom <= 1}
+              onClick={() => handleZoomChange(zoom - 0.1)}
+              className={styles.zoomBtn}
+              aria-label="Zoom out"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 2v6h-6" />
-                <path d="M21 13a9 9 0 1 1-3-7.7L21 8" />
-              </svg>
-              <span>Rotate 90°</span>
+              −
+            </button>
+            <input
+              type="range"
+              value={zoom}
+              min={1}
+              max={3}
+              step={0.02}
+              aria-label="Zoom scale"
+              disabled={processing}
+              onChange={(e) => handleZoomChange(Number(e.target.value))}
+              className={styles.slider}
+            />
+            <button
+              type="button"
+              disabled={processing || zoom >= 3}
+              onClick={() => handleZoomChange(zoom + 0.1)}
+              className={styles.zoomBtn}
+              aria-label="Zoom in"
+            >
+              +
             </button>
           </div>
         </div>
@@ -163,7 +148,7 @@ export function AvatarCropper({
             onClick={handleApply}
             className={styles.applyBtn}
           >
-            {processing ? 'Applying...' : 'Apply & Upload'}
+            {processing ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>

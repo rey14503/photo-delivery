@@ -61,6 +61,11 @@ export function EditProfileModal({
         const data = await res.json()
         if (data.avatarUrl) {
           setAvatarUrl(data.avatarUrl)
+          onSaveSuccess({
+            name,
+            studioName,
+            avatarUrl: data.avatarUrl,
+          })
         }
       }
     } catch (err) {
@@ -110,19 +115,32 @@ export function EditProfileModal({
 
         <form onSubmit={handleSave}>
           <div className={styles.avatarSection}>
-            <div
-              className={styles.avatarContainer}
-              onClick={() => fileInputRef.current?.click()}
-              title="Change Avatar"
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className={styles.avatarImage} />
-              ) : (
-                <span className={styles.avatarInitials}>{initials}</span>
-              )}
-              <div className={styles.avatarOverlay}>
-                <span>{uploadingAvatar ? 'Uploading...' : 'Change'}</span>
+            <div className={styles.avatarWrapper}>
+              <div
+                className={styles.avatarContainer}
+                onClick={() => fileInputRef.current?.click()}
+                title="Update profile picture"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className={styles.avatarImage} />
+                ) : (
+                  <span className={styles.avatarInitials}>{initials}</span>
+                )}
+                <div className={styles.avatarOverlay}>
+                  <span>{uploadingAvatar ? 'Uploading...' : 'Change'}</span>
+                </div>
               </div>
+              <button
+                type="button"
+                className={styles.cameraBadge}
+                onClick={() => fileInputRef.current?.click()}
+                title="Update profile picture"
+                aria-label="Update profile picture"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>
+                </svg>
+              </button>
             </div>
             <input
               ref={fileInputRef}

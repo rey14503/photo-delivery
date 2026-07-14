@@ -85,12 +85,35 @@ export function UserAccountMenu({
       {open && (
         <div className={styles.popover}>
           <div className={styles.headerBox}>
-            <div className={styles.popoverAvatar}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className={styles.popoverAvatarImg} />
-              ) : (
-                <span>{initials}</span>
-              )}
+            <div className={styles.popoverAvatarWrapper}>
+              <div
+                className={styles.popoverAvatar}
+                onClick={() => {
+                  setOpen(false)
+                  setShowEditModal(true)
+                }}
+                title="Update profile picture"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className={styles.popoverAvatarImg} />
+                ) : (
+                  <span>{initials}</span>
+                )}
+              </div>
+              <button
+                type="button"
+                className={styles.popoverCameraBadge}
+                onClick={() => {
+                  setOpen(false)
+                  setShowEditModal(true)
+                }}
+                title="Update profile picture"
+                aria-label="Update profile picture"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>
+                </svg>
+              </button>
             </div>
             <div className={styles.userInfo}>
               <span className={styles.userName}>{name || 'Photographer'}</span>
