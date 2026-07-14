@@ -90,15 +90,15 @@ export function EditProfileModal({
   const modalContent = (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <h2 className={styles.title}>Chỉnh sửa thông tin cá nhân</h2>
-        <p className={styles.subtitle}>Cập nhật ảnh đại diện và thông tin hiển thị với khách hàng</p>
+        <h2 className={styles.title}>Edit Profile</h2>
+        <p className={styles.subtitle}>Update your profile picture and display information for clients</p>
 
         <form onSubmit={handleSave}>
           <div className={styles.avatarSection}>
             <div
               className={styles.avatarContainer}
               onClick={() => fileInputRef.current?.click()}
-              title="Đổi ảnh đại diện"
+              title="Change Avatar"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar" className={styles.avatarImage} />
@@ -106,7 +106,7 @@ export function EditProfileModal({
                 <span className={styles.avatarInitials}>{initials}</span>
               )}
               <div className={styles.avatarOverlay}>
-                <span>{uploadingAvatar ? 'Đang tải...' : 'Thay ảnh'}</span>
+                <span>{uploadingAvatar ? 'Uploading...' : 'Change'}</span>
               </div>
             </div>
             <input
@@ -120,7 +120,7 @@ export function EditProfileModal({
 
           <div className={styles.formGroup}>
             <label htmlFor="edit-name" className={styles.label}>
-              Họ và tên
+              Full Name
             </label>
             <input
               id="edit-name"
@@ -128,14 +128,14 @@ export function EditProfileModal({
               value={name}
               onChange={e => setName(e.target.value)}
               className={styles.input}
-              placeholder="VD: Nguyễn Khoa"
+              placeholder="e.g. Nguyen Khoa"
               required
             />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="edit-studio" className={styles.label}>
-              Tên Studio / Danh xưng
+              Studio Name / Role
             </label>
             <input
               id="edit-studio"
@@ -143,16 +143,16 @@ export function EditProfileModal({
               value={studioName}
               onChange={e => setStudioName(e.target.value)}
               className={styles.input}
-              placeholder="VD: Chủ Studio (PRO)"
+              placeholder="e.g. PRO Studio"
             />
           </div>
 
           <div className={styles.actions}>
             <button type="button" onClick={onClose} className={styles.cancelBtn}>
-              Hủy
+              Cancel
             </button>
             <button type="submit" disabled={loading || uploadingAvatar} className={styles.saveBtn}>
-              {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+              {loading ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>

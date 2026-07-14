@@ -95,7 +95,7 @@ export function UserAccountMenu({
             <div className={styles.userInfo}>
               <span className={styles.userName}>{name || 'Photographer'}</span>
               <span className={styles.userEmail}>{userEmail || ''}</span>
-              <span className={styles.studioBadge}>{studioName || 'Chủ Studio (PRO)'}</span>
+              <span className={styles.studioBadge}>{studioName || 'PRO Studio'}</span>
             </div>
           </div>
 
@@ -109,7 +109,7 @@ export function UserAccountMenu({
               }}
             >
               <GearOutlineIcon size={18} className={styles.menuIconSvg} />
-              <span>Chỉnh sửa thông tin / Quản lý Studio</span>
+              <span>Edit Profile / Studio</span>
             </button>
           </div>
 
@@ -120,7 +120,7 @@ export function UserAccountMenu({
               onClick={() => signOut({ callbackUrl: '/login' })}
             >
               <SignOutOutlineIcon size={18} className={styles.menuIconSvg} />
-              <span>Đăng xuất</span>
+              <span>Sign Out</span>
             </button>
           </div>
         </div>

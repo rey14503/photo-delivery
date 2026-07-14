@@ -4,23 +4,23 @@
 }
 
 .triggerBtn {
-  background: #1e1e24;
-  border: 1px solid #3f3f46;
+  background: var(--card-bg, #1e1e24);
+  border: 1px solid var(--border-color, #3f3f46);
   border-radius: 9999px;
   padding: 4px 12px 4px 4px;
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  color: #f4f4f5;
+  color: var(--text-main, #f4f4f5);
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .triggerBtn:hover {
-  background: #27272a;
-  border-color: #52525b;
+  background: var(--bg-surface-hover, #27272a);
+  border-color: var(--text-muted, #52525b);
 }
 
 .triggerAvatar {
@@ -52,7 +52,7 @@
 
 .chevron {
   font-size: 0.65rem;
-  color: #a1a1aa;
+  color: var(--text-muted, #a1a1aa);
   transition: transform 0.2s ease;
 }
 
@@ -65,10 +65,10 @@
   top: calc(100% + 8px);
   right: 0;
   width: 310px;
-  background: #18181b;
-  border: 1px solid #2e2e33;
+  background: var(--card-bg, #18181b);
+  border: 1px solid var(--border-color, #2e2e33);
   border-radius: 16px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-lg, 0 15px 35px rgba(0, 0, 0, 0.6));
   z-index: 100;
   overflow: hidden;
   animation: slideDown 0.15s ease-out;
@@ -87,8 +87,8 @@
 
 .headerBox {
   padding: 16px;
-  background: #202024;
-  border-bottom: 1px solid #2e2e33;
+  background: var(--bg-base, #202024);
+  border-bottom: 1px solid var(--border-color, #2e2e33);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -125,7 +125,7 @@
 .userName {
   font-weight: 600;
   font-size: 0.95rem;
-  color: #fff;
+  color: var(--text-main, #fff);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -133,7 +133,7 @@
 
 .userEmail {
   font-size: 0.75rem;
-  color: #a1a1aa;
+  color: var(--text-muted, #a1a1aa);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -166,7 +166,7 @@
   text-align: left;
   padding: 10px 12px;
   border-radius: 10px;
-  color: #e4e4e7;
+  color: var(--text-main, #e4e4e7);
   font-size: 0.875rem;
   display: flex;
   align-items: center;
@@ -176,8 +176,8 @@
 }
 
 .menuItem:hover {
-  background: #27272a;
-  color: #fff;
+  background: var(--bg-surface-hover, #27272a);
+  color: var(--text-main, #fff);
 }
 
 .menuIcon {
@@ -191,7 +191,7 @@
 
 .footerBox {
   padding: 8px;
-  border-top: 1px solid #2e2e33;
+  border-top: 1px solid var(--border-color, #2e2e33);
 }
 
 .signOutBtn {
@@ -201,7 +201,7 @@
   text-align: left;
   padding: 10px 12px;
   border-radius: 10px;
-  color: #ff5c5c;
+  color: var(--danger, #ff5c5c);
   font-size: 0.875rem;
   font-weight: 500;
   display: flex;
@@ -212,5 +212,5 @@
 }
 
 .signOutBtn:hover {
-  background: rgba(255, 92, 92, 0.1);
+  background: var(--danger-subtle, rgba(255, 92, 92, 0.1));
 }

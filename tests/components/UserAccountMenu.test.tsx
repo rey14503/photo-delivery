@@ -12,7 +12,7 @@ vi.mock('next-auth/react', () => ({
         name: 'Khoa Nguyễn',
         email: 'khoa@example.com',
         avatarUrl: null,
-        studioName: 'Chủ Studio (PRO)',
+        studioName: 'PRO Studio',
       },
     },
     update: vi.fn(),
@@ -25,24 +25,24 @@ describe('UserAccountMenu Component', () => {
   })
 
   it('renders user button and opens popover menu on click', () => {
-    render(<UserAccountMenu userName="Khoa Nguyễn" userEmail="khoa@example.com" studioName="Chủ Studio (PRO)" />)
+    render(<UserAccountMenu userName="Khoa Nguyễn" userEmail="khoa@example.com" studioName="PRO Studio" />)
 
     const toggleBtn = screen.getByRole('button', { name: /open user menu/i })
     expect(toggleBtn).toBeInTheDocument()
 
     fireEvent.click(toggleBtn)
-    expect(screen.getByText('Chủ Studio (PRO)')).toBeInTheDocument()
-    expect(screen.getByText('Chỉnh sửa thông tin / Quản lý Studio')).toBeInTheDocument()
+    expect(screen.getByText('PRO Studio')).toBeInTheDocument()
+    expect(screen.getByText('Edit Profile / Studio')).toBeInTheDocument()
   })
 
   it('opens EditProfileModal when clicking edit profile option', () => {
-    render(<UserAccountMenu userName="Khoa Nguyễn" userEmail="khoa@example.com" studioName="Chủ Studio (PRO)" />)
+    render(<UserAccountMenu userName="Khoa Nguyễn" userEmail="khoa@example.com" studioName="PRO Studio" />)
 
     fireEvent.click(screen.getByRole('button', { name: /open user menu/i }))
-    fireEvent.click(screen.getByText('Chỉnh sửa thông tin / Quản lý Studio'))
+    fireEvent.click(screen.getByText('Edit Profile / Studio'))
 
-    expect(screen.getByText('Chỉnh sửa thông tin cá nhân')).toBeInTheDocument()
-    expect(screen.getByLabelText(/họ và tên/i)).toHaveValue('Khoa Nguyễn')
-    expect(screen.getByLabelText(/tên studio \/ danh xưng/i)).toHaveValue('Chủ Studio (PRO)')
+    expect(screen.getByText('Edit Profile')).toBeInTheDocument()
+    expect(screen.getByLabelText(/full name/i)).toHaveValue('Khoa Nguyễn')
+    expect(screen.getByLabelText(/studio name \/ role/i)).toHaveValue('PRO Studio')
   })
 })

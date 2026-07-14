@@ -21,7 +21,7 @@ describe('TopNav', () => {
     const triggerBtn = screen.getByRole('button', { name: /open user menu/i })
     fireEvent.click(triggerBtn)
 
-    const signOutBtn = screen.getByText(/Đăng xuất/i)
+    const signOutBtn = screen.getByText(/Sign Out/i)
     fireEvent.click(signOutBtn)
     expect(signOutMock).toHaveBeenCalledWith({ callbackUrl: '/login' })
   })

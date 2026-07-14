@@ -516,7 +516,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   onClick={() => syncNow()}
                   disabled={syncing}
                   className={styles.topActionBtn}
-                  title={lastSyncedAt ? `Lần đồng bộ gần nhất: ${lastSyncedAt.toLocaleTimeString('vi-VN')}` : 'Đồng bộ ảnh từ Google Drive'}
+                  title={lastSyncedAt ? `Last synced: ${lastSyncedAt.toLocaleTimeString()}` : 'Sync photos from Google Drive'}
                   aria-label="sync photos from google drive"
                   style={{
                     display: 'inline-flex',
@@ -533,7 +533,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   }}
                 >
                   <SyncOutlineIcon size={16} className={syncing ? styles.spinIcon : undefined} />
-                  <span>{syncing ? 'Đang đồng bộ...' : 'Đồng bộ Drive'}</span>
+                  <span>{syncing ? 'Syncing...' : 'Sync Drive'}</span>
                 </button>
 
                 {/* 2. Toggle Downloads Pill Switch */}
