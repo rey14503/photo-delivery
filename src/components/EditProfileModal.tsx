@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { AvatarCropper } from './AvatarCropper'
 import styles from './EditProfileModal.module.css'
 
 export interface EditProfileModalProps {
@@ -24,6 +25,8 @@ export function EditProfileModal({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl || null)
   const [loading, setLoading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null)
+  const [cropperOpen, setCropperOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -33,14 +36,23 @@ export function EditProfileModal({
 
   if (!mounted || typeof document === 'undefined') return null
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
+    const objectUrl = URL.createObjectURL(file)
+    setCropImageSrc(objectUrl)
+    setCropperOpen(true)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
     setUploadingAvatar(true)
     try {
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', croppedBlob, 'avatar.jpg')
       const res = await fetch('/api/user/avatar', {
         method: 'POST',
         body: formData,
@@ -55,6 +67,9 @@ export function EditProfileModal({
       console.error('Avatar upload failed:', err)
     } finally {
       setUploadingAvatar(false)
+      if (cropImageSrc) URL.revokeObjectURL(cropImageSrc)
+      setCropImageSrc(null)
+      setCropperOpen(false)
     }
   }
 
@@ -157,6 +172,17 @@ export function EditProfileModal({
           </div>
         </form>
       </div>
+
+      <AvatarCropper
+        imageSrc={cropImageSrc}
+        isOpen={cropperOpen}
+        onClose={() => {
+          setCropperOpen(false)
+          if (cropImageSrc) URL.revokeObjectURL(cropImageSrc)
+          setCropImageSrc(null)
+        }}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   )
 
