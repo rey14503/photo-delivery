@@ -7,9 +7,10 @@ import styles from './CreateAlbumForm.module.css'
 export interface CreateAlbumFormProps {
   onSuccess?: () => void
   onCancel?: () => void
+  onSubmittingChange?: (submitting: boolean) => void
 }
 
-export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = {}) {
+export function CreateAlbumForm({ onSuccess, onCancel, onSubmittingChange }: CreateAlbumFormProps = {}) {
   const router = useRouter()
   const [name, setName] = useState('')
   const [clientName, setClientName] = useState('')
@@ -24,9 +25,14 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
   const [importSummary, setImportSummary] = useState<{ imported: number; skipped: number } | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  function updateSubmitting(val: boolean) {
+    setSubmitting(val)
+    onSubmittingChange?.(val)
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    setSubmitting(true)
+    updateSubmitting(true)
     setError(null)
     setImportSummary(null)
     try {
@@ -81,145 +87,155 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
     } catch {
       setError('Network error — please try again.')
     } finally {
-      setSubmitting(false)
+      updateSubmitting(false)
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      {/* 1. Google Drive Folder Link */}
-      <div className={styles.field}>
-        <label htmlFor="driveLinkInput" className={styles.labelRow}>
-          <span className={styles.star}>*</span>
-          Google Drive folder link
-        </label>
-        <input
-          id="driveLinkInput"
-          aria-label="Google Drive folder link"
-          type="url"
-          placeholder="https://drive.google.com/drive/folders/..."
-          value={driveLink}
-          onChange={(e) => setDriveLink(e.target.value)}
-          required
-          className={styles.input}
-        />
-      </div>
-
-      {/* 2. Album Title */}
-      <div className={styles.field}>
-        <label htmlFor="albumNameInput" className={styles.labelRow}>
-          <span className={styles.star}>*</span>
-          Album name
-        </label>
-        <input
-          id="albumNameInput"
-          aria-label="Album name"
-          type="text"
-          placeholder="Album name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={styles.input}
-        />
-      </div>
-
-      {/* 3. Client Name */}
-      <div className={styles.field}>
-        <label htmlFor="clientNameInput" className={styles.labelRow}>
-          <span className={styles.star}>*</span>
-          Client name
-        </label>
-        <input
-          id="clientNameInput"
-          aria-label="Client name"
-          type="text"
-          placeholder="Client name"
-          value={clientName}
-          onChange={(e) => setClientName(e.target.value)}
-          className={styles.input}
-        />
-      </div>
-
-      {/* 4. Cover Photo info */}
-      <div className={styles.field}>
-        <label className={styles.labelRow}>
-          Cover photo
-        </label>
-        <div
-          className={styles.input}
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            color: '#a1a1aa',
-            fontSize: '0.85rem',
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'default',
-          }}
-        >
-          ✦ Auto-assign first photo from Drive after import (default)
+      <fieldset disabled={submitting} style={{ border: 'none', padding: 0, margin: 0 }}>
+        {/* 1. Google Drive Folder Link */}
+        <div className={styles.field}>
+          <label htmlFor="driveLinkInput" className={styles.labelRow}>
+            <span className={styles.star}>*</span>
+            Google Drive folder link
+          </label>
+          <input
+            id="driveLinkInput"
+            aria-label="Google Drive folder link"
+            type="url"
+            placeholder="https://drive.google.com/drive/folders/..."
+            value={driveLink}
+            onChange={(e) => setDriveLink(e.target.value)}
+            required
+            disabled={submitting}
+            className={styles.input}
+          />
         </div>
-      </div>
 
-      {/* Settings Section: Backed options only (Rule 4) */}
-      <div className={styles.settingsSection}>
-        {/* 1. Password Protect Album Toggle */}
-        <div>
+        {/* 2. Album Title */}
+        <div className={styles.field}>
+          <label htmlFor="albumNameInput" className={styles.labelRow}>
+            <span className={styles.star}>*</span>
+            Album name
+          </label>
+          <input
+            id="albumNameInput"
+            aria-label="Album name"
+            type="text"
+            placeholder="Album name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={submitting}
+            className={styles.input}
+          />
+        </div>
+
+        {/* 3. Client Name */}
+        <div className={styles.field}>
+          <label htmlFor="clientNameInput" className={styles.labelRow}>
+            <span className={styles.star}>*</span>
+            Client name
+          </label>
+          <input
+            id="clientNameInput"
+            aria-label="Client name"
+            type="text"
+            placeholder="Client name"
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            disabled={submitting}
+            className={styles.input}
+          />
+        </div>
+
+        {/* 4. Cover Photo info */}
+        <div className={styles.field}>
+          <label className={styles.labelRow}>
+            Cover photo
+          </label>
+          <div
+            className={styles.input}
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              color: '#a1a1aa',
+              fontSize: '0.85rem',
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'default',
+            }}
+          >
+            ✦ Auto-assign first photo from Drive after import (default)
+          </div>
+        </div>
+
+        {/* Settings Section: Backed options only (Rule 4) */}
+        <div className={styles.settingsSection}>
+          {/* 1. Password Protect Album Toggle */}
+          <div>
+            <div className={styles.settingRow}>
+              <span className={styles.settingLabel}>Password protect album</span>
+              <button
+                type="button"
+                aria-pressed={passwordProtected}
+                disabled={submitting}
+                onClick={() => setPasswordProtected(!passwordProtected)}
+                className={`${styles.toggleBtn} ${
+                  passwordProtected ? styles.toggleOnOrange : styles.toggleOff
+                }`}
+                style={{
+                  backgroundColor: passwordProtected ? '#ff5722' : '#71717a',
+                  borderColor: passwordProtected ? '#e64a19' : '#52525b',
+                  cursor: submitting ? 'not-allowed' : 'pointer',
+                }}
+              >
+                <span
+                  className={`${styles.toggleThumb} ${
+                    passwordProtected ? styles.toggleThumbOn : ''
+                  }`}
+                />
+              </button>
+            </div>
+            {passwordProtected && (
+              <div className={styles.subInputContainer}>
+                <input
+                  type="text"
+                  placeholder="Enter album access password..."
+                  value={albumPassword}
+                  onChange={(e) => setAlbumPassword(e.target.value)}
+                  disabled={submitting}
+                  className={styles.input}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* 2. Enable Original Download Toggle */}
           <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>Password protect album</span>
+            <span className={styles.settingLabel}>Allow photo downloads</span>
             <button
               type="button"
-              aria-pressed={passwordProtected}
-              onClick={() => setPasswordProtected(!passwordProtected)}
+              aria-pressed={downloadEnabled}
+              disabled={submitting}
+              onClick={() => setDownloadEnabled(!downloadEnabled)}
               className={`${styles.toggleBtn} ${
-                passwordProtected ? styles.toggleOnOrange : styles.toggleOff
+                downloadEnabled ? styles.toggleOnGreen : styles.toggleOff
               }`}
               style={{
-                backgroundColor: passwordProtected ? '#ff5722' : '#71717a',
-                borderColor: passwordProtected ? '#e64a19' : '#52525b',
+                backgroundColor: downloadEnabled ? '#10b981' : '#71717a',
+                borderColor: downloadEnabled ? '#059669' : '#52525b',
+                cursor: submitting ? 'not-allowed' : 'pointer',
               }}
             >
               <span
                 className={`${styles.toggleThumb} ${
-                  passwordProtected ? styles.toggleThumbOn : ''
+                  downloadEnabled ? styles.toggleThumbOn : ''
                 }`}
               />
             </button>
           </div>
-          {passwordProtected && (
-            <div className={styles.subInputContainer}>
-              <input
-                type="text"
-                placeholder="Enter album access password..."
-                value={albumPassword}
-                onChange={(e) => setAlbumPassword(e.target.value)}
-                className={styles.input}
-              />
-            </div>
-          )}
         </div>
-
-        {/* 2. Enable Original Download Toggle */}
-        <div className={styles.settingRow}>
-          <span className={styles.settingLabel}>Allow photo downloads</span>
-          <button
-            type="button"
-            aria-pressed={downloadEnabled}
-            onClick={() => setDownloadEnabled(!downloadEnabled)}
-            className={`${styles.toggleBtn} ${
-              downloadEnabled ? styles.toggleOnGreen : styles.toggleOff
-            }`}
-            style={{
-              backgroundColor: downloadEnabled ? '#10b981' : '#71717a',
-              borderColor: downloadEnabled ? '#059669' : '#52525b',
-            }}
-          >
-            <span
-              className={`${styles.toggleThumb} ${
-                downloadEnabled ? styles.toggleThumbOn : ''
-              }`}
-            />
-          </button>
-        </div>
-      </div>
+      </fieldset>
 
       {importSummary && (
         <div role="status" className={styles.successAlert}>
@@ -241,7 +257,7 @@ export function CreateAlbumForm({ onSuccess, onCancel }: CreateAlbumFormProps = 
       {/* Bottom Action Buttons */}
       <div className={styles.actions}>
         {onCancel && (
-          <button type="button" onClick={onCancel} className={styles.btnCancel}>
+          <button type="button" disabled={submitting} onClick={onCancel} className={styles.btnCancel}>
             Cancel
           </button>
         )}

@@ -81,4 +81,32 @@ describe('CreateAlbumForm', () => {
     )
     expect(screen.getByRole('button', { name: /create album/i })).toBeInTheDocument()
   })
+
+  it('disables all form inputs, toggles, and buttons while submitting', async () => {
+    let resolvePromise: (value: unknown) => void = () => {}
+    const pendingPromise = new Promise((resolve) => {
+      resolvePromise = resolve
+    })
+    vi.mocked(global.fetch).mockReturnValue(pendingPromise as never)
+
+    const onCancel = vi.fn()
+    render(<CreateAlbumForm onCancel={onCancel} />)
+
+    const driveInput = screen.getByLabelText('Google Drive folder link')
+    const albumInput = screen.getByLabelText('Album name')
+    const clientInput = screen.getByLabelText('Client name')
+    const submitBtn = screen.getByRole('button', { name: /create album/i })
+    const cancelBtn = screen.getByRole('button', { name: /cancel/i })
+
+    fireEvent.change(driveInput, { target: { value: 'https://drive.google.com/drive/folders/456DEF' } })
+    fireEvent.click(submitBtn)
+
+    expect(driveInput).toBeDisabled()
+    expect(albumInput).toBeDisabled()
+    expect(clientInput).toBeDisabled()
+    expect(submitBtn).toBeDisabled()
+    expect(cancelBtn).toBeDisabled()
+
+    resolvePromise({ ok: true, json: async () => ({ id: 'album_123' }) })
+  })
 })
