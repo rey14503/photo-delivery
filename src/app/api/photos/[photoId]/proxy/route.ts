@@ -24,6 +24,8 @@ export async function GET(
     return new NextResponse('Photo not found', { status: 404 })
   }
 
+  const currentUrl = type === 'preview' ? photo.previewUrl : photo.thumbnailUrl
+
   // If already a valid absolute URL (e.g. Vercel Blob / S3) that is NOT temporary Google Drive CDN, redirect directly
   const isPermanentBlob =
     currentUrl &&
