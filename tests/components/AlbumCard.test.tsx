@@ -40,7 +40,7 @@ describe('AlbumCard', () => {
     fireEvent.click(screen.getByRole('button', { name: /menu tùy chọn/i }))
     fireEvent.click(screen.getByRole('button', { name: /copy link/i }))
 
-    await waitFor(() => expect(screen.getByRole('button', { name: /đã copy!/i })).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Link copied to clipboard/i)).toBeInTheDocument())
     expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('/a/tok_abc123'))
   })
 })

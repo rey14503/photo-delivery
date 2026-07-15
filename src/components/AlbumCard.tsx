@@ -16,6 +16,7 @@ import {
   CheckOutlineIcon,
   CloseOutlineIcon,
   ShareNetworkIcon,
+  PhoneOutlineIcon,
 } from './PhotoIcons'
 import styles from './AlbumCard.module.css'
 
@@ -316,7 +317,10 @@ export function AlbumCard({ album }: AlbumCardProps) {
               <div className={styles.shareModalQrCard}>
                 <QRCodeSVG value={shareUrl} size={220} level="M" />
               </div>
-              <span className={styles.shareModalQrHint}>Scan with camera or QR reader on phone</span>
+              <span className={styles.shareModalQrHint}>
+                <PhoneOutlineIcon size={15} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                Scan with camera or QR reader on phone
+              </span>
             </div>
 
             <div className={styles.shareModalLinkRow}>
@@ -334,19 +338,25 @@ export function AlbumCard({ album }: AlbumCardProps) {
                 type="button"
                 onClick={handleCopy}
                 className={`${styles.shareModalCopyBtn} ${copied ? styles.shareModalCopyBtnActive : ''}`}
-                aria-label={copied ? 'Đã copy!' : 'Copy link'}
+                aria-label="Copy link"
               >
                 {copied ? (
                   <>
-                    <CheckOutlineIcon size={15} /> Copied!
+                    <CheckOutlineIcon size={15} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} /> Copied
                   </>
                 ) : (
                   <>
-                    <CopyOutlineIcon size={15} /> Copy Link
+                    <span>Copy</span>
                   </>
                 )}
               </button>
             </div>
+
+            {copied && (
+              <div role="alert" className={styles.shareModalCopiedAlert}>
+                Link copied to clipboard!
+              </div>
+            )}
           </div>
         </div>,
         document.body
