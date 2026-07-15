@@ -870,6 +870,33 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   placeholder="Client name"
                 />
               </div>
+              {photos && photos.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: '#a0a0ab' }}>Cover Photo (`Ảnh bìa`):</label>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    {editCoverPhotoId && (
+                      <img
+                        src={photos.find((p) => p.id === editCoverPhotoId)?.thumbnailUrl || photos.find((p) => p.id === editCoverPhotoId)?.previewUrl || ''}
+                        alt="Cover preview"
+                        style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #ff5722' }}
+                      />
+                    )}
+                    <select
+                      value={editCoverPhotoId || ''}
+                      onChange={(e) => setEditCoverPhotoId(e.target.value || null)}
+                      className={styles.editInput}
+                      style={{ flex: 1, cursor: 'pointer' }}
+                    >
+                      <option value="">-- Auto (First Photo) --</option>
+                      {photos.map((p, idx) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name || `Photo #${idx + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
               {infoError && <div role="alert" className={styles.editError}>{infoError}</div>}
               <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
                 <button type="submit" disabled={savingInfo} className={styles.saveInfoBtn} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: '#ff5c5c', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>

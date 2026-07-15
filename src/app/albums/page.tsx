@@ -18,10 +18,10 @@ export default async function AlbumsPage() {
       photos: {
         take: 20,
         orderBy: { displayOrder: 'asc' },
-        select: { id: true, thumbnailUrl: true, previewUrl: true },
+        select: { id: true, thumbnailUrl: true, previewUrl: true, originalName: true },
       },
       coverPhoto: {
-        select: { id: true, thumbnailUrl: true, previewUrl: true },
+        select: { id: true, thumbnailUrl: true, previewUrl: true, originalName: true },
       },
       _count: {
         select: { photos: true },
@@ -45,6 +45,12 @@ export default async function AlbumsPage() {
       createdAt: alb.createdAt,
       downloadEnabled: alb.downloadEnabled,
       coverUrl: coverPhotoObj?.previewUrl || coverPhotoObj?.thumbnailUrl || null,
+      coverPhotoId: alb.coverPhotoId || null,
+      samplePhotos: alb.photos.map((p) => ({
+        id: p.id,
+        name: p.originalName || p.id,
+        url: p.thumbnailUrl || p.previewUrl || '',
+      })),
     }
   })
 

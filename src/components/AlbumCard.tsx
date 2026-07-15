@@ -30,6 +30,8 @@ export interface AlbumCardProps {
     photoCount: number
     createdAt: string | Date
     coverUrl?: string | null
+    coverPhotoId?: string | null
+    samplePhotos?: { id: string; name: string; url: string }[]
     downloadEnabled?: boolean
     clientEmail?: string | null
     location?: string | null
@@ -43,6 +45,7 @@ export function AlbumCard({ album }: AlbumCardProps) {
   const [showShareModal, setShowShareModal] = useState(false)
   const [editName, setEditName] = useState(album.name)
   const [editClientName, setEditClientName] = useState(album.clientName)
+  const [editCoverPhotoId, setEditCoverPhotoId] = useState<string | null>(album.coverPhotoId || null)
   const [saving, setSaving] = useState(false)
 
   const [isDeleting, setIsDeleting] = useState(false)
@@ -63,14 +66,25 @@ export function AlbumCard({ album }: AlbumCardProps) {
     e.preventDefault()
     setSaving(true)
     try {
+      const payload: { name: string; clientName: string; coverPhotoId?: string | null } = {
+        name: editName,
+        clientName: editClientName,
+      }
+      if (editCoverPhotoId !== (album.coverPhotoId || null)) {
+        payload.coverPhotoId = editCoverPhotoId
+      }
       const res = await fetch(`/api/albums/${album.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editName, clientName: editClientName }),
+        body: JSON.stringify(payload),
       })
       if (res.ok) {
-        album.name = editName
-        album.clientName = editClientName
+        const updated = await res.json()
+        album.name = updated.name ?? editName
+        album.clientName = updated.clientName ?? editClientName
+        if (updated.coverPhotoId !== undefined) {
+          album.coverPhotoId = updated.coverPhotoId
+        }
         setIsEditing(false)
         router.refresh()
       } else {
@@ -375,6 +389,33 @@ export function AlbumCard({ album }: AlbumCardProps) {
                   required
                 />
               </div>
+              {album.samplePhotos && album.samplePhotos.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: '#a0a0ab' }}>Cover Photo:</label>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    {editCoverPhotoId && (
+                      <img
+                        src={album.samplePhotos.find((p) => p.id === editCoverPhotoId)?.url || album.coverUrl || ''}
+                        alt="Cover preview"
+                        style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #ff5722' }}
+                      />
+                    )}
+                    <select
+                      value={editCoverPhotoId || ''}
+                      onChange={(e) => setEditCoverPhotoId(e.target.value || null)}
+                      className={styles.editInput}
+                      style={{ flex: 1, cursor: 'pointer' }}
+                    >
+                      <option value="">-- Auto (First Photo) --</option>
+                      {album.samplePhotos.map((p, idx) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name || `Photo #${idx + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
               <div className={styles.editBtnRow}>
                 <button type="submit" disabled={saving} className={styles.saveBtn}>
                   {saving ? 'Saving...' : 'Save'}

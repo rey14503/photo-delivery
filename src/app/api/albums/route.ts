@@ -20,10 +20,11 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { name, clientName, driveLink } = body as {
+  const { name, clientName, driveLink, coverPhotoName } = body as {
     name?: string
     clientName?: string
     driveLink?: string
+    coverPhotoName?: string
   }
   if (!name || !clientName || !driveLink) {
     return NextResponse.json(
@@ -97,7 +98,16 @@ export async function POST(request: NextRequest) {
       )
 
       if (createdPhotos.length > 0 && createdPhotos[0]?.id) {
-        firstPhotoId = createdPhotos[0].id
+        let chosenPhotoId = createdPhotos[0].id
+        if (coverPhotoName && coverPhotoName.trim()) {
+          const matched = createdPhotos.find((p) =>
+            p.originalName.toLowerCase().includes(coverPhotoName.trim().toLowerCase())
+          )
+          if (matched) {
+            chosenPhotoId = matched.id
+          }
+        }
+        firstPhotoId = chosenPhotoId
       }
     }
 
