@@ -4,6 +4,13 @@ import { getDriveClientForUser, downloadOriginal } from '@/lib/drive'
 import { processImage } from '@/lib/image-processing'
 import { uploadToBlob } from '@/lib/blob-storage'
 
+// In-memory TTL cache for Drive CDN URLs (TTL: 2 hours)
+// Prevents flooding Google Drive API (`drive.files.get`) when loading 20 album cards or 900 photos simultaneously
+const driveCdnCache = new Map<string, { thumbUrl: string; prevUrl: string; expiresAt: number }>()
+
+// In-flight request deduplication map
+const inFlightRequests = new Map<string, Promise<{ thumbUrl: string; prevUrl: string } | null>>()
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ photoId: string }> }
@@ -38,26 +45,52 @@ export async function GET(
     return NextResponse.redirect(currentUrl, { status: 302 })
   }
 
+  // Check in-memory Drive CDN cache before calling Google Drive API
+  const cached = driveCdnCache.get(photo.driveFileId)
+  if (cached && Date.now() < cached.expiresAt) {
+    return NextResponse.redirect(type === 'preview' ? cached.prevUrl : cached.thumbUrl, { status: 302 })
+  }
+
   try {
-    const drive = getDriveClientForUser(photo.album.owner)
+    let fetchPromise = inFlightRequests.get(photo.driveFileId)
+    if (!fetchPromise) {
+      fetchPromise = (async () => {
+        try {
+          const drive = getDriveClientForUser(photo.album.owner)
+          const fileMeta = await drive.files.get({
+            fileId: photo.driveFileId,
+            fields: 'thumbnailLink',
+            supportsAllDrives: true,
+          })
 
-    // Try checking drive file thumbnailLink first
-    const fileMeta = await drive.files.get({
-      fileId: photo.driveFileId,
-      fields: 'thumbnailLink',
-      supportsAllDrives: true,
-    })
+          if (fileMeta.data.thumbnailLink) {
+            const thumbUrl = fileMeta.data.thumbnailLink.replace(/=s\d+.*$/, '=s600')
+            const prevUrl = fileMeta.data.thumbnailLink.replace(/=s\d+.*$/, '=s1600')
 
-    if (fileMeta.data.thumbnailLink) {
-      const thumbUrl = fileMeta.data.thumbnailLink.replace(/=s\d+.*$/, '=s600')
-      const prevUrl = fileMeta.data.thumbnailLink.replace(/=s\d+.*$/, '=s1600')
+            // Cache for 2 hours
+            driveCdnCache.set(photo.driveFileId, {
+              thumbUrl,
+              prevUrl,
+              expiresAt: Date.now() + 2 * 60 * 60 * 1000,
+            })
 
-      // Return a 302 redirect to the fresh, non-expired Drive CDN URL
-      // Note: We intentionally do NOT save googleusercontent URLs into the database because Drive CDN tokens expire after several hours.
-      return NextResponse.redirect(type === 'preview' ? prevUrl : thumbUrl, { status: 302 })
+            return { thumbUrl, prevUrl }
+          }
+          return null
+        } finally {
+          inFlightRequests.delete(photo.driveFileId)
+        }
+      })()
+      inFlightRequests.set(photo.driveFileId, fetchPromise)
+    }
+
+    const cdnResult = await fetchPromise
+    if (cdnResult) {
+      return NextResponse.redirect(type === 'preview' ? cdnResult.prevUrl : cdnResult.thumbUrl, { status: 302 })
     }
 
     // Fallback: download original, process with sharp, and upload to blob storage
+    const drive = getDriveClientForUser(photo.album.owner)
     const { buffer } = await downloadOriginal(drive, photo.driveFileId)
     const { thumbnail, preview } = await processImage(buffer)
 
@@ -74,6 +107,11 @@ export async function GET(
     return NextResponse.redirect(type === 'preview' ? previewUrl : thumbnailUrl, { status: 302 })
   } catch (error) {
     console.error('Failed to proxy/process photo:', error)
+    // If rate limit or error occurs but we have a stale cache entry, serve it as emergency fallback
+    if (cached) {
+      return NextResponse.redirect(type === 'preview' ? cached.prevUrl : cached.thumbUrl, { status: 302 })
+    }
     return new NextResponse('Error generating photo proxy', { status: 500 })
   }
 }
+

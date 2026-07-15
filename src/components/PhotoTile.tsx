@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PhotoActionMenu } from './PhotoActionMenu'
 import { LikeIcon, CommentIcon } from './PhotoIcons'
 import { stripExtension } from '@/lib/photo-name'
@@ -47,8 +47,28 @@ export function PhotoTile({
   isCover = false,
   onOpen,
 }: PhotoTileProps) {
+  const [imgSrc, setImgSrc] = useState(thumbnailUrl)
+  const [retryCount, setRetryCount] = useState(0)
   const [imgError, setImgError] = useState(false)
   const displayName = stripExtension(name)
+
+  // Keep state in sync if parent changes prop
+  useEffect(() => {
+    if ((thumbnailUrl || null) !== (imgSrc || null) && retryCount === 0 && !imgError) {
+      setImgSrc(thumbnailUrl)
+    }
+  }, [thumbnailUrl, imgSrc, retryCount, imgError])
+
+  const handleImgError = () => {
+    if (!imgSrc) return setImgError(true)
+    if (retryCount < 2) {
+      setRetryCount((prev) => prev + 1)
+      const sep = imgSrc.includes('?') ? '&' : '?'
+      setImgSrc(`${imgSrc.replace(/&retry=\d+/, '')}${sep}retry=${Date.now()}`)
+    } else {
+      setImgError(true)
+    }
+  }
 
   return (
     <div className={styles.tile}>
@@ -62,11 +82,12 @@ export function PhotoTile({
         >
           {!imgError ? (
             <img
-              src={thumbnailUrl}
+              src={imgSrc || thumbnailUrl}
               alt=""
               className={styles.image}
-              onError={() => setImgError(true)}
+              onError={handleImgError}
             />
+
           ) : (
             <div
               style={{

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -51,7 +51,28 @@ export function AlbumCard({ album }: AlbumCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [isCoverHovered, setIsCoverHovered] = useState(false)
+  const [imgSrc, setImgSrc] = useState(album.coverUrl || null)
+  const [retryCount, setRetryCount] = useState(0)
   const [imgError, setImgError] = useState(false)
+
+  useEffect(() => {
+    if ((album.coverUrl || null) !== (imgSrc || null) && retryCount === 0 && !imgError) {
+      setImgSrc(album.coverUrl || null)
+    }
+  }, [album.coverUrl, imgSrc, retryCount, imgError])
+
+  const handleCoverError = () => {
+    if (!imgSrc) return setImgError(true)
+    if (imgSrc.includes('type=preview')) {
+      setImgSrc(imgSrc.replace('type=preview', 'type=thumb'))
+    } else if (retryCount < 2) {
+      setRetryCount((prev) => prev + 1)
+      const sep = imgSrc.includes('?') ? '&' : '?'
+      setImgSrc(`${imgSrc.replace(/&retry=\d+/, '')}${sep}retry=${Date.now()}`)
+    } else {
+      setImgError(true)
+    }
+  }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
   const shareUrl = origin ? `${origin}/a/${album.shareToken}` : `/a/${album.shareToken}`
@@ -130,13 +151,13 @@ export function AlbumCard({ album }: AlbumCardProps) {
         onMouseEnter={() => setIsCoverHovered(true)}
         onMouseLeave={() => setIsCoverHovered(false)}
       >
-        {album.coverUrl && !imgError ? (
+        {(imgSrc || album.coverUrl) && !imgError ? (
           <img
-            src={album.coverUrl}
+            src={imgSrc || album.coverUrl!}
             alt=""
             className={styles.coverImage}
             loading="lazy"
-            onError={() => setImgError(true)}
+            onError={handleCoverError}
           />
         ) : (
           <div className={styles.coverPlaceholder}>
