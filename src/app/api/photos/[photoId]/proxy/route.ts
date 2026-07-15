@@ -11,13 +11,51 @@ const driveCdnCache = new Map<string, { thumbUrl: string; prevUrl: string; expir
 // In-flight request deduplication map
 const inFlightRequests = new Map<string, Promise<{ thumbUrl: string; prevUrl: string } | null>>()
 
+async function serveOrRedirectCdn(photo: any, type: string, targetCdnUrl: string) {
+  try {
+    const imgRes = await fetch(targetCdnUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+    })
+    if (imgRes.ok) {
+      const buffer = await imgRes.arrayBuffer()
+
+      if (!photo.thumbnailUrl.startsWith('http') || photo.thumbnailUrl.includes('/proxy')) {
+        uploadToBlob(`drive-files/${photo.driveFileId}/v1/${type}.jpg`, Buffer.from(buffer), 'image/jpeg')
+          .then((blobUrl) => {
+            if (type === 'preview') {
+              prisma.photo.update({ where: { id: photo.id }, data: { previewUrl: blobUrl } }).catch(() => {})
+            } else {
+              prisma.photo.update({ where: { id: photo.id }, data: { thumbnailUrl: blobUrl } }).catch(() => {})
+            }
+          })
+          .catch(() => {})
+      }
+
+      return new NextResponse(buffer, {
+        status: 200,
+        headers: {
+          'Content-Type': imgRes.headers.get('content-type') || 'image/jpeg',
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+        },
+      })
+    }
+  } catch (cdnFetchErr) {
+    console.warn('Failed to stream from CDN, falling back to redirect:', cdnFetchErr)
+  }
+
+  return NextResponse.redirect(targetCdnUrl, { status: 302 })
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ photoId: string }> }
 ) {
   const { photoId } = await params
-  const type = request.nextUrl.searchParams.get('type') || 'thumb'
-  const albumId = request.nextUrl.searchParams.get('albumId')
+  const searchParams = request.nextUrl.searchParams
+  const type = searchParams.get('type') || 'thumb'
+  const albumId = searchParams.get('albumId') || undefined
 
   // Find photo by id or by driveFileId
   const photo = await prisma.photo.findFirst({
@@ -33,22 +71,15 @@ export async function GET(
 
   const currentUrl = type === 'preview' ? photo.previewUrl : photo.thumbnailUrl
 
-  // If already a valid absolute URL (e.g. Vercel Blob / S3) that is NOT temporary Google Drive CDN, redirect directly
-  const isPermanentBlob =
-    currentUrl &&
-    currentUrl.startsWith('http') &&
-    !currentUrl.includes('googleusercontent.com') &&
-    !currentUrl.includes('drive.google.com') &&
-    !currentUrl.includes('/proxy')
-
-  if (isPermanentBlob) {
+  // If already uploaded to Blob storage (or external permanent URL not proxying), redirect directly
+  if (currentUrl && currentUrl.startsWith('http') && !currentUrl.includes('/proxy')) {
     return NextResponse.redirect(currentUrl, { status: 302 })
   }
 
   // Check in-memory Drive CDN cache before calling Google Drive API
   const cached = driveCdnCache.get(photo.driveFileId)
   if (cached && Date.now() < cached.expiresAt) {
-    return NextResponse.redirect(type === 'preview' ? cached.prevUrl : cached.thumbUrl, { status: 302 })
+    return await serveOrRedirectCdn(photo, type, type === 'preview' ? cached.prevUrl : cached.thumbUrl)
   }
 
   try {
@@ -86,7 +117,7 @@ export async function GET(
 
     const cdnResult = await fetchPromise
     if (cdnResult) {
-      return NextResponse.redirect(type === 'preview' ? cdnResult.prevUrl : cdnResult.thumbUrl, { status: 302 })
+      return await serveOrRedirectCdn(photo, type, type === 'preview' ? cdnResult.prevUrl : cdnResult.thumbUrl)
     }
 
     // Fallback: download original, process with sharp, and upload to blob storage
@@ -109,9 +140,8 @@ export async function GET(
     console.error('Failed to proxy/process photo:', error)
     // If rate limit or error occurs but we have a stale cache entry, serve it as emergency fallback
     if (cached) {
-      return NextResponse.redirect(type === 'preview' ? cached.prevUrl : cached.thumbUrl, { status: 302 })
+      return await serveOrRedirectCdn(photo, type, type === 'preview' ? cached.prevUrl : cached.thumbUrl)
     }
     return new NextResponse('Error generating photo proxy', { status: 500 })
   }
 }
-
