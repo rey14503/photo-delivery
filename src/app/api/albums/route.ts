@@ -106,6 +106,10 @@ export async function POST(request: NextRequest) {
           if (matched) {
             chosenPhotoId = matched.id
           }
+        } else {
+          // Default to random photo on creation ("mặc định ở bước tạo album là ngẫu nhiên")
+          const randomIndex = Math.floor(Math.random() * createdPhotos.length)
+          chosenPhotoId = createdPhotos[randomIndex].id
         }
         firstPhotoId = chosenPhotoId
       }

@@ -11,13 +11,20 @@ export interface TopNavProps {
   avatarUrl?: string | null
   studioName?: string | null
   onCreateClick?: () => void
+  onLogoClick?: () => void
 }
 
-export function TopNav({ userName, userEmail, avatarUrl, studioName, onCreateClick }: TopNavProps) {
+export function TopNav({ userName, userEmail, avatarUrl, studioName, onCreateClick, onLogoClick }: TopNavProps) {
   return (
     <header className={styles.nav}>
       <div className={styles.left}>
-        <Link href="/albums" className={styles.brand}>
+        <Link
+          href="/albums"
+          className={styles.brand}
+          onClick={() => {
+            if (onLogoClick) onLogoClick()
+          }}
+        >
           <img
             src="/logo.png"
             alt="BK Media Box Logo"

@@ -25,6 +25,14 @@
   font-size: 1.15rem;
   color: var(--text-main, #f4f4f5);
   text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.brand:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
 }
 
 .brandAccent {

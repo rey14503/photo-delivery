@@ -15,9 +15,6 @@ export function CreateAlbumForm({ onSuccess, onCancel, onSubmittingChange }: Cre
   const [name, setName] = useState('')
   const [clientName, setClientName] = useState('')
   const [driveLink, setDriveLink] = useState('')
-  const [coverMode, setCoverMode] = useState<'auto' | 'filename'>('auto')
-  const [coverPhotoName, setCoverPhotoName] = useState('')
-
   // Backed settings toggles
   const [passwordProtected, setPasswordProtected] = useState(false)
   const [albumPassword, setAlbumPassword] = useState('')
@@ -45,7 +42,6 @@ export function CreateAlbumForm({ onSuccess, onCancel, onSubmittingChange }: Cre
           name,
           clientName,
           driveLink,
-          coverPhotoName: coverMode === 'filename' ? coverPhotoName : undefined,
         }),
       })
       if (!res.ok) {
@@ -154,45 +150,6 @@ export function CreateAlbumForm({ onSuccess, onCancel, onSubmittingChange }: Cre
             disabled={submitting}
             className={styles.input}
           />
-        </div>
-
-        {/* 4. Cover Photo selection */}
-        <div className={styles.field}>
-          <label className={styles.labelRow}>Cover photo (`Ảnh bìa`)</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem', color: '#e4e4e7' }}>
-              <input
-                type="radio"
-                name="coverMode"
-                checked={coverMode === 'auto'}
-                onChange={() => setCoverMode('auto')}
-                disabled={submitting}
-              />
-              <span>✦ Auto (First photo imported from Drive folder)</span>
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem', color: '#e4e4e7' }}>
-              <input
-                type="radio"
-                name="coverMode"
-                checked={coverMode === 'filename'}
-                onChange={() => setCoverMode('filename')}
-                disabled={submitting}
-              />
-              <span>🔍 Choose by filename in Drive (e.g. IMG_1234.jpg)</span>
-            </label>
-            {coverMode === 'filename' && (
-              <input
-                type="text"
-                placeholder="Enter exact or partial filename (e.g. DSC_0042.JPG)"
-                value={coverPhotoName}
-                onChange={(e) => setCoverPhotoName(e.target.value)}
-                disabled={submitting}
-                className={styles.input}
-                style={{ marginTop: 4 }}
-                required={coverMode === 'filename'}
-              />
-            )}
-          </div>
         </div>
 
         {/* Settings Section: Backed options only (Rule 4) */}

@@ -28,6 +28,7 @@ export function AlbumGrid({ albums, userName, userEmail, avatarUrl, studioName }
         avatarUrl={avatarUrl}
         studioName={studioName}
         onCreateClick={() => setModalOpen(true)}
+        onLogoClick={() => setModalOpen(false)}
       />
       <DashboardToolbar albumCount={albums.length} photoCount={totalPhotos} />
       <main className={styles.container}>
