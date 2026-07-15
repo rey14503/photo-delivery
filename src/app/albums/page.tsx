@@ -20,6 +20,9 @@ export default async function AlbumsPage() {
         orderBy: { displayOrder: 'asc' },
         select: { id: true, thumbnailUrl: true, previewUrl: true },
       },
+      coverPhoto: {
+        select: { id: true, thumbnailUrl: true, previewUrl: true },
+      },
       _count: {
         select: { photos: true },
       },
@@ -30,7 +33,7 @@ export default async function AlbumsPage() {
   })
 
   const formattedAlbums = albums.map((alb) => {
-    const coverPhotoObj = alb.photos.find((p) => p.id === alb.coverPhotoId) || alb.photos[0]
+    const coverPhotoObj = alb.coverPhoto || alb.photos.find((p) => p.id === alb.coverPhotoId) || alb.photos[0]
     return {
       id: alb.id,
       name: alb.name,

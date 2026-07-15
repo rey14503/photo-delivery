@@ -22,6 +22,8 @@ export interface PhotoTileProps {
   commentCount: number
   showReplace: boolean
   onReplace: () => void
+  onSetCover?: () => void
+  isCover?: boolean
   onOpen: () => void
 }
 
@@ -41,6 +43,8 @@ export function PhotoTile({
   commentCount,
   showReplace,
   onReplace,
+  onSetCover,
+  isCover = false,
   onOpen,
 }: PhotoTileProps) {
   const [imgError, setImgError] = useState(false)
@@ -110,6 +114,8 @@ export function PhotoTile({
                 onViewComments={onOpen}
                 showReplace={showReplace}
                 onReplace={onReplace}
+                onSetCover={onSetCover}
+                isCover={isCover}
               />
             </div>
           </div>
@@ -123,6 +129,28 @@ export function PhotoTile({
             )}
           </div>
         </div>
+
+        {isCover && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 10,
+              left: 10,
+              background: 'rgba(255, 179, 0, 0.95)',
+              color: '#000',
+              fontWeight: 700,
+              fontSize: '0.72rem',
+              padding: '3px 8px',
+              borderRadius: 6,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+              zIndex: 3,
+              pointerEvents: 'none',
+              letterSpacing: '0.3px',
+            }}
+          >
+            ★ COVER
+          </div>
+        )}
 
         {version > 1 && (
           <div className={styles.versionBadge}>

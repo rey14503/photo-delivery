@@ -347,6 +347,32 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
     }
   }
 
+  async function handleSetCoverPhoto(photoId: string) {
+    if (!albumInfo) return
+    const prevCover = albumInfo.coverPhotoId ?? null
+    setAlbumInfo({ ...albumInfo, coverPhotoId: photoId })
+    setEditCoverPhotoId(photoId)
+
+    try {
+      const res = await fetch(`/api/albums/${albumInfo.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coverPhotoId: photoId }),
+      })
+      if (!res.ok) {
+        setAlbumInfo((prev) => (prev ? { ...prev, coverPhotoId: prevCover } : prev))
+        setEditCoverPhotoId(prevCover)
+        alert('Failed to update cover photo')
+      } else {
+        router.refresh()
+      }
+    } catch {
+      setAlbumInfo((prev) => (prev ? { ...prev, coverPhotoId: prevCover } : prev))
+      setEditCoverPhotoId(prevCover)
+      alert('Network error while setting cover photo')
+    }
+  }
+
   async function handleDeleteAlbum() {
     if (!albumInfo?.id) return
     setDeletingAlbum(true)
@@ -1183,7 +1209,12 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
             const actualIndex = photos.findIndex((p) => p.id === photo.id)
             return (
               <li key={photo.id}>
-                <PhotographerPhotoTile photo={photo} onOpen={() => setOpenIndex(actualIndex)} />
+                <PhotographerPhotoTile
+                  photo={photo}
+                  albumCoverPhotoId={albumInfo?.coverPhotoId}
+                  onOpen={() => setOpenIndex(actualIndex)}
+                  onSetCover={() => handleSetCoverPhoto(photo.id)}
+                />
               </li>
             )
           })}
@@ -1194,11 +1225,13 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
       {openIndex !== null && photos[openIndex] && (
         <PhotographerPhotoLightbox
           photo={photos[openIndex]}
+          albumCoverPhotoId={albumInfo?.coverPhotoId}
           hasPrevious={openIndex > 0}
           hasNext={openIndex < photos.length - 1}
           onPrevious={() => setOpenIndex(openIndex - 1)}
           onNext={() => setOpenIndex(openIndex + 1)}
           onClose={() => setOpenIndex(null)}
+          onSetCover={() => handleSetCoverPhoto(photos[openIndex].id)}
         />
       )}
     </div>
@@ -1207,10 +1240,14 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
 
 function PhotographerPhotoTile({
   photo,
+  albumCoverPhotoId,
   onOpen,
+  onSetCover,
 }: {
   photo: PhotographerGalleryPhoto
+  albumCoverPhotoId?: string | null
   onOpen: () => void
+  onSetCover: () => void
 }) {
   const { submitting, error: likeError, toggle } = useLikeToggle(photo.id)
   const { inputRef, error: replaceError, triggerFileSelect, handleFileChange } = useReplacePhoto(
@@ -1233,6 +1270,8 @@ function PhotographerPhotoTile({
         commentCount={photo.comments.length}
         showReplace={true}
         onReplace={triggerFileSelect}
+        onSetCover={onSetCover}
+        isCover={photo.id === albumCoverPhotoId}
         onOpen={onOpen}
       />
       <input
@@ -1251,18 +1290,22 @@ function PhotographerPhotoTile({
 
 function PhotographerPhotoLightbox({
   photo,
+  albumCoverPhotoId,
   hasPrevious,
   hasNext,
   onPrevious,
   onNext,
   onClose,
+  onSetCover,
 }: {
   photo: PhotographerGalleryPhoto
+  albumCoverPhotoId?: string | null
   hasPrevious: boolean
   hasNext: boolean
   onPrevious: () => void
   onNext: () => void
   onClose: () => void
+  onSetCover?: () => void
 }) {
   const { submitting, error: likeError, toggle } = useLikeToggle(photo.id)
   const { inputRef, error: replaceError, triggerFileSelect, handleFileChange } = useReplacePhoto(
@@ -1285,6 +1328,8 @@ function PhotographerPhotoLightbox({
         comments={photo.comments}
         showReplace={true}
         onReplace={triggerFileSelect}
+        onSetCover={onSetCover}
+        isCover={photo.id === albumCoverPhotoId}
         hasPrevious={hasPrevious}
         hasNext={hasNext}
         onPrevious={onPrevious}

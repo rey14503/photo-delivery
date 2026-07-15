@@ -22,6 +22,8 @@ export interface PhotoLightboxProps {
   comments: ThreadComment[]
   showReplace: boolean
   onReplace: () => void
+  onSetCover?: () => void
+  isCover?: boolean
   hasPrevious: boolean
   hasNext: boolean
   onPrevious: () => void
@@ -52,6 +54,8 @@ export function PhotoLightbox({
   comments,
   showReplace,
   onReplace,
+  onSetCover,
+  isCover = false,
   hasPrevious,
   hasNext,
   onPrevious,
@@ -159,6 +163,8 @@ export function PhotoLightbox({
               onViewComments={() => setCommentsOpen(true)}
               showReplace={showReplace}
               onReplace={onReplace}
+              onSetCover={onSetCover}
+              isCover={isCover}
               direction="up"
             />
           </div>
