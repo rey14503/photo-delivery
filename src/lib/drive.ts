@@ -19,6 +19,19 @@ export function getDriveClientForUser(user: DriveUser): drive_v3.Drive {
   return google.drive({ version: 'v3', auth: oauth2Client })
 }
 
+export async function getDriveAccessTokenForUser(user: DriveUser): Promise<string | null | undefined> {
+  if (!user.encryptedRefreshToken) {
+    throw new Error('User has no stored Drive refresh token')
+  }
+  const oauth2Client = new google.auth.OAuth2(
+    requireEnv('GOOGLE_CLIENT_ID'),
+    requireEnv('GOOGLE_CLIENT_SECRET')
+  )
+  oauth2Client.setCredentials({ refresh_token: decrypt(user.encryptedRefreshToken) })
+  const { token } = await oauth2Client.getAccessToken()
+  return token
+}
+
 export async function createFolder(
   drive: drive_v3.Drive,
   name: string,

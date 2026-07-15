@@ -9,8 +9,12 @@ const filesList = vi.fn()
 vi.mock('googleapis', () => ({
   google: {
     auth: {
-      OAuth2: vi.fn().mockImplementation(function (this: { setCredentials: ReturnType<typeof vi.fn> }) {
+      OAuth2: vi.fn().mockImplementation(function (this: {
+        setCredentials: ReturnType<typeof vi.fn>
+        getAccessToken: ReturnType<typeof vi.fn>
+      }) {
         this.setCredentials = vi.fn()
+        this.getAccessToken = vi.fn().mockResolvedValue({ token: 'mock-access-token' })
       }),
     },
     drive: vi.fn().mockImplementation(() => ({
@@ -45,6 +49,7 @@ import {
   isSupportedImageMimeType,
   listFolderFiles,
   driveFolderIsGone,
+  getDriveAccessTokenForUser,
 } from '@/lib/drive'
 import { google } from 'googleapis'
 
@@ -67,6 +72,19 @@ describe('getDriveClientForUser', () => {
   it('builds a Drive client from the decrypted refresh token', () => {
     getDriveClientForUser({ encryptedRefreshToken: 'cipher-text' })
     expect(google.drive).toHaveBeenCalledWith(expect.objectContaining({ version: 'v3' }))
+  })
+})
+
+describe('getDriveAccessTokenForUser', () => {
+  it('throws when the user has no refresh token', async () => {
+    await expect(getDriveAccessTokenForUser({ encryptedRefreshToken: null })).rejects.toThrow(
+      'User has no stored Drive refresh token'
+    )
+  })
+
+  it('returns the access token for a valid refresh token', async () => {
+    const token = await getDriveAccessTokenForUser({ encryptedRefreshToken: 'cipher-text' })
+    expect(token).toBe('mock-access-token')
   })
 })
 
