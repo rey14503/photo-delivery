@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { MoreActionsIcon } from './PhotoIcons'
 import styles from './PhotoActionMenu.module.css'
 
@@ -34,25 +35,38 @@ export function PhotoActionMenu({
   direction = 'down',
 }: PhotoActionMenuProps) {
   const [open, setOpen] = useState(false)
+  const [coords, setCoords] = useState<{ top: number; right: number; openUpward: boolean }>({ top: 0, right: 0, openUpward: false })
   const containerRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
     if (!open) return
 
     function handlePointerDown(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node) &&
+        (!menuRef.current || !menuRef.current.contains(e.target as Node))
+      ) {
         setOpen(false)
       }
     }
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false)
     }
+    function handleScroll() {
+      setOpen(false)
+    }
 
     document.addEventListener('mousedown', handlePointerDown)
     document.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('scroll', handleScroll, { capture: true })
+    window.addEventListener('resize', handleScroll)
     return () => {
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('scroll', handleScroll, { capture: true })
+      window.removeEventListener('resize', handleScroll)
     }
   }, [open])
 
@@ -66,13 +80,34 @@ export function PhotoActionMenu({
         className={`${styles.trigger} ${open ? styles.triggerActive : ''}`}
         onClick={(e) => {
           e.stopPropagation()
+          if (!open && containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect()
+            const spaceBelow = window.innerHeight - rect.bottom
+            const openUpward = direction === 'up' || (spaceBelow < 260 && rect.top > 260)
+            setCoords({
+              top: openUpward ? rect.top - 6 : rect.bottom + 6,
+              right: window.innerWidth - rect.right,
+              openUpward,
+            })
+          }
           setOpen((prev) => !prev)
         }}
       >
         <MoreActionsIcon size={20} />
       </button>
-      {open && (
-        <ul role="menu" className={`${styles.menu} ${direction === 'up' ? styles.menuUp : styles.menuDown}`}>
+      {open && typeof document !== 'undefined' && createPortal(
+        <ul
+          ref={menuRef}
+          role="menu"
+          className={`${styles.menu} ${coords.openUpward ? styles.menuUp : styles.menuDown}`}
+          style={{
+            position: 'fixed',
+            top: coords.openUpward ? 'auto' : `${coords.top}px`,
+            bottom: coords.openUpward ? `${window.innerHeight - coords.top + 12}px` : 'auto',
+            right: `${coords.right}px`,
+            zIndex: 999999,
+          }}
+        >
           <li role="none" className={styles.menuItemWrapper}>
             <button
               type="button"
@@ -151,7 +186,8 @@ export function PhotoActionMenu({
               </button>
             </li>
           )}
-        </ul>
+        </ul>,
+        document.body
       )}
     </div>
   )
