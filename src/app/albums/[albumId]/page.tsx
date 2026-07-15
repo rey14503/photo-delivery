@@ -48,10 +48,10 @@ export default async function AlbumDetailPage({
       id: album.id,
       driveFolderId: album.driveFolderId,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : 'Unknown error'
     console.warn('[page.tsx] Warning: Could not check Drive folder status for album:', album.id, {
-      message: error?.message,
-      code: error?.code,
+      message: errMsg,
     })
   }
   if (wasDeleted) {
@@ -108,6 +108,7 @@ export default async function AlbumDetailPage({
     hasPassword: Boolean(album.passwordHash),
     coverPhotoId: album.coverPhotoId ?? null,
     selectionLocked: album.selectionLocked,
+    selectionLimit: album.selectionLimit ?? 0,
   }
 
   return (
@@ -117,6 +118,7 @@ export default async function AlbumDetailPage({
         userEmail={session.user.email}
         avatarUrl={session.user.avatarUrl}
         studioName={session.user.studioName}
+        role={session.user.role}
       />
       <main className={styles.page}>
         {/* Photographer Gallery with Integrated Top Management Controls & Share Modal */}

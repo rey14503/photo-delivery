@@ -42,6 +42,7 @@ model Album {
   coverPhoto       Photo?   @relation("AlbumCoverPhoto", fields: [coverPhotoId], references: [id])
   selectionLocked  Boolean  @default(false)
   selectionSubmittedAt DateTime?
+  selectionLimit   Int?     @default(0)
   createdAt        DateTime @default(now())
   photos           Photo[]
 }

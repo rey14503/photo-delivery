@@ -162,7 +162,6 @@ export async function canEditFolder(drive: drive_v3.Drive, folderId: string): Pr
       supportsAllDrives: true,
     })
     const { mimeType, trashed, capabilities } = res.data
-    console.log('[canEditFolder] folderId:', folderId, 'capabilities:', capabilities)
     const hasPermission =
       capabilities?.canEdit === true ||
       capabilities?.canAddChildren === true
@@ -171,8 +170,9 @@ export async function canEditFolder(drive: drive_v3.Drive, folderId: string): Pr
       trashed !== true &&
       hasPermission
     )
-  } catch (error: any) {
-    console.error('[canEditFolder] Error checking folderId:', folderId, error?.message || error)
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
+    console.error('[canEditFolder] Error checking folderId:', folderId, errMsg)
     return false
   }
 }
@@ -265,19 +265,17 @@ export async function driveFolderIsGone(
 ): Promise<boolean> {
   try {
     const res = await drive.files.get({ fileId: folderId, fields: 'trashed', supportsAllDrives: true })
-    console.log('[driveFolderIsGone] folderId:', folderId, 'trashed:', res.data.trashed)
     return res.data.trashed === true
-  } catch (error: any) {
-    const code = (error as { code?: number | string })?.code
-    const status = error?.status ?? error?.response?.status
+  } catch (error: unknown) {
+    const gError = error as { code?: number | string; status?: number; response?: { status?: number }; message?: string }
+    const code = gError?.code
+    const status = gError?.status ?? gError?.response?.status
     const isGone = code === 404 || code === '404' || status === 404
-    if (isGone) {
-      console.log('[driveFolderIsGone] Confirmed 404 for folderId:', folderId)
-    } else {
+    if (!isGone) {
       console.error('[driveFolderIsGone] Error checking folderId:', folderId, {
         code,
         status,
-        message: error?.message,
+        message: error instanceof Error ? error.message : String(error),
       })
     }
     return isGone

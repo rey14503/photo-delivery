@@ -173,16 +173,14 @@ export function PhotoActionMenu({
               <button
                 type="button"
                 role="menuitem"
-                disabled={isCover}
                 className={styles.itemBtn}
-                style={isCover ? { color: '#ffb300', fontWeight: 600 } : undefined}
                 onClick={(e) => {
                   e.stopPropagation()
                   onSetCover()
                   setOpen(false)
                 }}
               >
-                {isCover ? '★ Cover Photo' : 'Set as Album Cover'}
+                Set as Album Cover
               </button>
             </li>
           )}

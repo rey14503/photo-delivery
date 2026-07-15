@@ -20,11 +20,12 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { name, clientName, driveLink, coverPhotoName } = body as {
+  const { name, clientName, driveLink, coverPhotoName, selectionLimit } = body as {
     name?: string
     clientName?: string
     driveLink?: string
     coverPhotoName?: string
+    selectionLimit?: number | null
   }
   if (!name || !clientName || !driveLink) {
     return NextResponse.json(
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
         driveFolderId: folderId,
         selectedFolderId,
         shareToken,
+        selectionLimit: selectionLimit && selectionLimit > 0 ? Number(selectionLimit) : 0,
       },
     })
 
@@ -101,7 +103,7 @@ export async function POST(request: NextRequest) {
         let chosenPhotoId = createdPhotos[0].id
         if (coverPhotoName && coverPhotoName.trim()) {
           const matched = createdPhotos.find((p) =>
-            p.originalName.toLowerCase().includes(coverPhotoName.trim().toLowerCase())
+            p.originalName?.toLowerCase().includes(coverPhotoName.trim().toLowerCase())
           )
           if (matched) {
             chosenPhotoId = matched.id

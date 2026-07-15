@@ -13,9 +13,10 @@ export interface AlbumGridProps {
   userEmail?: string | null
   avatarUrl?: string | null
   studioName?: string | null
+  role?: 'ADMIN' | 'PHOTOGRAPHER'
 }
 
-export function AlbumGrid({ albums, userName, userEmail, avatarUrl, studioName }: AlbumGridProps) {
+export function AlbumGrid({ albums, userName, userEmail, avatarUrl, studioName, role }: AlbumGridProps) {
   const [modalOpen, setModalOpen] = useState(false)
 
   const totalPhotos = albums.reduce((acc, alb) => acc + alb.photoCount, 0)
@@ -27,6 +28,7 @@ export function AlbumGrid({ albums, userName, userEmail, avatarUrl, studioName }
         userEmail={userEmail}
         avatarUrl={avatarUrl}
         studioName={studioName}
+        role={role}
         onCreateClick={() => setModalOpen(true)}
         onLogoClick={() => setModalOpen(false)}
       />

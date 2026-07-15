@@ -100,19 +100,13 @@ export function AlbumCard({ album }: AlbumCardProps) {
         body: JSON.stringify(payload),
       })
       if (res.ok) {
-        const updated = await res.json()
-        album.name = updated.name ?? editName
-        album.clientName = updated.clientName ?? editClientName
-        if (updated.coverPhotoId !== undefined) {
-          album.coverPhotoId = updated.coverPhotoId
-        }
         setIsEditing(false)
         router.refresh()
       } else {
-        alert('Update failed.')
+        console.error('Failed to update album')
       }
     } catch {
-      alert('Network error while saving.')
+      console.error('Network error while saving album')
     } finally {
       setSaving(false)
     }
@@ -127,12 +121,11 @@ export function AlbumCard({ album }: AlbumCardProps) {
       if (res.ok) {
         router.refresh()
       } else {
-        const data = await res.json()
-        alert(`Failed to delete album: ${data.error || res.statusText}`)
+        console.error('Failed to delete album')
         setDeleting(false)
       }
     } catch {
-      alert('Network error while deleting album.')
+      console.error('Network error while deleting album')
       setDeleting(false)
     }
   }
@@ -223,22 +216,7 @@ export function AlbumCard({ album }: AlbumCardProps) {
             </span>
             Edit
           </button>
-          <Link
-            href={`/albums/${album.id}`}
-            style={{
-              position: 'absolute',
-              width: 1,
-              height: 1,
-              padding: 0,
-              margin: -1,
-              overflow: 'hidden',
-              clip: 'rect(0, 0, 0, 0)',
-              border: 0,
-            }}
-            aria-label="xem album"
-          >
-            Xem album
-          </Link>
+
         </div>
       </div>
 
@@ -258,7 +236,6 @@ export function AlbumCard({ album }: AlbumCardProps) {
             </span>
             <span>
               {album.clientName}
-              <span style={{ display: 'none' }}>Khách hàng: {album.clientName}</span>
             </span>
           </li>
           <li className={styles.metaRow}>
@@ -273,14 +250,9 @@ export function AlbumCard({ album }: AlbumCardProps) {
             </span>
             <span>
               {album.photoCount} {album.photoCount === 1 ? 'photo' : 'photos'}
-              <span style={{ display: 'none' }}>{album.photoCount} ảnh</span>
             </span>
           </li>
         </ul>
-
-        <div style={{ display: 'none' }}>
-          {album.hasPassword ? '🔒 Có mật khẩu' : '🔓 Mở'}
-        </div>
 
         <div className={styles.footer}>
           <span className={styles.dateText}>

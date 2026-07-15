@@ -174,9 +174,9 @@
   padding: 0;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(36, 36, 42, 0.9) !important;
-  color: #f4f4f5 !important;
-  font-size: 1.1rem;
+  background: var(--bg-surface, rgba(36, 36, 42, 0.9)) !important;
+  color: var(--text-main, #ffffff) !important;
+  border-color: var(--border-medium, rgba(255, 255, 255, 0.4)) !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;

@@ -11,7 +11,13 @@ const driveCdnCache = new Map<string, { thumbUrl: string; prevUrl: string; expir
 // In-flight request deduplication map
 const inFlightRequests = new Map<string, Promise<{ thumbUrl: string; prevUrl: string } | null>>()
 
-async function serveOrRedirectCdn(photo: any, type: string, targetCdnUrl: string) {
+interface ProxyPhoto {
+  id: string
+  driveFileId: string
+  thumbnailUrl: string
+}
+
+async function serveOrRedirectCdn(photo: ProxyPhoto, type: string, targetCdnUrl: string) {
   try {
     const imgRes = await fetch(targetCdnUrl, {
       headers: {

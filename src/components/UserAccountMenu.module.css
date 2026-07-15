@@ -173,10 +173,13 @@
   text-overflow: ellipsis;
 }
 
-.studioBadge {
-  display: inline-block;
-  align-self: flex-start;
+.badgesWrapper {
+  display: flex;
+  gap: 6px;
   margin-top: 4px;
+}
+
+.roleBadge {
   background: rgba(16, 185, 129, 0.15);
   color: #34d399;
   border: 1px solid rgba(16, 185, 129, 0.3);
@@ -184,6 +187,20 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.nicknameBadge {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menuList {
@@ -247,4 +264,58 @@
 
 .signOutBtn:hover {
   background: var(--danger-subtle, rgba(255, 92, 92, 0.1));
+}
+
+.themeToggleRow {
+  padding: 4px 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--border-color, #2e2e33);
+  margin-top: 4px;
+}
+
+.themeToggleLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-main, #e4e4e7);
+}
+
+.themeToggleGroup {
+  display: flex;
+  flex: 1;
+  background: var(--bg-subtle, rgba(0, 0, 0, 0.05));
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.themeToggleBtn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-main, #e4e4e7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.themeToggleBtn:hover {
+  background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.08));
+}
+
+.themeToggleBtnActive {
+  background: var(--accent, #ff5722);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(255, 87, 34, 0.3);
+}
+
+.themeToggleBtnActive:hover {
+  background: var(--accent-hover, #e64a19);
 }

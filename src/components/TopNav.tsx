@@ -10,11 +10,12 @@ export interface TopNavProps {
   userEmail?: string | null
   avatarUrl?: string | null
   studioName?: string | null
+  role?: 'ADMIN' | 'PHOTOGRAPHER'
   onCreateClick?: () => void
   onLogoClick?: () => void
 }
 
-export function TopNav({ userName, userEmail, avatarUrl, studioName, onCreateClick, onLogoClick }: TopNavProps) {
+export function TopNav({ userName, userEmail, avatarUrl, studioName, role, onCreateClick, onLogoClick }: TopNavProps) {
   return (
     <header className={styles.nav}>
       <div className={styles.left}>
@@ -55,6 +56,7 @@ export function TopNav({ userName, userEmail, avatarUrl, studioName, onCreateCli
           userEmail={userEmail}
           avatarUrl={avatarUrl}
           studioName={studioName}
+          role={role}
         />
       </div>
     </header>

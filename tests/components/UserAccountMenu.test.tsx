@@ -31,6 +31,7 @@ describe('UserAccountMenu Component', () => {
     expect(toggleBtn).toBeInTheDocument()
 
     fireEvent.click(toggleBtn)
+    expect(screen.getByText('Photographer')).toBeInTheDocument()
     expect(screen.getByText('PRO Studio')).toBeInTheDocument()
     expect(screen.getByText('Edit Profile / Studio')).toBeInTheDocument()
   })
@@ -43,6 +44,6 @@ describe('UserAccountMenu Component', () => {
 
     expect(screen.getByText('Edit Profile')).toBeInTheDocument()
     expect(screen.getByLabelText(/full name/i)).toHaveValue('Khoa Nguyễn')
-    expect(screen.getByLabelText(/studio name \/ role/i)).toHaveValue('PRO Studio')
+    expect(screen.getByLabelText(/^Nickname$/i)).toHaveValue('PRO Studio')
   })
 })

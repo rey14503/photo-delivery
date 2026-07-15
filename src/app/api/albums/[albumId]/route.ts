@@ -26,9 +26,10 @@ export async function DELETE(
     await prisma.album.delete({ where: { id: albumId } })
 
     return new NextResponse(null, { status: 204 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[DELETE /api/albums/[albumId]] Error:', error)
-    return NextResponse.json({ error: error?.message || 'Failed to delete album' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to delete album'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -87,8 +88,9 @@ export async function PATCH(
     const updated = await prisma.album.update({ where: { id: albumId }, data })
 
     return NextResponse.json(updated)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PATCH /api/albums/[albumId]] Error:', error)
-    return NextResponse.json({ error: error?.message || 'Failed to update album info' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to update album info'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -2,15 +2,17 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { signOut } from 'next-auth/react'
+import { useTheme } from 'next-themes'
 import styles from './UserAccountMenu.module.css'
 import { EditProfileModal } from './EditProfileModal'
-import { GearOutlineIcon, SignOutOutlineIcon } from './PhotoIcons'
+import { GearOutlineIcon, SignOutOutlineIcon, SunIcon, MoonIcon, MonitorIcon } from './PhotoIcons'
 
 export interface UserAccountMenuProps {
   userName?: string | null
   userEmail?: string | null
   avatarUrl?: string | null
   studioName?: string | null
+  role?: 'ADMIN' | 'PHOTOGRAPHER'
 }
 
 export function UserAccountMenu({
@@ -18,15 +20,20 @@ export function UserAccountMenu({
   userEmail,
   avatarUrl: initialAvatarUrl,
   studioName: initialStudioName,
+  role: initialRole,
 }: UserAccountMenuProps) {
   const [open, setOpen] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [name, setName] = useState(initialUserName || '')
   const [studioName, setStudioName] = useState(initialStudioName || '')
+  const [role, setRole] = useState<'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl || null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     setName(initialUserName || '')
   }, [initialUserName])
 
@@ -37,6 +44,10 @@ export function UserAccountMenu({
   useEffect(() => {
     setAvatarUrl(initialAvatarUrl || null)
   }, [initialAvatarUrl])
+
+  useEffect(() => {
+    if (initialRole) setRole(initialRole)
+  }, [initialRole])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -57,9 +68,10 @@ export function UserAccountMenu({
     ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : 'BK'
 
-  const handleProfileUpdated = (updated: { name: string; studioName: string; avatarUrl: string | null }) => {
+  const handleProfileUpdated = (updated: { name: string; studioName: string; avatarUrl: string | null; role: 'ADMIN' | 'PHOTOGRAPHER' }) => {
     setName(updated.name)
     setStudioName(updated.studioName)
+    setRole(updated.role)
     setAvatarUrl(updated.avatarUrl)
   }
 
@@ -118,7 +130,16 @@ export function UserAccountMenu({
             <div className={styles.userInfo}>
               <span className={styles.userName}>{name || 'Photographer'}</span>
               <span className={styles.userEmail}>{userEmail || ''}</span>
-              <span className={styles.studioBadge}>{studioName || 'PRO Studio'}</span>
+              <div className={styles.badgesWrapper}>
+                <span className={styles.roleBadge}>
+                  {role === 'ADMIN' ? 'Owner' : 'Photographer'}
+                </span>
+                {studioName && (
+                  <span className={styles.nicknameBadge}>
+                    {studioName}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -134,6 +155,37 @@ export function UserAccountMenu({
               <GearOutlineIcon size={18} className={styles.menuIconSvg} />
               <span>Edit Profile / Studio</span>
             </button>
+            {mounted && (
+              <div className={styles.themeToggleRow}>
+                <span className={styles.themeToggleLabel}>Theme</span>
+                <div className={styles.themeToggleGroup}>
+                  <button
+                    type="button"
+                    className={`${styles.themeToggleBtn} ${theme === 'system' ? styles.themeToggleBtnActive : ''}`}
+                    onClick={() => setTheme('system')}
+                    title="System"
+                  >
+                    <MonitorIcon size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.themeToggleBtn} ${theme === 'light' ? styles.themeToggleBtnActive : ''}`}
+                    onClick={() => setTheme('light')}
+                    title="Light"
+                  >
+                    <SunIcon size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.themeToggleBtn} ${theme === 'dark' ? styles.themeToggleBtnActive : ''}`}
+                    onClick={() => setTheme('dark')}
+                    title="Dark"
+                  >
+                    <MoonIcon size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className={styles.footerBox}>
@@ -154,6 +206,7 @@ export function UserAccountMenu({
           initialName={name}
           initialStudioName={studioName}
           initialAvatarUrl={avatarUrl}
+          initialRole={role}
           onClose={() => setShowEditModal(false)}
           onSaveSuccess={handleProfileUpdated}
         />

@@ -33,7 +33,7 @@ describe('CreateAlbumForm', () => {
       '/api/albums',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ name: 'Wedding', clientName: 'Jane', driveLink: 'https://drive.google.com/drive/folders/123ABC' }),
+        body: JSON.stringify({ name: 'Wedding', clientName: 'Jane', driveLink: 'https://drive.google.com/drive/folders/123ABC', selectionLimit: 0 }),
       })
     )
   })

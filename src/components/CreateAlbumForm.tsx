@@ -19,6 +19,8 @@ export function CreateAlbumForm({ onSuccess, onCancel, onSubmittingChange }: Cre
   const [passwordProtected, setPasswordProtected] = useState(false)
   const [albumPassword, setAlbumPassword] = useState('')
   const [downloadEnabled, setDownloadEnabled] = useState(true)
+  const [limitEnabled, setLimitEnabled] = useState(false)
+  const [limitCount, setLimitCount] = useState('30')
 
   const [error, setError] = useState<string | null>(null)
   const [importSummary, setImportSummary] = useState<{ imported: number; skipped: number } | null>(null)
@@ -42,6 +44,7 @@ export function CreateAlbumForm({ onSuccess, onCancel, onSubmittingChange }: Cre
           name,
           clientName,
           driveLink,
+          selectionLimit: limitEnabled && Number(limitCount) > 0 ? Number(limitCount) : 0,
         }),
       })
       if (!res.ok) {
@@ -216,6 +219,46 @@ export function CreateAlbumForm({ onSuccess, onCancel, onSubmittingChange }: Cre
                 }`}
               />
             </button>
+          </div>
+
+          {/* 3. Selection Limit Toggle */}
+          <div>
+            <div className={styles.settingRow}>
+              <span className={styles.settingLabel}>Limit client photo selection</span>
+              <button
+                type="button"
+                aria-pressed={limitEnabled}
+                disabled={submitting}
+                onClick={() => setLimitEnabled(!limitEnabled)}
+                className={`${styles.toggleBtn} ${
+                  limitEnabled ? styles.toggleOnOrange : styles.toggleOff
+                }`}
+                style={{
+                  backgroundColor: limitEnabled ? '#ff5722' : '#71717a',
+                  borderColor: limitEnabled ? '#e64a19' : '#52525b',
+                  cursor: submitting ? 'not-allowed' : 'pointer',
+                }}
+              >
+                <span
+                  className={`${styles.toggleThumb} ${
+                    limitEnabled ? styles.toggleThumbOn : ''
+                  }`}
+                />
+              </button>
+            </div>
+            {limitEnabled && (
+              <div className={styles.subInputContainer}>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Enter max number of photos (e.g. 30)"
+                  value={limitCount}
+                  onChange={(e) => setLimitCount(e.target.value)}
+                  disabled={submitting}
+                  className={styles.input}
+                />
+              </div>
+            )}
           </div>
         </div>
       </fieldset>

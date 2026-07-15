@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import { LockOutlineIcon } from './PhotoIcons'
+import { KeyOutlineIcon } from './PhotoIcons'
 import styles from './AlbumControls.module.css'
 
 async function submitPassword(albumId: string, password: string | null) {
@@ -13,13 +13,14 @@ async function submitPassword(albumId: string, password: string | null) {
   })
 }
 
-export function SetAlbumPassword({
-  albumId,
-  hasPassword,
-}: {
+export interface SetAlbumPasswordProps {
   albumId: string
-  hasPassword: boolean
-}) {
+  currentHasPassword?: boolean
+  hasPassword?: boolean
+}
+
+export function SetAlbumPassword({ albumId, currentHasPassword, hasPassword }: SetAlbumPasswordProps) {
+  const activeHasPass = currentHasPassword ?? hasPassword ?? false
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -27,38 +28,46 @@ export function SetAlbumPassword({
 
   async function handleSetSubmit(e: FormEvent) {
     e.preventDefault()
+    if (!password.trim()) return
     setSubmitting(true)
     setError(null)
-    try {
-      const res = await submitPassword(albumId, password.trim() || null)
-      if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string }
-        setError(data.error ?? 'Save failed')
-      } else {
-        router.refresh()
-      }
-    } finally {
-      setSubmitting(false)
+    const res = await submitPassword(albumId, password.trim())
+    setSubmitting(false)
+    if (res.ok) {
+      setPassword('')
+      router.refresh()
+    } else {
+      const data = await res.json()
+      setError(data.error ?? 'Could not set password')
     }
   }
 
   async function handleRemove() {
     setSubmitting(true)
     setError(null)
-    try {
-      const res = await submitPassword(albumId, null)
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error ?? 'Something went wrong')
-        return
-      }
-      setPassword('')
+    const res = await submitPassword(albumId, null)
+    setSubmitting(false)
+    if (res.ok) {
       router.refresh()
-    } catch {
-      setError('Network error — please try again.')
-    } finally {
-      setSubmitting(false)
+    } else {
+      setError('Could not remove password')
     }
+  }
+
+  if (activeHasPass) {
+    return (
+      <div className={styles.card}>
+        <div className={styles.cardRow}>
+          <span>
+            <strong>Password protected</strong> — clients must enter the password to view this album.
+          </span>
+          <button type="button" onClick={handleRemove} disabled={submitting} className={styles.btnDanger}>
+            {submitting ? 'Removing…' : 'Remove password'}
+          </button>
+        </div>
+        {error && <p className={styles.error}>{error}</p>}
+      </div>
+    )
   }
 
   return (
@@ -67,7 +76,7 @@ export function SetAlbumPassword({
         <div>
           <label className={styles.label}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <LockOutlineIcon size={16} /> Album password
+              <KeyOutlineIcon size={16} /> Album password
             </span>
             <input
               aria-label="Album password"
@@ -80,16 +89,16 @@ export function SetAlbumPassword({
             />
           </label>
           <div className={styles.subText}>
-            {hasPassword
+            {activeHasPass
               ? 'Password protection is currently ACTIVE for client access.'
               : 'Set a password to restrict unauthorized client gallery view.'}
           </div>
         </div>
         <div className={styles.inputGroup}>
           <button type="submit" disabled={submitting} className={styles.btnPrimary}>
-            {hasPassword ? 'Change password' : 'Set password'}
+            {activeHasPass ? 'Change password' : 'Set password'}
           </button>
-          {hasPassword && (
+          {activeHasPass && (
             <button type="button" onClick={handleRemove} disabled={submitting} className={styles.btnSecondary}>
               Remove password
             </button>

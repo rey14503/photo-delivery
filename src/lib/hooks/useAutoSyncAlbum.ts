@@ -31,6 +31,10 @@ export function useAutoSyncAlbum({
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
   const isSyncingRef = useRef(false)
+  const onSyncSuccessRef = useRef(onSyncSuccess)
+  useEffect(() => {
+    onSyncSuccessRef.current = onSyncSuccess
+  }, [onSyncSuccess])
 
   const syncNow = useCallback(async (options?: SyncNowOptions) => {
     if (!albumId || isSyncingRef.current) return
@@ -49,8 +53,8 @@ export function useAutoSyncAlbum({
 
       if (res.ok && data.synced) {
         setLastSyncedAt(new Date())
-        if (onSyncSuccess) {
-          onSyncSuccess(data)
+        if (onSyncSuccessRef.current) {
+          onSyncSuccessRef.current(data)
         }
       } else {
         const msg = data.error || 'Sync failed'
@@ -63,7 +67,7 @@ export function useAutoSyncAlbum({
       setSyncing(false)
       isSyncingRef.current = false
     }
-  }, [albumId, onSyncSuccess])
+  }, [albumId])
 
   // Initial sync on mount & visibility change (silent without spinning UI)
   useEffect(() => {

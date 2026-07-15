@@ -10,11 +10,11 @@
   overflow: visible;
   background-color: var(--card-bg);
   color: var(--text-main);
-  padding: 24px 32px;
+  padding: 16px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-subtle);
 }
@@ -33,27 +33,51 @@
 }
 
 .backToMenuBtn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius-md, 10px);
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: var(--bg-surface, rgba(36, 36, 42, 0.9));
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.22));
   color: var(--text-main, #f3f4f6);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.18s ease;
-  width: fit-content;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   margin-bottom: 4px;
 }
 
 .backToMenuBtn:hover {
-  background-color: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.28);
-  transform: translateX(-3px);
+  background-color: var(--accent, #e5532d);
+  border-color: var(--accent, #e5532d);
+  transform: translateX(-3px) scale(1.05);
   color: #ffffff;
+  box-shadow: 0 4px 14px rgba(229, 83, 45, 0.45);
+}
+
+.shareCircleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-surface, rgba(36, 36, 42, 0.9));
+  color: var(--text-main, #ffffff);
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.22));
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.shareCircleBtn:hover {
+  background: var(--accent, #e5532d);
+  border-color: var(--accent, #e5532d);
+  color: #ffffff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(229, 83, 45, 0.45);
 }
 
 .modeBadgeRow {
@@ -88,41 +112,40 @@
   align-items: center;
   justify-content: center;
   height: 26px;
-  gap: 5px;
+  width: 26px;
   background-color: rgba(34, 197, 94, 0.15);
   color: #22c55e;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0 10px;
   border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: var(--font-mono, monospace);
   border: 1px solid rgba(34, 197, 94, 0.3);
-  white-space: nowrap;
   box-sizing: border-box;
-  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
+
+.submittedBadge:hover {
+  background-color: rgba(34, 197, 94, 0.25);
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
 
 .proofingBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 26px;
-  gap: 5px;
+  width: 26px;
   background-color: rgba(234, 179, 8, 0.15);
   color: #eab308;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0 10px;
   border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: var(--font-mono, monospace);
   border: 1px solid rgba(234, 179, 8, 0.3);
-  white-space: nowrap;
   box-sizing: border-box;
-  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.proofingBadge:hover {
+  background-color: rgba(234, 179, 8, 0.25);
+  border-color: rgba(234, 179, 8, 0.5);
 }
 
 .idText {
@@ -279,11 +302,18 @@
 .bannerMeta {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
   font-size: 0.85rem;
   color: var(--text-muted);
-  padding-top: 8px;
+  padding-top: 4px;
   align-items: center;
+}
+
+.metaDivider {
+  width: 1px;
+  height: 14px;
+  background-color: var(--border-medium);
+  margin: 0 4px;
 }
 
 .bannerRight {
@@ -455,7 +485,58 @@
   justify-content: center;
 }
 
-.shareModalQrHint {
+/* Custom CSS Tooltip */
+.container [data-tooltip] {
+  position: relative;
+}
+
+.container [data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--bg-surface, #1e1e24);
+  color: var(--text-main, #ffffff);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  border: 1px solid var(--border-color, #333);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  opacity: 0;
+  animation: fadeTooltip 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.1s;
+}
+
+.container [data-tooltip]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0 6px;
+  border-style: solid;
+  border-color: var(--border-color, #333) transparent transparent transparent;
+  pointer-events: none;
+  z-index: 101;
+  opacity: 0;
+  animation: fadeTooltipArrow 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.1s;
+}
+
+@keyframes fadeTooltip {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes fadeTooltipArrow {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}.shareModalQrHint {
   font-size: 0.8rem;
   color: var(--text-muted, #9ca3af);
   font-weight: 500;
@@ -531,6 +612,13 @@
   width: 100%;
 }
 
+.topActionBarDivider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-medium, rgba(255, 255, 255, 0.15));
+  margin: 0 4px;
+}
+
 .spinIcon {
   animation: spin 1s linear infinite;
 }
@@ -573,79 +661,90 @@
   transform: translateY(-1px);
 }
 
+.topActionIconBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  padding: 0 !important;
+  border-radius: var(--radius-md, 10px) !important;
+  background-color: var(--bg-surface, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.14));
+  color: var(--text-main, #f3f4f6);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+}
+
+.topActionIconBtn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
 .topActionBtnSecured {
   background-color: rgba(16, 185, 129, 0.12);
   border-color: rgba(16, 185, 129, 0.35);
   color: var(--success, #10b981);
 }
 
-.unlockBtn {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  height: 38px !important;
-  min-height: 38px !important;
-  max-height: 38px !important;
-  padding: 0 14px !important;
-  border-radius: var(--radius-md, 10px) !important;
+.shareActionIconBtn {
+  background: linear-gradient(135deg, var(--accent, #ff5722), #e64a19) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3) !important;
+}
+
+.shareActionIconBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff6e40, #f4511e) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(255, 87, 34, 0.4) !important;
+}
+
+.unlockActionIconBtn {
   background-color: rgba(239, 68, 68, 0.12) !important;
   border: 1px solid rgba(239, 68, 68, 0.35) !important;
   color: #ef4444 !important;
-  font-size: 0.84rem !important;
-  font-weight: 600 !important;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  user-select: none;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
-  line-height: 1 !important;
 }
 
-.unlockBtn:hover:not(:disabled) {
+.unlockActionIconBtn:hover:not(:disabled) {
   background-color: rgba(239, 68, 68, 0.2) !important;
   border-color: rgba(239, 68, 68, 0.5) !important;
-  transform: translateY(-1px);
+  transform: translateY(-1px) !important;
 }
 
-.unlockBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.lockBtn {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  height: 38px !important;
-  min-height: 38px !important;
-  max-height: 38px !important;
-  padding: 0 14px !important;
-  border-radius: var(--radius-md, 10px) !important;
+.lockActionIconBtn {
   background-color: #ef4444 !important;
   border: 1px solid #dc2626 !important;
   color: #ffffff !important;
-  font-size: 0.84rem !important;
-  font-weight: 600 !important;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  user-select: none;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
-  line-height: 1 !important;
 }
 
-.lockBtn:hover:not(:disabled) {
-  background-color: #dc2626;
-  border-color: #b91c1c;
-  transform: translateY(-1px);
+.lockActionIconBtn:hover:not(:disabled) {
+  background-color: #dc2626 !important;
+  transform: translateY(-1px) !important;
 }
 
-.lockBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.topToggleIconBtnActive {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
 }
+
+.topToggleIconBtnSecured {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: var(--success, #10b981) !important;
+}
+
+
+
 
 .lightroomActionsGroup {
   display: flex;

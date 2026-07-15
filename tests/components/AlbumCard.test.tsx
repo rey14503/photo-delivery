@@ -17,20 +17,19 @@ describe('AlbumCard', () => {
     createdAt: new Date('2026-07-01T10:00:00Z'),
   }
 
-  it('renders album name, client, photo count, lock status, and formatted date', () => {
+  it('renders album name, client, photo count, and formatted date', () => {
     render(<AlbumCard album={sampleAlbum} />)
 
     expect(screen.getByText('Tiệc Cưới Jane & John')).toBeInTheDocument()
-    expect(screen.getByText('Khách hàng: Jane Doe')).toBeInTheDocument()
-    expect(screen.getByText('45 ảnh')).toBeInTheDocument()
-    expect(screen.getByText('🔒 Có mật khẩu')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /xem album/i })).toHaveAttribute('href', '/albums/alb_1')
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument()
+    expect(screen.getByText('45 photos')).toBeInTheDocument()
+    expect(screen.getByText('July 01, 2026')).toBeInTheDocument()
   })
 
-  it('renders unlocked badge when hasPassword is false', () => {
-    render(<AlbumCard album={{ ...sampleAlbum, hasPassword: false }} />)
+  it('renders singular photo text when count is 1', () => {
+    render(<AlbumCard album={{ ...sampleAlbum, photoCount: 1 }} />)
 
-    expect(screen.getByText('🔓 Mở')).toBeInTheDocument()
+    expect(screen.getByText('1 photo')).toBeInTheDocument()
   })
 
   it('copies share link to clipboard when Copy link button is clicked', async () => {

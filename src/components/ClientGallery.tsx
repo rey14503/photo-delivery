@@ -49,6 +49,7 @@ export interface ClientGalleryProps {
   canDownload?: boolean
   albumInfo?: ClientGalleryAlbumInfo
   selectionLocked?: boolean
+  selectionLimit?: number
 }
 
 export function ClientGallery(props: ClientGalleryProps) {
@@ -91,6 +92,18 @@ export function ClientGallery(props: ClientGalleryProps) {
   }
 
   const selectedCount = photos.filter((p) => p.likedByMe).length
+  const selectionLimit = props.selectionLimit ?? 0
+  const [limitWarning, setLimitWarning] = useState<string | null>(null)
+
+  function handleSelectAttempt(isAlreadyLiked: boolean, doToggle: () => void) {
+    if (isSelectionLocked) return
+    if (!isAlreadyLiked && selectionLimit > 0 && selectedCount >= selectionLimit) {
+      setLimitWarning(`You have reached the maximum selection limit of ${selectionLimit} photos for this album. Please unselect another photo before choosing this one.`)
+      return
+    }
+    setLimitWarning(null)
+    doToggle()
+  }
 
   async function handleConfirmSubmit() {
     if (!albumId) return
@@ -112,6 +125,12 @@ export function ClientGallery(props: ClientGalleryProps) {
 
   return (
     <div className={styles.container}>
+      {limitWarning && (
+        <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', color: '#fca5a5', padding: '12px 16px', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem' }} role="alert">
+          <span>⚠️ {limitWarning}</span>
+          <button type="button" onClick={() => setLimitWarning(null)} style={{ color: '#fca5a5', fontWeight: 700, fontSize: '1.2rem', padding: '0 8px', background: 'transparent', border: 'none', cursor: 'pointer' }}>×</button>
+        </div>
+      )}
       {/* Client Shared Album Banner */}
       <div className={styles.banner} style={{ overflow: 'visible' }}>
         <div className={styles.bannerLeft}>
@@ -209,7 +228,7 @@ export function ClientGallery(props: ClientGalleryProps) {
             onClick={() => setFilter('liked')}
             className={`${styles.filterBtn} ${filter === 'liked' ? styles.filterBtnActive : ''}`}
           >
-            My Selections ({selectedCount})
+            My Selections ({selectionLimit > 0 ? `${selectedCount} / ${selectionLimit}` : selectedCount})
           </button>
           <button
             type="button"
@@ -260,6 +279,7 @@ export function ClientGallery(props: ClientGalleryProps) {
                   onOpen={() => setOpenIndex(actualIndex)}
                   toggling={isSelectionLocked}
                   selectionLocked={isSelectionLocked}
+                  onSelectAttempt={handleSelectAttempt}
                 />
               </li>
             )
@@ -279,6 +299,7 @@ export function ClientGallery(props: ClientGalleryProps) {
           onClose={() => setOpenIndex(null)}
           toggling={isSelectionLocked}
           selectionLocked={isSelectionLocked}
+          onSelectAttempt={handleSelectAttempt}
         />
       )}
 
@@ -292,7 +313,7 @@ export function ClientGallery(props: ClientGalleryProps) {
             </div>
           ) : (
             <div className={styles.floatingBarActive}>
-              <span className={styles.floatingBarText}>Selected: {selectedCount} photo(s)</span>
+              <span className={styles.floatingBarText}>Selected: {selectionLimit > 0 ? `${selectedCount} / ${selectionLimit}` : selectedCount} photo(s)</span>
               <button
                 type="button"
                 onClick={() => setShowSubmitConfirm(true)}
@@ -344,6 +365,7 @@ function ClientPhotoTile({
   onOpen,
   toggling,
   selectionLocked,
+  onSelectAttempt,
 }: {
   photo: GalleryPhoto
   canDownload: boolean
@@ -351,6 +373,7 @@ function ClientPhotoTile({
   onOpen: () => void
   toggling?: boolean
   selectionLocked?: boolean
+  onSelectAttempt?: (isAlreadyLiked: boolean, doToggle: () => void) => void
 }) {
   const { submitting, error, toggle } = useLikeToggle(photo.id)
   const isToggling = Boolean(submitting || toggling)
@@ -371,7 +394,13 @@ function ClientPhotoTile({
         liked={Boolean(photo.likedByMe)}
         likeIcon="heart"
         likeLabel={likeLabel}
-        onToggleLike={selectionLocked ? () => {} : toggle}
+        onToggleLike={selectionLocked ? () => {} : () => {
+          if (onSelectAttempt) {
+            onSelectAttempt(Boolean(photo.likedByMe), toggle)
+          } else {
+            toggle()
+          }
+        }}
         toggling={isToggling}
         showDownload={canDownload}
         downloadHref={`/api/photos/${photo.id}/download`}
@@ -395,6 +424,7 @@ function ClientPhotoLightbox({
   onClose,
   toggling,
   selectionLocked,
+  onSelectAttempt,
 }: {
   photo: GalleryPhoto
   canDownload: boolean
@@ -405,6 +435,7 @@ function ClientPhotoLightbox({
   onClose: () => void
   toggling?: boolean
   selectionLocked?: boolean
+  onSelectAttempt?: (isAlreadyLiked: boolean, doToggle: () => void) => void
 }) {
   const [showInfo, setShowInfo] = useState(false)
   const { submitting, error, toggle } = useLikeToggle(photo.id)
@@ -425,7 +456,13 @@ function ClientPhotoLightbox({
         liked={Boolean(photo.likedByMe)}
         likeIcon="heart"
         likeLabel={likeLabel}
-        onToggleLike={selectionLocked ? () => {} : toggle}
+        onToggleLike={selectionLocked ? () => {} : () => {
+          if (onSelectAttempt) {
+            onSelectAttempt(Boolean(photo.likedByMe), toggle)
+          } else {
+            toggle()
+          }
+        }}
         toggling={isToggling}
         showDownload={canDownload}
         downloadHref={`/api/photos/${photo.id}/download`}
@@ -441,9 +478,6 @@ function ClientPhotoLightbox({
         onToggleInfo={() => setShowInfo(!showInfo)}
         photoInfoDetails={{
           filename: photo.name || photo.id,
-          resolution: '3840 x 2160',
-          fileSize: '4.2 MB',
-          uploadedDate: '2026-07-10',
         }}
       />
       {error && <p role="alert">{error}</p>}

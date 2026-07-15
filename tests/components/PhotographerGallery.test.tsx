@@ -74,8 +74,8 @@ describe('PhotographerGallery', () => {
     const dialog = screen.getByRole('dialog')
     fireEvent.click(within(dialog).getByRole('button', { name: /more actions/i }))
 
-    expect(within(dialog).getByRole('menuitem', { name: /replace \/ update version/i })).toBeTruthy()
-    expect(within(dialog).getByRole('menuitem', { name: /download/i })).toBeTruthy()
+    expect(screen.getByRole('menuitem', { name: /replace \/ update version/i })).toBeTruthy()
+    expect(screen.getByRole('menuitem', { name: /download/i })).toBeTruthy()
   })
 
   it('triggers the hidden file input when Replace / update version is chosen', () => {
@@ -220,8 +220,8 @@ describe('PhotographerGallery', () => {
       />
     )
 
-    expect(screen.getByText(/CLIENT SUBMITTED/i)).toBeInTheDocument()
-    const unlockBtn = screen.getByRole('button', { name: /unlock client selection/i })
+    expect(screen.getByLabelText('Unlock album')).toBeInTheDocument()
+    const unlockBtn = screen.getByLabelText('Unlock album')
     await act(async () => {
       fireEvent.click(unlockBtn)
     })

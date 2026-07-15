@@ -33,6 +33,11 @@ import {
   TxtFileIcon,
   ZipBoxIcon,
   SyncOutlineIcon,
+  HeartIcon,
+  CommentIcon,
+  StarIcon,
+  DownloadIcon,
+  KeyOutlineIcon,
 } from './PhotoIcons'
 import { AlbumActionMenu } from './AlbumActionMenu'
 import styles from './PhotographerGallery.module.css'
@@ -59,6 +64,7 @@ export interface PhotographerGalleryAlbumInfo {
   hasPassword?: boolean
   coverPhotoId?: string | null
   selectionLocked?: boolean
+  selectionLimit?: number
 }
 
 function statusNoteFor(photo: PhotographerGalleryPhoto): string | undefined {
@@ -178,7 +184,6 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
   const [isEditingInfo, setIsEditingInfo] = useState(false)
   const [editName, setEditName] = useState(albumInfo?.name || '')
   const [editClientName, setEditClientName] = useState(albumInfo?.clientName || '')
-  const [editCoverPhotoId, setEditCoverPhotoId] = useState<string | null>(albumInfo?.coverPhotoId ?? null)
   const [savingInfo, setSavingInfo] = useState(false)
   const [infoError, setInfoError] = useState<string | null>(null)
   const [displayName, setDisplayName] = useState(albumInfo?.name || '')
@@ -200,6 +205,13 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
   const [uploadingPhotos, setUploadingPhotos] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
 
+  const [selectionLimitOn, setSelectionLimitOn] = useState((albumInfo?.selectionLimit ?? 0) > 0)
+  const [selectionLimitVal, setSelectionLimitVal] = useState<number>(albumInfo?.selectionLimit ?? 0)
+  const [updatingLimit, setUpdatingLimit] = useState(false)
+  const [showLimitModal, setShowLimitModal] = useState(false)
+  const [limitModalInput, setLimitModalInput] = useState<string>('30')
+  const [limitError, setLimitError] = useState<string | null>(null)
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setOrigin(window.location.origin)
@@ -212,12 +224,15 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
       setEditClientName(albumInfo.clientName || '')
       setDisplayName(albumInfo.name || '')
       setDisplayClientName(albumInfo.clientName || '')
-      setEditCoverPhotoId(albumInfo?.coverPhotoId ?? null)
       if (albumInfo.downloadEnabled !== undefined) {
         setDownloadsOn(albumInfo.downloadEnabled)
       }
       if (albumInfo.hasPassword !== undefined) {
         setHasPass(albumInfo.hasPassword)
+      }
+      if (albumInfo.selectionLimit !== undefined) {
+        setSelectionLimitOn(albumInfo.selectionLimit > 0)
+        setSelectionLimitVal(albumInfo.selectionLimit)
       }
     }
   }, [albumInfo])
@@ -242,6 +257,39 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
       setDownloadsOn(!targetState)
     } finally {
       setTogglingDownloads(false)
+    }
+  }
+
+  function handleOpenLimitModal() {
+    setLimitModalInput(selectionLimitVal > 0 ? String(selectionLimitVal) : '30')
+    setLimitError(null)
+    setShowLimitModal(true)
+  }
+
+  async function handleSaveSelectionLimit(newLimit: number) {
+    if (!albumInfo?.id || newLimit < 0) return
+    setUpdatingLimit(true)
+    setLimitError(null)
+    try {
+      const res = await fetch(`/api/albums/${albumInfo.id}/selection-limit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ limit: newLimit }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        setLimitError(err?.error || 'Failed to save selection limit')
+      } else {
+        const data = await res.json()
+        setSelectionLimitVal(data.selectionLimit)
+        setSelectionLimitOn(data.selectionLimit > 0)
+        setShowLimitModal(false)
+        router.refresh()
+      }
+    } catch {
+      setLimitError('Network error while updating selection limit')
+    } finally {
+      setUpdatingLimit(false)
     }
   }
 
@@ -306,12 +354,9 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
     setSavingInfo(true)
     setInfoError(null)
     try {
-      const payload: { name: string; clientName: string; coverPhotoId?: string | null } = {
+      const payload: { name: string; clientName: string } = {
         name: editName,
         clientName: editClientName,
-      }
-      if (editCoverPhotoId !== (albumInfo.coverPhotoId ?? null)) {
-        payload.coverPhotoId = editCoverPhotoId
       }
       const res = await fetch(`/api/albums/${albumInfo.id}`, {
         method: 'PATCH',
@@ -335,9 +380,6 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
       const updated = await res.json()
       setDisplayName(updated.name ?? editName)
       setDisplayClientName(updated.clientName ?? editClientName)
-      if (updated.coverPhotoId !== undefined) {
-        setEditCoverPhotoId(updated.coverPhotoId)
-      }
       setIsEditingInfo(false)
       router.refresh()
     } catch {
@@ -347,31 +389,6 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
     }
   }
 
-  async function handleSetCoverPhoto(photoId: string) {
-    if (!albumInfo) return
-    const prevCover = albumInfo.coverPhotoId ?? null
-    setAlbumInfo({ ...albumInfo, coverPhotoId: photoId })
-    setEditCoverPhotoId(photoId)
-
-    try {
-      const res = await fetch(`/api/albums/${albumInfo.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ coverPhotoId: photoId }),
-      })
-      if (!res.ok) {
-        setAlbumInfo((prev) => (prev ? { ...prev, coverPhotoId: prevCover } : prev))
-        setEditCoverPhotoId(prevCover)
-        alert('Failed to update cover photo')
-      } else {
-        router.refresh()
-      }
-    } catch {
-      setAlbumInfo((prev) => (prev ? { ...prev, coverPhotoId: prevCover } : prev))
-      setEditCoverPhotoId(prevCover)
-      alert('Network error while setting cover photo')
-    }
-  }
 
   async function handleDeleteAlbum() {
     if (!albumInfo?.id) return
@@ -439,32 +456,14 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
       {albumInfo && (
         <div className={styles.banner} style={{ overflow: 'visible' }}>
           <div className={styles.bannerLeft}>
-            <Link href="/albums" className={styles.backToMenuBtn} aria-label="Back to main menu">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <line x1="19" y1="12" x2="5" y2="12"/>
-                <polyline points="12 19 5 12 12 5"/>
-              </svg>
-              <span>Back to Main Menu</span>
-            </Link>
-            <div className={styles.modeBadgeRow}>
-              <span className={styles.modeBadge}>Photographer Mode</span>
-              {isLocked ? (
-                <span className={styles.submittedBadge}>
-                  <CheckOutlineIcon size={14} />
-                  <span>CLIENT SUBMITTED ({clientLikedPhotosCount} PHOTOS)</span>
-                </span>
-              ) : (
-                <span className={styles.proofingBadge}>
-                  <HourglassOutlineIcon size={14} />
-                  <span>PROOFING IN PROGRESS</span>
-                </span>
-              )}
-              {albumInfo.photographerName && (
-                <span className={styles.idText}>• by {albumInfo.photographerName}</span>
-              )}
-            </div>
             <div className={styles.albumTitleGroup}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <Link href="/albums" className={styles.backToMenuBtn} aria-label="Back to main menu" data-tooltip="Back to Main Menu">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                  </svg>
+                </Link>
                 <div className={styles.titleLine}>
                   <span className={styles.titleLabel}>Album:</span> {displayName || 'Untitled Album'}
                 </div>
@@ -486,6 +485,18 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                     />
                   </div>
                 )}
+                {/* Share Button (moved next to edit) */}
+                {albumInfo.shareToken && (
+                  <button
+                    type="button"
+                    onClick={() => setShowQr(true)}
+                    className={styles.shareCircleBtn}
+                    aria-label="Toggle QR code / Share album"
+                    data-tooltip="Share Album / QR Code"
+                  >
+                    <ShareNetworkIcon size={20} />
+                  </button>
+                )}
               </div>
               <div className={styles.titleLine}>
                 <span className={styles.titleLabel}>Client:</span> {displayClientName || 'None'}
@@ -500,314 +511,174 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                 <FolderOutlineIcon size={15} />
                 <span>{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
               </div>
+              
+              <div className={styles.metaDivider}></div>
+              
+              <div className={styles.modeBadgeRow}>
+                <span className={styles.modeBadge}>Photographer Mode</span>
+                {isLocked ? (
+                  <button
+                    type="button"
+                    className={styles.submittedBadge}
+                    onClick={handleUnlockSelection}
+                    style={{ opacity: unlocking ? 0.5 : 1, pointerEvents: unlocking ? 'none' : 'auto' }}
+                    data-tooltip={`Client Submitted: ${clientLikedPhotosCount} Photos (Click to Unlock)`}
+                    aria-label="Unlock album"
+                  >
+                    <LockOutlineIcon size={15} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.proofingBadge}
+                    onClick={handleLockSelection}
+                    style={{ opacity: locking ? 0.5 : 1, pointerEvents: locking ? 'none' : 'auto' }}
+                    data-tooltip="Proofing In Progress (Click to Lock)"
+                    aria-label="Lock album"
+                  >
+                    <HourglassOutlineIcon size={15} />
+                  </button>
+                )}
+                {albumInfo.photographerName && (
+                  <span className={styles.idText}>• by {albumInfo.photographerName}</span>
+                )}
+              </div>
             </div>
           </div>
           {albumInfo.shareToken && (
             <div className={styles.bannerRight}>
               <div className={styles.topActionBar}>
-                {/* 1. Quick Upload Icon Button */}
-                <label
-                  className={styles.topActionBtn}
-                  title="Quick upload delivery photos"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    height: '38px',
-                    minHeight: '38px',
-                    padding: '0 14px',
-                    borderRadius: '10px',
-                    boxSizing: 'border-box',
-                    whiteSpace: 'nowrap',
-                    cursor: uploadingPhotos ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  <UploadTrayIcon size={16} />
-                  <span>{uploadingPhotos ? 'Uploading...' : 'Upload'}</span>
-                  <input
-                    aria-label="Quick upload photos"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleQuickUpload}
-                    style={{ display: 'none' }}
-                    disabled={uploadingPhotos}
-                  />
-                </label>
+                {/* --- 1. COMMON ACTIONS GROUP --- */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    {/* 1. Quick Upload Icon Button */}
+                    <label
+                      className={styles.topActionIconBtn}
+                      data-tooltip="Quick upload delivery photos"
+                      aria-label="Quick upload photos"
+                      style={{ cursor: uploadingPhotos ? 'not-allowed' : 'pointer' }}
+                    >
+                      <UploadTrayIcon size={18} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleQuickUpload}
+                        style={{ display: 'none' }}
+                        disabled={uploadingPhotos}
+                      />
+                    </label>
 
-                {/* 1.5. Manual Sync from Drive Button */}
-                <button
-                  type="button"
-                  onClick={() => syncNow()}
-                  disabled={syncing}
-                  className={styles.topActionBtn}
-                  title={lastSyncedAt ? `Last synced: ${lastSyncedAt.toLocaleTimeString()}` : 'Sync photos from Google Drive'}
-                  aria-label="sync photos from google drive"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    height: '38px',
-                    minHeight: '38px',
-                    padding: '0 14px',
-                    borderRadius: '10px',
-                    boxSizing: 'border-box',
-                    whiteSpace: 'nowrap',
-                    cursor: syncing ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  <SyncOutlineIcon size={16} className={syncing ? styles.spinIcon : undefined} />
-                  <span>{syncing ? 'Syncing...' : 'Sync Drive'}</span>
-                </button>
+                    {/* 2. Toggle Downloads */}
+                    <button
+                      type="button"
+                      onClick={handleToggleDownloads}
+                      disabled={togglingDownloads}
+                      className={`${styles.topActionIconBtn} ${downloadsOn ? styles.topToggleIconBtnActive : ''}`}
+                      data-tooltip={downloadsOn ? 'Client downloads: ON' : 'Client downloads: OFF'}
+                      aria-label="Toggle client photo downloads"
+                    >
+                      <DownloadIcon size={18} />
+                    </button>
 
-                {/* 2. Toggle Downloads Pill Switch */}
-                <button
-                  type="button"
-                  onClick={handleToggleDownloads}
-                  disabled={togglingDownloads}
-                  className={`${styles.topToggleBtn} ${downloadsOn ? styles.topToggleBtnActive : ''}`}
-                  title={downloadsOn ? 'Client downloads: ON' : 'Client downloads: OFF'}
-                  aria-label="Toggle client photo downloads"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    height: '38px',
-                    minHeight: '38px',
-                    padding: '0 14px',
-                    borderRadius: '10px',
-                    boxSizing: 'border-box',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                  </svg>
-                  <span>Downloads: {downloadsOn ? 'ON' : 'OFF'}</span>
-                  <div className={styles.switchTrack}>
-                    <div className={styles.switchThumb} />
-                  </div>
-                </button>
+                    {/* 2.5 Toggle Selection Limit */}
+                    <button
+                      type="button"
+                      onClick={handleOpenLimitModal}
+                      disabled={updatingLimit}
+                      className={`${styles.topActionIconBtn} ${selectionLimitOn ? styles.topToggleIconBtnActive : ''}`}
+                      data-tooltip={selectionLimitOn ? `Selection limit: ${selectionLimitVal} photos (Click to change)` : 'Selection limit: OFF (Click to set limit)'}
+                      aria-label="Toggle client photo selection limit"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points="9 11 12 14 22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                      </svg>
+                    </button>
 
-                {/* 3. Album Password Icon Button */}
-                <button
-                  type="button"
-                  onClick={() => { setPasswordError(null); setPasswordInput(''); setShowPasswordModal(true); }}
-                  className={`${styles.topActionBtn} ${hasPass ? styles.topActionBtnSecured : ''}`}
-                  title={hasPass ? 'Album protected by secret password' : 'Configure album password'}
-                  aria-label="Configure album password"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    height: '38px',
-                    minHeight: '38px',
-                    padding: '0 14px',
-                    borderRadius: '10px',
-                    boxSizing: 'border-box',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                  </svg>
-                  <span>{hasPass ? 'Secured' : 'Pass: OFF'}</span>
-                </button>
+                    {/* 3. Album Password */}
+                    <button
+                      type="button"
+                      onClick={() => { setPasswordError(null); setPasswordInput(''); setShowPasswordModal(true); }}
+                      className={`${styles.topActionIconBtn} ${hasPass ? styles.topToggleIconBtnSecured : ''}`}
+                      data-tooltip={hasPass ? 'Album protected by secret password' : 'Configure album password'}
+                      aria-label="Configure album password"
+                    >
+                      <KeyOutlineIcon size={18} />
+                    </button>
 
-                {/* 4. Share to Client Button */}
-                <button
-                  type="button"
-                  onClick={() => setShowQr(true)}
-                  className={styles.shareMainBtn}
-                  aria-label="Toggle QR code / Share album"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    height: '38px',
-                    minHeight: '38px',
-                    padding: '0 16px',
-                    borderRadius: '10px',
-                    boxSizing: 'border-box',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <ShareNetworkIcon size={17} />
-                  <span>Share</span>
-                </button>
+                    {/* Divider between General and Lightroom actions */}
+                    <div className={styles.topActionBarDivider} style={{ margin: '0 4px' }} />
 
-                {isLocked ? (
-                  <button
-                    type="button"
-                    onClick={handleUnlockSelection}
-                    disabled={unlocking}
-                    className={styles.unlockBtn}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      height: '38px',
-                      minHeight: '38px',
-                      padding: '0 14px',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(239, 68, 68, 0.12)',
-                      border: '1px solid rgba(239, 68, 68, 0.35)',
-                      color: '#ef4444',
-                      fontSize: '0.84rem',
-                      fontWeight: 600,
-                      boxSizing: 'border-box',
-                      whiteSpace: 'nowrap',
-                      cursor: unlocking ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    <UnlockIcon size={16} />
-                    <span>{unlocking ? 'Unlocking...' : 'Unlock Client Selection'}</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleLockSelection}
-                    disabled={locking}
-                    className={styles.lockBtn || styles.unlockBtn}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      height: '38px',
-                      minHeight: '38px',
-                      padding: '0 14px',
-                      borderRadius: '10px',
-                      backgroundColor: '#ef4444',
-                      border: '1px solid #dc2626',
-                      color: '#ffffff',
-                      fontSize: '0.84rem',
-                      fontWeight: 600,
-                      boxSizing: 'border-box',
-                      whiteSpace: 'nowrap',
-                      cursor: locking ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    <LockIcon size={16} />
-                    <span>{locking ? 'Locking...' : 'Lock Client Selection'}</span>
-                  </button>
-                )}
-              </div>
+                    {/* 1.5. Manual Sync from Drive Icon Button */}
+                    <button
+                      type="button"
+                      onClick={() => syncNow()}
+                      disabled={syncing}
+                      className={styles.topActionIconBtn}
+                      data-tooltip={lastSyncedAt ? `Last synced: ${lastSyncedAt.toLocaleTimeString()}` : 'Sync photos from Google Drive'}
+                      aria-label="sync photos from google drive"
+                      style={{ cursor: syncing ? 'not-allowed' : 'pointer' }}
+                    >
+                      <SyncOutlineIcon size={18} className={syncing ? styles.spinIcon : undefined} />
+                    </button>
 
-              <div className={styles.lightroomActionsGroup}>
-                {albumId && (
-                  <a
-                    href={`/api/albums/${albumId}/download-all`}
-                    className={styles.toolbarActionBtn}
-                    style={{
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      height: '38px',
-                      minHeight: '38px',
-                      padding: '0 14px',
-                      borderRadius: '10px',
-                      boxSizing: 'border-box',
-                      whiteSpace: 'nowrap',
-                    }}
-                    title="Download all photos as ZIP"
-                  >
-                    <ZipBoxIcon size={16} />
-                    Download All Photos
-                  </a>
-                )}
-                {clientLikedPhotosCount > 0 && albumId && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const selectedIds = photos.filter((p) => p.clientLikers.length > 0).map((p) => p.id)
-                      const res = await fetch(`/api/albums/${albumId}/download-selected`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ shareToken: albumInfo.shareToken, photoIds: selectedIds }),
-                      })
-                      if (res.ok) {
-                        const blob = await res.blob()
-                        const url = URL.createObjectURL(blob)
-                        const a = document.createElement('a')
-                        a.href = url
-                        a.download = `${(albumInfo.name || 'album').replace(/[^a-zA-Z0-9-_]/g, '_')}-selected.zip`
-                        a.click()
-                        URL.revokeObjectURL(url)
-                      }
-                    }}
-                    className={styles.downloadSelectedZipBtn || styles.toolbarActionBtn}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      height: '38px',
-                      minHeight: '38px',
-                      padding: '0 14px',
-                      borderRadius: '10px',
-                      boxSizing: 'border-box',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    <ZipBoxIcon size={16} />
-                    Download Selected ({clientLikedPhotosCount}) ZIP
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={handleCopyFilenames}
-                  className={styles.toolbarActionBtn}
-                  title="Copy comma-separated filenames for Lightroom filter"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    height: '38px',
-                    minHeight: '38px',
-                    padding: '0 14px',
-                    borderRadius: '10px',
-                    boxSizing: 'border-box',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <ClipboardListIcon size={16} />
-                  Copy Selected Filenames
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExportTxt}
-                  className={styles.toolbarActionBtn}
-                  title="Download .txt list of filenames for editing"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    height: '38px',
-                    minHeight: '38px',
-                    padding: '0 14px',
-                    borderRadius: '10px',
-                    boxSizing: 'border-box',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <TxtFileIcon size={16} />
-                  <span>Export Lightroom List (.TXT)</span>
-                </button>
-                {copyFeedback && <span className={styles.copyFeedbackBadge}>{copyFeedback}</span>}
+                    {albumId && (
+                      <a
+                        href={`/api/albums/${albumId}/download-all`}
+                        className={styles.topActionIconBtn}
+                        data-tooltip="Download all photos as ZIP"
+                        aria-label="Download all photos as ZIP"
+                      >
+                        <ZipBoxIcon size={18} />
+                      </a>
+                    )}
+                    {clientLikedPhotosCount > 0 && albumId && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const selectedIds = photos.filter((p) => p.clientLikers.length > 0).map((p) => p.id)
+                          const res = await fetch(`/api/albums/${albumId}/download-selected`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ shareToken: albumInfo.shareToken, photoIds: selectedIds }),
+                          })
+                          if (res.ok) {
+                            const blob = await res.blob()
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = `${(albumInfo.name || 'album').replace(/[^a-zA-Z0-9-_]/g, '_')}-selected.zip`
+                            a.click()
+                            URL.revokeObjectURL(url)
+                          }
+                        }}
+                        className={styles.topActionIconBtn}
+                        data-tooltip={`Download selected (${clientLikedPhotosCount}) photos as ZIP`}
+                        aria-label={`Download selected (${clientLikedPhotosCount}) photos as ZIP`}
+                      >
+                        <ZipBoxIcon size={18} />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleCopyFilenames}
+                      className={styles.topActionIconBtn}
+                      data-tooltip="Copy comma-separated filenames for Lightroom filter"
+                      aria-label="copy selected filenames"
+                    >
+                      <ClipboardListIcon size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExportTxt}
+                      className={styles.topActionIconBtn}
+                      data-tooltip="Download .txt list of filenames for Lightroom"
+                      aria-label="export lightroom list (.txt)"
+                    >
+                      <TxtFileIcon size={18} />
+                    </button>
+                    {copyFeedback && <span className={styles.copyFeedbackBadge}>{copyFeedback}</span>}
+                </div>
               </div>
             </div>
           )}
@@ -830,7 +701,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
             <div className={styles.shareModalHeader}>
               <div>
                 <h2 className={styles.shareModalTitle}>Edit Album</h2>
-                <p className={styles.shareModalSubtitle}>Update album title, client name, and cover photo.</p>
+                <p className={styles.shareModalSubtitle}>Update album title and client name.</p>
               </div>
               <button
                 type="button"
@@ -839,7 +710,6 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   setInfoError(null)
                   setEditName(displayName)
                   setEditClientName(displayClientName)
-                  setEditCoverPhotoId(albumInfo?.coverPhotoId ?? null)
                 }}
                 className={styles.shareModalCloseBtn}
                 aria-label="Close edit modal"
@@ -870,33 +740,6 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   placeholder="Client name"
                 />
               </div>
-              {photos && photos.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: '#a0a0ab' }}>Cover Photo (`Ảnh bìa`):</label>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    {editCoverPhotoId && (
-                      <img
-                        src={photos.find((p) => p.id === editCoverPhotoId)?.thumbnailUrl || photos.find((p) => p.id === editCoverPhotoId)?.previewUrl || ''}
-                        alt="Cover preview"
-                        style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #ff5722' }}
-                      />
-                    )}
-                    <select
-                      value={editCoverPhotoId || ''}
-                      onChange={(e) => setEditCoverPhotoId(e.target.value || null)}
-                      className={styles.editInput}
-                      style={{ flex: 1, cursor: 'pointer' }}
-                    >
-                      <option value="">-- Auto (First Photo) --</option>
-                      {photos.map((p, idx) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name || `Photo #${idx + 1}`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
               {infoError && <div role="alert" className={styles.editError}>{infoError}</div>}
               <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
                 <button type="submit" disabled={savingInfo} className={styles.saveInfoBtn} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: '#ff5c5c', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
@@ -909,7 +752,6 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                     setInfoError(null)
                     setEditName(displayName)
                     setEditClientName(displayClientName)
-                    setEditCoverPhotoId(albumInfo?.coverPhotoId ?? null)
                   }}
                   disabled={savingInfo}
                   className={styles.cancelInfoBtn}
@@ -1029,6 +871,25 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                   {hasPass ? 'Change pass' : '+ Set pass'}
                 </button>
               </div>
+
+              <div className={styles.shareModalOptionRow}>
+                <div className={styles.shareModalOptionInfo}>
+                  <span className={styles.shareModalOptionTitle}>Limit client photo selection</span>
+                  <span className={styles.shareModalOptionDesc}>
+                    {selectionLimitOn ? `Client is limited to selecting at most ${selectionLimitVal} photos` : 'No selection limit set (client can select unlimited photos)'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleOpenLimitModal()
+                  }}
+                  className={styles.passwordModalTriggerBtn}
+                  aria-label="Configure selection limit inside share modal"
+                >
+                  {selectionLimitOn ? `${selectionLimitVal} photos (Edit)` : '+ Set limit'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1046,7 +907,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
           <div className={styles.passwordModalCard} onClick={(e) => e.stopPropagation()}>
             <div className={styles.shareModalHeader}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <LockOutlineIcon size={20} />
+                <KeyOutlineIcon size={20} />
                 <div>
                   <h2 className={styles.shareModalTitle}>Album Password</h2>
                   <p className={styles.shareModalSubtitle}>Protect your client gallery with a secret password or remove existing protection.</p>
@@ -1099,6 +960,89 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
                 className={styles.btnSavePass}
               >
                 {passwordLoading ? 'Saving...' : (hasPass ? 'Change password' : 'Save password')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selection Limit Configuration Popup Modal */}
+      {showLimitModal && (
+        <div
+          className={styles.passwordModalOverlay}
+          onClick={() => setShowLimitModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Selection Limit Modal"
+        >
+          <div className={styles.passwordModalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.shareModalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: '#ff5722' }}>
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+                <div>
+                  <h2 className={styles.shareModalTitle}>Client Selection Limit</h2>
+                  <p className={styles.shareModalSubtitle}>Set the maximum number of photos your client can choose or remove the limit.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLimitModal(false)}
+                className={styles.shareModalCloseBtn}
+                aria-label="Close limit modal"
+              >
+                <CloseOutlineIcon size={16} />
+              </button>
+            </div>
+
+            <div className={styles.passwordInputContainer}>
+              <label htmlFor="modal-selection-limit" className={styles.passwordLabel}>Maximum Photos Allowed</label>
+              <input
+                id="modal-selection-limit"
+                type="number"
+                min="1"
+                placeholder="Enter maximum photo limit (e.g. 30)..."
+                value={limitModalInput}
+                onChange={(e) => setLimitModalInput(e.target.value)}
+                className={styles.passwordInput}
+                autoFocus
+              />
+              {limitError && (
+                <div role="alert" className={styles.passwordAlert} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <WarningOutlineIcon size={16} />
+                  <span>{limitError}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.passwordActions}>
+              {selectionLimitOn && (
+                <button
+                  type="button"
+                  onClick={() => handleSaveSelectionLimit(0)}
+                  disabled={updatingLimit}
+                  className={styles.btnRemovePass}
+                >
+                  {updatingLimit ? 'Saving...' : 'Remove limit (Turn OFF)'}
+                </button>
+              )}
+              <div style={{ flex: 1 }} />
+              <button
+                type="button"
+                onClick={() => {
+                  const val = Number(limitModalInput)
+                  if (!val || isNaN(val) || val <= 0) {
+                    setLimitError('Please enter a valid positive number greater than 0.')
+                    return
+                  }
+                  handleSaveSelectionLimit(val)
+                }}
+                disabled={updatingLimit}
+                className={styles.btnSavePass}
+              >
+                {updatingLimit ? 'Saving...' : selectionLimitOn ? 'Update Limit' : 'Turn ON & Save'}
               </button>
             </div>
           </div>
@@ -1209,7 +1153,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
         <div className={styles.sortBox}>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as 'default' | 'version' | 'comments-count')}
             className={styles.sortSelect}
           >
             <option value="default">Default Order</option>
@@ -1238,9 +1182,7 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
               <li key={photo.id}>
                 <PhotographerPhotoTile
                   photo={photo}
-                  albumCoverPhotoId={albumInfo?.coverPhotoId}
                   onOpen={() => setOpenIndex(actualIndex)}
-                  onSetCover={() => handleSetCoverPhoto(photo.id)}
                 />
               </li>
             )
@@ -1252,13 +1194,11 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
       {openIndex !== null && photos[openIndex] && (
         <PhotographerPhotoLightbox
           photo={photos[openIndex]}
-          albumCoverPhotoId={albumInfo?.coverPhotoId}
           hasPrevious={openIndex > 0}
           hasNext={openIndex < photos.length - 1}
           onPrevious={() => setOpenIndex(openIndex - 1)}
           onNext={() => setOpenIndex(openIndex + 1)}
           onClose={() => setOpenIndex(null)}
-          onSetCover={() => handleSetCoverPhoto(photos[openIndex].id)}
         />
       )}
     </div>
@@ -1267,14 +1207,10 @@ export function PhotographerGallery(props: PhotographerGalleryProps) {
 
 function PhotographerPhotoTile({
   photo,
-  albumCoverPhotoId,
   onOpen,
-  onSetCover,
 }: {
   photo: PhotographerGalleryPhoto
-  albumCoverPhotoId?: string | null
   onOpen: () => void
-  onSetCover: () => void
 }) {
   const { submitting, error: likeError, toggle } = useLikeToggle(photo.id)
   const { inputRef, error: replaceError, triggerFileSelect, handleFileChange } = useReplacePhoto(
@@ -1297,8 +1233,6 @@ function PhotographerPhotoTile({
         commentCount={photo.comments.length}
         showReplace={true}
         onReplace={triggerFileSelect}
-        onSetCover={onSetCover}
-        isCover={photo.id === albumCoverPhotoId}
         onOpen={onOpen}
       />
       <input
@@ -1317,22 +1251,18 @@ function PhotographerPhotoTile({
 
 function PhotographerPhotoLightbox({
   photo,
-  albumCoverPhotoId,
   hasPrevious,
   hasNext,
   onPrevious,
   onNext,
   onClose,
-  onSetCover,
 }: {
   photo: PhotographerGalleryPhoto
-  albumCoverPhotoId?: string | null
   hasPrevious: boolean
   hasNext: boolean
   onPrevious: () => void
   onNext: () => void
   onClose: () => void
-  onSetCover?: () => void
 }) {
   const { submitting, error: likeError, toggle } = useLikeToggle(photo.id)
   const { inputRef, error: replaceError, triggerFileSelect, handleFileChange } = useReplacePhoto(
@@ -1355,8 +1285,6 @@ function PhotographerPhotoLightbox({
         comments={photo.comments}
         showReplace={true}
         onReplace={triggerFileSelect}
-        onSetCover={onSetCover}
-        isCover={photo.id === albumCoverPhotoId}
         hasPrevious={hasPrevious}
         hasNext={hasNext}
         onPrevious={onPrevious}

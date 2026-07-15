@@ -1,6 +1,0 @@
-{
-  "name": "BK Media Box",
-  "description": "Photo-delivery dashboard and album gallery interactive prototype for photographers and clients.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

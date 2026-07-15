@@ -183,10 +183,10 @@ describe('ClientGallery', () => {
     const dialog = screen.getByRole('dialog')
     fireEvent.click(within(dialog).getByRole('button', { name: /more actions/i }))
 
-    expect(within(dialog).getByRole('menuitem', { name: 'Unselect this photo' })).toBeTruthy()
-    expect(within(dialog).getByRole('menuitem', { name: /download/i })).toBeTruthy()
-    expect(within(dialog).getByRole('menuitem', { name: /view comments \(1\)/i })).toBeTruthy()
-    expect(within(dialog).queryByRole('menuitem', { name: /replace/i })).toBeNull()
+    expect(screen.getByRole('menuitem', { name: 'Unselect this photo' })).toBeTruthy()
+    expect(screen.getByRole('menuitem', { name: /download/i })).toBeTruthy()
+    expect(screen.getByRole('menuitem', { name: /view comments \(1\)/i })).toBeTruthy()
+    expect(screen.queryByRole('menuitem', { name: /replace/i })).toBeNull()
   })
 
   it('renders floating selection bar when photos are selected, triggers confirmation modal and lock selection', async () => {
@@ -259,6 +259,21 @@ describe('ClientGallery', () => {
     expect(screen.getByText('base_p1')).toBeInTheDocument()
     expect(screen.getByText('3840 x 2160')).toBeInTheDocument()
     expect(screen.getByText('4.2 MB')).toBeInTheDocument()
+  })
+
+  it('displays warning alert when client attempts to select photos beyond selectionLimit', () => {
+    const photosWithLimit = [
+      { ...basePhoto, id: 'p1', likedByMe: true },
+      { ...basePhoto, id: 'p2', likedByMe: false },
+    ]
+    render(<ClientGallery photos={photosWithLimit} selectionLimit={1} />)
+
+    expect(screen.getByText(/Selected: 1 \/ 1 photo\(s\)/i)).toBeInTheDocument()
+
+    const selectBtnP2 = screen.getByRole('button', { name: 'Select this photo' })
+    fireEvent.click(selectBtnP2)
+
+    expect(screen.getByText(/You have reached the maximum selection limit of 1 photos for this album/i)).toBeInTheDocument()
   })
 })
 

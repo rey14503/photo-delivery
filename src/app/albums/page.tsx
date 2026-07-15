@@ -61,6 +61,7 @@ export default async function AlbumsPage() {
       userEmail={session.user.email}
       avatarUrl={session.user.avatarUrl}
       studioName={session.user.studioName}
+      role={session.user.role}
     />
   )
 }

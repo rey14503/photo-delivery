@@ -10,7 +10,7 @@ export interface DashboardToolbarProps {
 export function DashboardToolbar({ albumCount, photoCount }: DashboardToolbarProps) {
   return (
     <div className={styles.toolbar}>
-      <h1 className={styles.title}>Dashboard</h1>
+      <h1 className={styles.title}>Albums</h1>
       <div className={styles.metrics}>
         <span className={styles.pill}>Total albums: {albumCount}</span>
         <span className={styles.pill}>Total photos: {photoCount}</span>

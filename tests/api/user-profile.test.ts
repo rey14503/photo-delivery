@@ -32,7 +32,7 @@ describe('PUT /api/user/profile', () => {
 
   it('returns 401 if user is not authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(null)
-    const res = await PUT(jsonRequest({ name: 'New Name', studioName: 'Studio PRO' }))
+    const res = await PUT(jsonRequest({ name: 'New Name', studioName: 'Studio PRO', role: 'ADMIN' }))
     expect(res.status).toBe(401)
   })
 
@@ -53,20 +53,22 @@ describe('PUT /api/user/profile', () => {
       email: 'test@example.com',
       name: 'Khoa Nguyễn',
       studioName: 'Khoa Studio PRO',
+      role: 'ADMIN',
     } as any)
 
-    const res = await PUT(jsonRequest({ name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO' }))
+    const res = await PUT(jsonRequest({ name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO', role: 'ADMIN' }))
     const data = await res.json()
 
     expect(res.status).toBe(200)
     expect(data).toEqual({
       name: 'Khoa Nguyễn',
       studioName: 'Khoa Studio PRO',
+      role: 'ADMIN',
     })
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: 'user_1' },
-      data: { name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO' },
-      select: { name: true, studioName: true, avatarUrl: true },
+      data: { name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO', role: 'ADMIN' },
+      select: { name: true, studioName: true, role: true, avatarUrl: true },
     })
   })
 })

@@ -9,19 +9,22 @@ export interface EditProfileModalProps {
   initialName?: string | null
   initialStudioName?: string | null
   initialAvatarUrl?: string | null
+  initialRole?: 'ADMIN' | 'PHOTOGRAPHER'
   onClose: () => void
-  onSaveSuccess: (updated: { name: string; studioName: string; avatarUrl: string | null }) => void
+  onSaveSuccess: (updated: { name: string; studioName: string; avatarUrl: string | null; role: 'ADMIN' | 'PHOTOGRAPHER' }) => void
 }
 
 export function EditProfileModal({
   initialName,
   initialStudioName,
   initialAvatarUrl,
+  initialRole,
   onClose,
   onSaveSuccess,
 }: EditProfileModalProps) {
   const [name, setName] = useState(initialName || '')
   const [studioName, setStudioName] = useState(initialStudioName || '')
+  const [role, setRole] = useState<'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl || null)
   const [loading, setLoading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -65,6 +68,7 @@ export function EditProfileModal({
           onSaveSuccess({
             name,
             studioName,
+            role,
             avatarUrl: data.avatarUrl,
           })
         }
@@ -86,13 +90,14 @@ export function EditProfileModal({
       const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, studioName }),
+        body: JSON.stringify({ name, studioName, role }),
       })
       if (res.ok) {
         const data = await res.json()
         onSaveSuccess({
           name: data.name || name,
           studioName: data.studioName || studioName,
+          role: data.role || role,
           avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : avatarUrl,
         })
         onClose()
@@ -181,18 +186,35 @@ export function EditProfileModal({
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="edit-studio" className={styles.label}>
-              Studio Name / Role
-            </label>
-            <input
-              id="edit-studio"
-              type="text"
-              value={studioName}
-              onChange={e => setStudioName(e.target.value)}
-              className={styles.input}
-              placeholder="e.g. PRO Studio"
-            />
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="edit-studio" className={styles.label}>
+                Nickname
+              </label>
+              <input
+                id="edit-studio"
+                type="text"
+                value={studioName}
+                onChange={e => setStudioName(e.target.value)}
+                className={styles.input}
+                placeholder="e.g. Rey"
+              />
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label htmlFor="edit-role" className={styles.label}>
+                Role
+              </label>
+              <select
+                id="edit-role"
+                value={role}
+                onChange={e => setRole(e.target.value as 'ADMIN' | 'PHOTOGRAPHER')}
+                className={styles.input}
+              >
+                <option value="PHOTOGRAPHER">Photographer</option>
+                <option value="ADMIN">Owner</option>
+              </select>
+            </div>
           </div>
 
           <div className={styles.actions}>

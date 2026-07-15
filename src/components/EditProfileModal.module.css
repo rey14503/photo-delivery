@@ -139,6 +139,17 @@
   display: none;
 }
 
+.formRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.formRow > .formGroup {
+  flex: 1;
+  margin-bottom: 0;
+}
+
 .formGroup {
   display: flex;
   flex-direction: column;
@@ -153,6 +164,8 @@
 }
 
 .input {
+  width: 100%;
+  box-sizing: border-box;
   background: var(--bg-base, #27272a);
   border: 1px solid var(--border-color, #3f3f46);
   border-radius: 8px;
