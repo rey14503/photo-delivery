@@ -46,7 +46,7 @@
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
-  color: #fff;
+  color: var(--text-main, #fff);
 }
 
 .subtitle {
@@ -70,7 +70,7 @@
 
 .closeBtn:hover {
   background: var(--bg-surface-hover, #27272a);
-  color: #fff;
+  color: var(--text-main, #fff);
 }
 
 .content {
@@ -93,7 +93,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--bg-base, #242526);
+  background: var(--bg-surface, #242526);
   border: 1px solid var(--border-color, #3f3f46);
   border-radius: 12px;
   padding: 14px 16px;
@@ -102,7 +102,7 @@
 }
 
 .userCard:hover {
-  border-color: #52525b;
+  border-color: var(--border-medium, #52525b);
 }
 
 .userInfo {
@@ -124,7 +124,7 @@
   justify-content: center;
   font-weight: 700;
   color: #ff5722;
-  border: 2px solid #3f3f46;
+  border: 2px solid var(--border-color, #3f3f46);
 }
 
 .userDetails {
@@ -140,9 +140,9 @@
 }
 
 .userName {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-main, #fff);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -186,7 +186,7 @@
 .roleSelect {
   background: var(--bg-surface-hover, #27272a);
   border: 1px solid var(--border-color, #3f3f46);
-  color: #fff;
+  color: var(--text-main, #fff);
   font-size: 0.85rem;
   font-weight: 500;
   padding: 6px 10px;
