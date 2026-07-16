@@ -57,8 +57,8 @@ export default async function SharePage({
 
   const photos = album.photos.map((photo) => ({
     id: photo.id,
-    thumbnailUrl: photo.thumbnailUrl,
-    previewUrl: photo.previewUrl,
+    thumbnailUrl: `/api/photos/${photo.id}/proxy?type=thumb`,
+    previewUrl: `/api/photos/${photo.id}/proxy?type=preview`,
     name: photo.originalName ?? undefined,
     version: photo.version,
     likedByMe: myActorKey ? photo.likes.some((like) => like.actorKey === myActorKey) : false,

@@ -77,9 +77,24 @@ export async function GET(
 
   const currentUrl = type === 'preview' ? photo.previewUrl : photo.thumbnailUrl
 
-  // If already uploaded to Blob storage (or external permanent URL not proxying), redirect directly
+  // If already uploaded to Blob storage, fetch server-side and stream back
+  // (Blob URLs may return 403 on direct browser access due to Vercel access policies)
   if (currentUrl && currentUrl.startsWith('http') && !currentUrl.includes('/proxy')) {
-    return NextResponse.redirect(currentUrl, { status: 302 })
+    try {
+      const blobRes = await fetch(currentUrl)
+      if (blobRes.ok) {
+        const buffer = await blobRes.arrayBuffer()
+        return new NextResponse(buffer, {
+          status: 200,
+          headers: {
+            'Content-Type': blobRes.headers.get('content-type') || 'image/jpeg',
+            'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+          },
+        })
+      }
+    } catch {
+      // Fall through to Drive CDN fallback below
+    }
   }
 
   // Check in-memory Drive CDN cache before calling Google Drive API
@@ -141,7 +156,13 @@ export async function GET(
       data: { thumbnailUrl, previewUrl },
     })
 
-    return NextResponse.redirect(type === 'preview' ? previewUrl : thumbnailUrl, { status: 302 })
+    return new NextResponse(type === 'preview' ? preview : thumbnail, {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/jpeg',
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+      },
+    })
   } catch (error) {
     console.error('Failed to proxy/process photo:', error)
     // If rate limit or error occurs but we have a stale cache entry, serve it as emergency fallback

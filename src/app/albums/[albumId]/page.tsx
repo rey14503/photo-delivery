@@ -87,8 +87,8 @@ export default async function AlbumDetailPage({
 
     return {
       id: photo.id,
-      thumbnailUrl: photo.thumbnailUrl,
-      previewUrl: photo.previewUrl,
+      thumbnailUrl: `/api/photos/${photo.id}/proxy?type=thumb`,
+      previewUrl: `/api/photos/${photo.id}/proxy?type=preview`,
       name: photo.originalName ?? undefined,
       version: photo.version,
       suggestedByMe,
