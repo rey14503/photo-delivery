@@ -17,6 +17,8 @@ import {
   CloseOutlineIcon,
   ShareNetworkIcon,
   PhoneOutlineIcon,
+  KeyOutlineIcon,
+  WarningOutlineIcon,
 } from './PhotoIcons'
 import styles from './AlbumCard.module.css'
 
@@ -34,6 +36,7 @@ export interface AlbumCardProps {
     coverPhotoId?: string | null
     samplePhotos?: { id: string; name: string; url: string }[]
     downloadEnabled?: boolean
+    selectionLimit?: number | null
     clientEmail?: string | null
     location?: string | null
   }
@@ -55,6 +58,23 @@ export function AlbumCard({ album }: AlbumCardProps) {
   const [imgSrc, setImgSrc] = useState(album.coverUrl || null)
   const [retryCount, setRetryCount] = useState(0)
   const [imgError, setImgError] = useState(false)
+
+  // Access Permissions & Security state (synced with PhotographerGallery share modal)
+  const [downloadsOn, setDownloadsOn] = useState(album.downloadEnabled ?? false)
+  const [togglingDownloads, setTogglingDownloads] = useState(false)
+
+  const [hasPass, setHasPass] = useState(album.hasPassword)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [passwordInput, setPasswordInput] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  const [selectionLimitOn, setSelectionLimitOn] = useState((album.selectionLimit ?? 0) > 0)
+  const [selectionLimitVal, setSelectionLimitVal] = useState<number>(album.selectionLimit ?? 0)
+  const [updatingLimit, setUpdatingLimit] = useState(false)
+  const [showLimitModal, setShowLimitModal] = useState(false)
+  const [limitModalInput, setLimitModalInput] = useState<string>('30')
+  const [limitError, setLimitError] = useState<string | null>(null)
 
   useEffect(() => {
     if ((album.coverUrl || null) !== (imgSrc || null) && retryCount === 0 && !imgError) {
@@ -82,6 +102,86 @@ export function AlbumCard({ album }: AlbumCardProps) {
     navigator.clipboard.writeText(shareUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleToggleDownloads = async () => {
+    const targetState = !downloadsOn
+    setDownloadsOn(targetState)
+    setTogglingDownloads(true)
+    try {
+      const res = await fetch(`/api/albums/${album.id}/download-toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: targetState }),
+      })
+      if (!res.ok) {
+        setDownloadsOn(!targetState)
+      } else {
+        router.refresh()
+      }
+    } catch {
+      setDownloadsOn(!targetState)
+    } finally {
+      setTogglingDownloads(false)
+    }
+  }
+
+  const handleSavePassword = async (passValue: string | null) => {
+    setPasswordLoading(true)
+    setPasswordError(null)
+    try {
+      const res = await fetch(`/api/albums/${album.id}/password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passValue }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setPasswordError(data.error ?? 'Failed to update password')
+        return
+      }
+      setHasPass(Boolean(passValue))
+      setPasswordInput('')
+      setShowPasswordModal(false)
+      router.refresh()
+    } catch {
+      setPasswordError('Network error — please try again.')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  const handleOpenLimitModal = () => {
+    setLimitModalInput(selectionLimitVal > 0 ? String(selectionLimitVal) : '30')
+    setLimitError(null)
+    setShowLimitModal(true)
+  }
+
+  const handleSaveSelectionLimit = async (newLimit: number) => {
+    if (newLimit < 0) return
+    setUpdatingLimit(true)
+    setLimitError(null)
+    try {
+      const res = await fetch(`/api/albums/${album.id}/selection-limit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ limit: newLimit }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        setLimitError(err?.error || 'Failed to save selection limit')
+      } else {
+        const data = await res.json()
+        setSelectionLimitVal(data.selectionLimit)
+        setSelectionLimitOn(data.selectionLimit > 0)
+        setShowLimitModal(false)
+        router.refresh()
+      }
+    } catch {
+      setLimitError('Network error while updating selection limit')
+    } finally {
+      setUpdatingLimit(false)
+    }
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -357,6 +457,213 @@ export function AlbumCard({ album }: AlbumCardProps) {
                 Link copied to clipboard!
               </div>
             )}
+
+            {/* Access Permissions & Security — synced with PhotographerGallery */}
+            <div className={styles.shareModalOptionsSection}>
+              <h4 className={styles.shareModalOptionsHeading}>Access Permissions & Security</h4>
+
+              <div className={styles.shareModalOptionRow}>
+                <div className={styles.shareModalOptionInfo}>
+                  <span className={styles.shareModalOptionTitle}>Allow client photo downloads</span>
+                  <span className={styles.shareModalOptionDesc}>Let clients download high-resolution and preview photos</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleToggleDownloads}
+                  disabled={togglingDownloads}
+                  className={`${styles.toggleSwitch} ${downloadsOn ? styles.toggleSwitchActive : ''}`}
+                  aria-label="Toggle downloads in share modal"
+                >
+                  <div className={styles.toggleSwitchThumb} />
+                </button>
+              </div>
+
+              <div className={styles.shareModalOptionRow}>
+                <div className={styles.shareModalOptionInfo}>
+                  <span className={styles.shareModalOptionTitle}>Password protection</span>
+                  <span className={styles.shareModalOptionDesc}>
+                    {hasPass ? 'Client must enter secret password before viewing album' : 'No password set (accessible directly via link)'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setPasswordError(null); setPasswordInput(''); setShowPasswordModal(true); }}
+                  className={styles.passwordModalTriggerBtn}
+                >
+                  {hasPass ? 'Change pass' : '+ Set pass'}
+                </button>
+              </div>
+
+              <div className={styles.shareModalOptionRow}>
+                <div className={styles.shareModalOptionInfo}>
+                  <span className={styles.shareModalOptionTitle}>Limit client photo selection</span>
+                  <span className={styles.shareModalOptionDesc}>
+                    {selectionLimitOn ? `Client is limited to selecting at most ${selectionLimitVal} photos` : 'No selection limit set (client can select unlimited photos)'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenLimitModal}
+                  className={styles.passwordModalTriggerBtn}
+                  aria-label="Configure selection limit inside share modal"
+                >
+                  {selectionLimitOn ? `${selectionLimitVal} photos (Edit)` : '+ Set limit'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Password Configuration Popup Modal */}
+      {typeof document !== 'undefined' && showPasswordModal && createPortal(
+        <div
+          className={styles.passwordModalOverlay}
+          onClick={() => setShowPasswordModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Configure Album Password Modal"
+        >
+          <div className={styles.passwordModalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.shareModalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <KeyOutlineIcon size={20} />
+                <div>
+                  <h2 className={styles.shareModalTitle}>Album Password</h2>
+                  <p className={styles.shareModalSubtitle}>Protect your client gallery with a secret password or remove existing protection.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPasswordModal(false)}
+                className={styles.shareModalCloseBtn}
+                aria-label="Close password modal"
+              >
+                <CloseOutlineIcon size={16} />
+              </button>
+            </div>
+
+            <div className={styles.passwordInputContainer}>
+              <label htmlFor={`card-album-pass-${album.id}`} className={styles.passwordLabel}>Secret Password</label>
+              <input
+                id={`card-album-pass-${album.id}`}
+                type="password"
+                placeholder="Enter new album password..."
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                className={styles.passwordInput}
+              />
+              {passwordError && (
+                <div role="alert" className={styles.passwordAlert} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <WarningOutlineIcon size={16} />
+                  <span>{passwordError}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.passwordActions}>
+              {hasPass && (
+                <button
+                  type="button"
+                  onClick={() => handleSavePassword(null)}
+                  disabled={passwordLoading}
+                  className={styles.btnRemovePass}
+                >
+                  {passwordLoading ? 'Saving...' : 'Remove password'}
+                </button>
+              )}
+              <div style={{ flex: 1 }} />
+              <button
+                type="button"
+                onClick={() => handleSavePassword(passwordInput || null)}
+                disabled={passwordLoading}
+                className={styles.btnSavePass}
+              >
+                {passwordLoading ? 'Saving...' : (hasPass ? 'Change password' : 'Save password')}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Selection Limit Configuration Popup Modal */}
+      {typeof document !== 'undefined' && showLimitModal && createPortal(
+        <div
+          className={styles.passwordModalOverlay}
+          onClick={() => setShowLimitModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Selection Limit Modal"
+        >
+          <div className={styles.passwordModalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.shareModalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <EditOutlineIcon size={20} />
+                <div>
+                  <h2 className={styles.shareModalTitle}>Client Selection Limit</h2>
+                  <p className={styles.shareModalSubtitle}>Set the maximum number of photos your client can choose or remove the limit.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLimitModal(false)}
+                className={styles.shareModalCloseBtn}
+                aria-label="Close limit modal"
+              >
+                <CloseOutlineIcon size={16} />
+              </button>
+            </div>
+
+            <div className={styles.passwordInputContainer}>
+              <label htmlFor={`card-selection-limit-${album.id}`} className={styles.passwordLabel}>Maximum Photos Allowed</label>
+              <input
+                id={`card-selection-limit-${album.id}`}
+                type="number"
+                min="1"
+                placeholder="Enter maximum photo limit (e.g. 30)..."
+                value={limitModalInput}
+                onChange={(e) => setLimitModalInput(e.target.value)}
+                className={styles.passwordInput}
+                autoFocus
+              />
+              {limitError && (
+                <div role="alert" className={styles.passwordAlert} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <WarningOutlineIcon size={16} />
+                  <span>{limitError}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.passwordActions}>
+              {selectionLimitOn && (
+                <button
+                  type="button"
+                  onClick={() => handleSaveSelectionLimit(0)}
+                  disabled={updatingLimit}
+                  className={styles.btnRemovePass}
+                >
+                  {updatingLimit ? 'Saving...' : 'Remove limit (Turn OFF)'}
+                </button>
+              )}
+              <div style={{ flex: 1 }} />
+              <button
+                type="button"
+                onClick={() => {
+                  const val = Number(limitModalInput)
+                  if (!val || isNaN(val) || val <= 0) {
+                    setLimitError('Please enter a valid positive number greater than 0.')
+                    return
+                  }
+                  handleSaveSelectionLimit(val)
+                }}
+                disabled={updatingLimit}
+                className={styles.btnSavePass}
+              >
+                {updatingLimit ? 'Saving...' : selectionLimitOn ? 'Update Limit' : 'Turn ON & Save'}
+              </button>
+            </div>
           </div>
         </div>,
         document.body

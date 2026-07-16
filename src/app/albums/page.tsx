@@ -44,6 +44,7 @@ export default async function AlbumsPage() {
       photoCount: alb._count.photos,
       createdAt: alb.createdAt,
       downloadEnabled: alb.downloadEnabled,
+      selectionLimit: alb.selectionLimit ?? 0,
       coverUrl: coverPhotoObj?.thumbnailUrl || coverPhotoObj?.previewUrl || null,
       coverPhotoId: alb.coverPhotoId || null,
       samplePhotos: alb.photos.map((p) => ({
