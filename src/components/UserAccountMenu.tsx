@@ -80,6 +80,7 @@ export function UserAccountMenu({
     setRole(updated.role)
     setAvatarUrl(updated.avatarUrl)
     setImgError(false)
+    setOpen(false) // Auto-close the menu after successful save
   }
 
   return (
