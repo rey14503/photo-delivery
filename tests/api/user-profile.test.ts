@@ -32,7 +32,7 @@ describe('PUT /api/user/profile', () => {
 
   it('returns 401 if user is not authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(null)
-    const res = await PUT(jsonRequest({ name: 'New Name', studioName: 'Studio PRO', role: 'ADMIN' }))
+    const res = await PUT(jsonRequest({ name: 'New Name', studioName: 'Studio PRO' }))
     expect(res.status).toBe(401)
   })
 
@@ -44,7 +44,7 @@ describe('PUT /api/user/profile', () => {
     expect(res.status).toBe(400)
   })
 
-  it('updates the user profile and returns 200 with updated fields', async () => {
+  it('updates the user profile and returns 200 with updated fields without altering role', async () => {
     vi.mocked(getServerSession).mockResolvedValue({
       user: { id: 'user_1', email: 'test@example.com' },
     } as any)
@@ -56,7 +56,7 @@ describe('PUT /api/user/profile', () => {
       role: 'ADMIN',
     } as any)
 
-    const res = await PUT(jsonRequest({ name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO', role: 'ADMIN' }))
+    const res = await PUT(jsonRequest({ name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO' }))
     const data = await res.json()
 
     expect(res.status).toBe(200)
@@ -67,7 +67,7 @@ describe('PUT /api/user/profile', () => {
     })
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: 'user_1' },
-      data: { name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO', role: 'ADMIN' },
+      data: { name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO' },
       select: { name: true, studioName: true, role: true, avatarUrl: true },
     })
   })

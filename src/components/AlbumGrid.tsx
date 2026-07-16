@@ -13,7 +13,7 @@ export interface AlbumGridProps {
   userEmail?: string | null
   avatarUrl?: string | null
   studioName?: string | null
-  role?: 'ADMIN' | 'PHOTOGRAPHER'
+  role?: 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'
 }
 
 export function AlbumGrid({ albums, userName, userEmail, avatarUrl, studioName, role }: AlbumGridProps) {

@@ -4,5 +4,5 @@ export function canManageAlbum(
   user: { id: string; role: Role },
   album: { ownerId: string }
 ): boolean {
-  return user.role === 'ADMIN' || album.ownerId === user.id
+  return user.role === 'OWNER' || user.role === 'ADMIN' || album.ownerId === user.id
 }

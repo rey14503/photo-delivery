@@ -5,6 +5,7 @@ import { signOut } from 'next-auth/react'
 import { useTheme } from 'next-themes'
 import styles from './UserAccountMenu.module.css'
 import { EditProfileModal } from './EditProfileModal'
+import { ManageTeamModal } from './ManageTeamModal'
 import { GearOutlineIcon, SignOutOutlineIcon, SunIcon, MoonIcon, MonitorIcon } from './PhotoIcons'
 
 export interface UserAccountMenuProps {
@@ -12,7 +13,7 @@ export interface UserAccountMenuProps {
   userEmail?: string | null
   avatarUrl?: string | null
   studioName?: string | null
-  role?: 'ADMIN' | 'PHOTOGRAPHER'
+  role?: 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'
 }
 
 export function UserAccountMenu({
@@ -24,9 +25,10 @@ export function UserAccountMenu({
 }: UserAccountMenuProps) {
   const [open, setOpen] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showTeamModal, setShowTeamModal] = useState(false)
   const [name, setName] = useState(initialUserName || '')
   const [studioName, setStudioName] = useState(initialStudioName || '')
-  const [role, setRole] = useState<'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
+  const [role, setRole] = useState<'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl || null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const { theme, setTheme } = useTheme()
@@ -68,7 +70,7 @@ export function UserAccountMenu({
     ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : 'BK'
 
-  const handleProfileUpdated = (updated: { name: string; studioName: string; avatarUrl: string | null; role: 'ADMIN' | 'PHOTOGRAPHER' }) => {
+  const handleProfileUpdated = (updated: { name: string; studioName: string; avatarUrl: string | null; role: 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER' }) => {
     setName(updated.name)
     setStudioName(updated.studioName)
     setRole(updated.role)
@@ -132,7 +134,7 @@ export function UserAccountMenu({
               <span className={styles.userEmail}>{userEmail || ''}</span>
               <div className={styles.badgesWrapper}>
                 <span className={styles.roleBadge}>
-                  {role === 'ADMIN' ? 'Owner' : 'Photographer'}
+                  {role === 'OWNER' ? 'Owner' : role === 'ADMIN' ? 'Admin' : 'Photographer'}
                 </span>
                 {studioName && (
                   <span className={styles.nicknameBadge}>
@@ -155,6 +157,24 @@ export function UserAccountMenu({
               <GearOutlineIcon size={18} className={styles.menuIconSvg} />
               <span>Edit Profile / Studio</span>
             </button>
+            {role === 'OWNER' && (
+              <button
+                type="button"
+                className={styles.menuItem}
+                onClick={() => {
+                  setOpen(false)
+                  setShowTeamModal(true)
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.menuIconSvg}>
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>Manage Team & Permissions</span>
+              </button>
+            )}
             {mounted && (
               <div className={styles.themeToggleRow}>
                 <span className={styles.themeToggleLabel}>Theme</span>
@@ -211,6 +231,11 @@ export function UserAccountMenu({
           onSaveSuccess={handleProfileUpdated}
         />
       )}
+
+      <ManageTeamModal
+        isOpen={showTeamModal}
+        onClose={() => setShowTeamModal(false)}
+      />
     </div>
   )
 }

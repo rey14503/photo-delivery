@@ -7,7 +7,7 @@ import { prisma } from './prisma'
 /** Extended user type used during NextAuth callbacks */
 interface AuthUser {
   id?: string
-  role?: 'ADMIN' | 'PHOTOGRAPHER'
+  role?: 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'
   email?: string | null
   name?: string | null
 }
@@ -66,7 +66,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
-        session.user.role = token.role as 'ADMIN' | 'PHOTOGRAPHER'
+        session.user.role = token.role as 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'
         session.user.name = token.name as string | null | undefined
         session.user.avatarUrl = token.avatarUrl as string | null | undefined
         session.user.studioName = token.studioName as string | null | undefined

@@ -10,7 +10,7 @@ export interface TopNavProps {
   userEmail?: string | null
   avatarUrl?: string | null
   studioName?: string | null
-  role?: 'ADMIN' | 'PHOTOGRAPHER'
+  role?: 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'
   onCreateClick?: () => void
   onLogoClick?: () => void
 }

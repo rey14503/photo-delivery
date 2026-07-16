@@ -165,6 +165,7 @@
 
 .input {
   width: 100%;
+  height: 42px;
   box-sizing: border-box;
   background: var(--bg-base, #27272a);
   border: 1px solid var(--border-color, #3f3f46);
@@ -172,12 +173,21 @@
   padding: 10px 12px;
   color: var(--text-main, #fff);
   font-size: 0.95rem;
+  line-height: 1.5;
   transition: border-color 0.2s ease;
 }
 
 .input:focus {
   outline: none;
   border-color: var(--accent, #ff5722);
+}
+
+.readOnlyInput {
+  background: var(--bg-surface-disabled, #1f1f23) !important;
+  color: var(--text-muted, #a1a1aa) !important;
+  cursor: not-allowed;
+  opacity: 0.85;
+  border-color: #2e2e33 !important;
 }
 
 .actions {

@@ -11,22 +11,36 @@ export async function upsertUserFromGoogleAccount(
   name: string | null | undefined,
   account: GoogleAccountInfo
 ): Promise<{ id: string; role: Role }> {
-  const role: Role = email === process.env.ADMIN_EMAIL ? 'ADMIN' : 'PHOTOGRAPHER'
+  const isRootOwner = Boolean(
+    email &&
+      (email === process.env.ADMIN_EMAIL || email === process.env.OWNER_EMAIL)
+  )
   const existing = await prisma.user.findUnique({ where: { email } })
 
-  const data: { name?: string | null; role: Role; encryptedRefreshToken?: string } = {
+  const data: { name?: string | null; role?: Role; encryptedRefreshToken?: string } = {
     name,
-    role,
   }
   if (account.refresh_token) {
     data.encryptedRefreshToken = encrypt(account.refresh_token)
   }
 
   if (existing) {
+    if (isRootOwner && existing.role !== 'OWNER') {
+      data.role = 'OWNER'
+    } else if (!isRootOwner && existing.role === 'OWNER') {
+      data.role = 'PHOTOGRAPHER'
+    }
     const updated = await prisma.user.update({ where: { email }, data })
     return { id: updated.id, role: updated.role }
   }
 
-  const created = await prisma.user.create({ data: { email, ...data } })
+  const createdRole: Role = isRootOwner ? 'OWNER' : 'PHOTOGRAPHER'
+  const created = await prisma.user.create({
+    data: {
+      email,
+      role: createdRole,
+      ...data,
+    },
+  })
   return { id: created.id, role: created.role }
 }

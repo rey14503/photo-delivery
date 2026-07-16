@@ -9,9 +9,9 @@ export interface EditProfileModalProps {
   initialName?: string | null
   initialStudioName?: string | null
   initialAvatarUrl?: string | null
-  initialRole?: 'ADMIN' | 'PHOTOGRAPHER'
+  initialRole?: 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'
   onClose: () => void
-  onSaveSuccess: (updated: { name: string; studioName: string; avatarUrl: string | null; role: 'ADMIN' | 'PHOTOGRAPHER' }) => void
+  onSaveSuccess: (updated: { name: string; studioName: string; avatarUrl: string | null; role: 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER' }) => void
 }
 
 export function EditProfileModal({
@@ -24,7 +24,7 @@ export function EditProfileModal({
 }: EditProfileModalProps) {
   const [name, setName] = useState(initialName || '')
   const [studioName, setStudioName] = useState(initialStudioName || '')
-  const [role, setRole] = useState<'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
+  const [role, setRole] = useState<'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl || null)
   const [loading, setLoading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -90,13 +90,13 @@ export function EditProfileModal({
       const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, studioName, role }),
+        body: JSON.stringify({ name, studioName }),
       })
       if (res.ok) {
         const data = await res.json()
         onSaveSuccess({
           name: data.name || name,
-          studioName: data.studioName || studioName,
+          studioName: data.studioName !== undefined ? data.studioName : studioName,
           role: data.role || role,
           avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : avatarUrl,
         })
@@ -205,15 +205,13 @@ export function EditProfileModal({
               <label htmlFor="edit-role" className={styles.label}>
                 Role
               </label>
-              <select
+              <input
                 id="edit-role"
-                value={role}
-                onChange={e => setRole(e.target.value as 'ADMIN' | 'PHOTOGRAPHER')}
-                className={styles.input}
-              >
-                <option value="PHOTOGRAPHER">Photographer</option>
-                <option value="ADMIN">Owner</option>
-              </select>
+                type="text"
+                value={role === 'OWNER' ? 'Owner' : role === 'ADMIN' ? 'Admin' : 'Photographer'}
+                disabled
+                className={`${styles.input} ${styles.readOnlyInput}`}
+              />
             </div>
           </div>
 
