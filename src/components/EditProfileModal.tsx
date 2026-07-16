@@ -280,7 +280,7 @@ export function EditProfileModal({
 
           {/* Contact Section */}
           <div className={styles.sectionDivider}>
-            <h3 className={styles.sectionTitle}>Liên hệ</h3>
+            <h3 className={styles.sectionTitle}>Contact</h3>
           </div>
 
           <div className={styles.formRow}>
@@ -314,7 +314,7 @@ export function EditProfileModal({
 
           {/* Payment Section */}
           <div className={styles.sectionDivider}>
-            <h3 className={styles.sectionTitle}>Thanh toán</h3>
+            <h3 className={styles.sectionTitle}>Payment</h3>
           </div>
 
           <div className={styles.formRow}>
@@ -362,7 +362,7 @@ export function EditProfileModal({
 
           <div className={styles.formGroup}>
             <label className={styles.label}>
-              Mã QR Thanh toán
+              Payment QR Code
             </label>
             <div className={styles.qrUploadArea}>
               {qrCodeUrl && !qrImgError ? (
@@ -377,7 +377,7 @@ export function EditProfileModal({
                     type="button"
                     className={styles.qrRemoveBtn}
                     onClick={() => { setQrCodeUrl(''); setQrImgError(false) }}
-                    title="Xóa ảnh QR"
+                    title="Remove QR image"
                   >×</button>
                 </div>
               ) : (
@@ -388,11 +388,16 @@ export function EditProfileModal({
                   disabled={uploadingQr}
                 >
                   {uploadingQr ? (
-                    <span>Đang tải lên...</span>
+                    <span className={styles.qrUploadSpinner}>Uploading...</span>
                   ) : (
                     <>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                      <span>Tải ảnh QR lên</span>
+                      <svg className={styles.qrUploadIcon} xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <span className={styles.qrUploadText}>Upload QR Image</span>
+                      <span className={styles.qrUploadHint}>PNG, JPG up to 5MB</span>
                     </>
                   )}
                 </button>
@@ -411,7 +416,7 @@ export function EditProfileModal({
                   onClick={() => qrFileInputRef.current?.click()}
                   disabled={uploadingQr}
                 >
-                  {uploadingQr ? 'Đang tải...' : 'Đổi ảnh QR'}
+                  {uploadingQr ? 'Uploading...' : 'Change QR Image'}
                 </button>
               )}
             </div>

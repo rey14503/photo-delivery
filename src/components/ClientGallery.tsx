@@ -161,13 +161,13 @@ export function ClientGallery(props: ClientGalleryProps) {
             {hasContactInfo && (
               <button type="button" className={styles.bannerMetaBtn} onClick={() => setShowContactModal(true)}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Liên hệ
+                Contact
               </button>
             )}
             {hasPaymentInfo && (
               <button type="button" className={styles.bannerMetaBtn} onClick={() => setShowPaymentModal(true)}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                Thanh toán
+                Payment
               </button>
             )}
           </div>
@@ -383,7 +383,7 @@ export function ClientGallery(props: ClientGalleryProps) {
       {showContactModal && (
         <div className={styles.modalOverlay} onClick={() => setShowContactModal(false)}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>Liên hệ Photographer</h3>
+            <h3 className={styles.modalTitle}>Contact Photographer</h3>
             <div className={styles.contactList}>
               {albumInfo?.phone && (
                 <a href={`tel:${albumInfo.phone}`} className={styles.contactItem}>
@@ -391,7 +391,7 @@ export function ClientGallery(props: ClientGalleryProps) {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                   </span>
                   <div className={styles.contactDetail}>
-                    <span className={styles.contactLabel}>Số điện thoại</span>
+                    <span className={styles.contactLabel}>Phone</span>
                     <span className={styles.contactValue}>{albumInfo.phone}</span>
                   </div>
                 </a>
@@ -403,13 +403,13 @@ export function ClientGallery(props: ClientGalleryProps) {
                   </span>
                   <div className={styles.contactDetail}>
                     <span className={styles.contactLabel}>Facebook</span>
-                    <span className={styles.contactValue}>Mở trang Facebook</span>
+                    <span className={styles.contactValue}>Open Facebook Page</span>
                   </div>
                 </a>
               )}
             </div>
             <div className={styles.modalActions}>
-              <button type="button" onClick={() => setShowContactModal(false)} className={styles.modalCancelBtn}>Đóng</button>
+              <button type="button" onClick={() => setShowContactModal(false)} className={styles.modalCancelBtn}>Close</button>
             </div>
           </div>
         </div>
@@ -419,34 +419,34 @@ export function ClientGallery(props: ClientGalleryProps) {
       {showPaymentModal && (
         <div className={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>Thông tin thanh toán</h3>
+            <h3 className={styles.modalTitle}>Payment Details</h3>
             <div className={styles.paymentDetails}>
               {albumInfo?.bankName && (
                 <div className={styles.paymentRow}>
-                  <span className={styles.paymentLabel}>Ngân hàng</span>
+                  <span className={styles.paymentLabel}>Bank</span>
                   <span className={styles.paymentValue}>{albumInfo.bankName}</span>
                 </div>
               )}
               {albumInfo?.bankAccountNumber && (
                 <div className={styles.paymentRow}>
-                  <span className={styles.paymentLabel}>Số tài khoản</span>
+                  <span className={styles.paymentLabel}>Account Number</span>
                   <span className={styles.paymentValue}>{albumInfo.bankAccountNumber}</span>
                 </div>
               )}
               {albumInfo?.bankAccountName && (
                 <div className={styles.paymentRow}>
-                  <span className={styles.paymentLabel}>Chủ tài khoản</span>
+                  <span className={styles.paymentLabel}>Account Holder</span>
                   <span className={styles.paymentValue}>{albumInfo.bankAccountName}</span>
                 </div>
               )}
               {albumInfo?.qrCodeUrl && (
                 <div className={styles.qrCodeContainer}>
-                  <img src={albumInfo.qrCodeUrl} alt="QR Code thanh toán" className={styles.qrCodeImage} />
+                  <img src={albumInfo.qrCodeUrl} alt="Payment QR Code" className={styles.qrCodeImage} />
                 </div>
               )}
             </div>
             <div className={styles.modalActions}>
-              <button type="button" onClick={() => setShowPaymentModal(false)} className={styles.modalCancelBtn}>Đóng</button>
+              <button type="button" onClick={() => setShowPaymentModal(false)} className={styles.modalCancelBtn}>Close</button>
             </div>
           </div>
         </div>
