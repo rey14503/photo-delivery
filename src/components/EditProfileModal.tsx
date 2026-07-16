@@ -26,6 +26,12 @@ export function EditProfileModal({
   const [studioName, setStudioName] = useState(initialStudioName || '')
   const [role, setRole] = useState<'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl || null)
+  const [phone, setPhone] = useState('')
+  const [facebookUrl, setFacebookUrl] = useState('')
+  const [bankName, setBankName] = useState('')
+  const [bankAccountNumber, setBankAccountNumber] = useState('')
+  const [bankAccountName, setBankAccountName] = useState('')
+  const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [imgError, setImgError] = useState(false)
   const [loading, setLoading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -45,6 +51,12 @@ export function EditProfileModal({
           if (data.studioName !== undefined) setStudioName(data.studioName)
           if (data.role) setRole(data.role)
           if (data.avatarUrl !== undefined) setAvatarUrl(data.avatarUrl)
+          if (data.phone) setPhone(data.phone)
+          if (data.facebookUrl) setFacebookUrl(data.facebookUrl)
+          if (data.bankName) setBankName(data.bankName)
+          if (data.bankAccountNumber) setBankAccountNumber(data.bankAccountNumber)
+          if (data.bankAccountName) setBankAccountName(data.bankAccountName)
+          if (data.qrCodeUrl) setQrCodeUrl(data.qrCodeUrl)
         }
       })
       .catch(err => console.error('Failed to fetch latest profile:', err))
@@ -103,7 +115,7 @@ export function EditProfileModal({
       const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, studioName }),
+        body: JSON.stringify({ name, studioName, phone, facebookUrl, bankName, bankAccountNumber, bankAccountName, qrCodeUrl }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -232,6 +244,102 @@ export function EditProfileModal({
                 className={`${styles.input} ${styles.readOnlyInput}`}
               />
             </div>
+          </div>
+
+          {/* Contact Section */}
+          <div className={styles.sectionDivider}>
+            <h3 className={styles.sectionTitle}>Liên hệ</h3>
+          </div>
+
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="edit-phone" className={styles.label}>
+                Phone / Zalo
+              </label>
+              <input
+                id="edit-phone"
+                type="tel"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                className={styles.input}
+                placeholder="0912 345 678"
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="edit-facebook" className={styles.label}>
+                Facebook
+              </label>
+              <input
+                id="edit-facebook"
+                type="url"
+                value={facebookUrl}
+                onChange={e => setFacebookUrl(e.target.value)}
+                className={styles.input}
+                placeholder="https://facebook.com/..."
+              />
+            </div>
+          </div>
+
+          {/* Payment Section */}
+          <div className={styles.sectionDivider}>
+            <h3 className={styles.sectionTitle}>Thanh toán</h3>
+          </div>
+
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="edit-bank-name" className={styles.label}>
+                Bank Name
+              </label>
+              <input
+                id="edit-bank-name"
+                type="text"
+                value={bankName}
+                onChange={e => setBankName(e.target.value)}
+                className={styles.input}
+                placeholder="MBBank, Vietcombank..."
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="edit-bank-account" className={styles.label}>
+                Account Number
+              </label>
+              <input
+                id="edit-bank-account"
+                type="text"
+                value={bankAccountNumber}
+                onChange={e => setBankAccountNumber(e.target.value)}
+                className={styles.input}
+                placeholder="0123456789"
+              />
+            </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="edit-bank-holder" className={styles.label}>
+              Account Holder Name
+            </label>
+            <input
+              id="edit-bank-holder"
+              type="text"
+              value={bankAccountName}
+              onChange={e => setBankAccountName(e.target.value)}
+              className={styles.input}
+              placeholder="NGUYEN VAN A"
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="edit-qr-code" className={styles.label}>
+              QR Code Image URL
+            </label>
+            <input
+              id="edit-qr-code"
+              type="url"
+              value={qrCodeUrl}
+              onChange={e => setQrCodeUrl(e.target.value)}
+              className={styles.input}
+              placeholder="Paste VietQR image URL..."
+            />
           </div>
 
           <div className={styles.actions}>
