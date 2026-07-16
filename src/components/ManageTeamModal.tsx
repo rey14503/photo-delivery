@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useTheme } from 'next-themes'
 import styles from './ManageTeamModal.module.css'
 
 export interface TeamUser {
@@ -24,6 +25,8 @@ export function ManageTeamModal({
   isOpen,
   onClose,
 }: ManageTeamModalProps) {
+  const { theme, resolvedTheme } = useTheme()
+  const isLight = resolvedTheme === 'light' || theme === 'light'
   const [users, setUsers] = useState<TeamUser[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
@@ -97,12 +100,13 @@ export function ManageTeamModal({
     >
       <div
         className={styles.modal}
+        style={isLight ? { background: '#ffffff', borderColor: '#e4e4e7', color: '#18181b' } : undefined}
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
       >
         <div className={styles.header}>
           <div>
-            <h2 className={styles.title}>Team & Permissions</h2>
+            <h2 className={styles.title} style={isLight ? { color: '#18181b' } : undefined}>Team & Permissions</h2>
             <p className={styles.subtitle}>
               Manage user roles for project administration and team job schedules
             </p>
@@ -128,7 +132,11 @@ export function ManageTeamModal({
               const isOwner = u.role === 'OWNER' || u.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL || u.email === 'khoanguyenfotk5@gmail.com'
 
               return (
-                <div key={u.id} className={styles.userCard}>
+                <div
+                  key={u.id}
+                  className={styles.userCard}
+                  style={isLight ? { background: '#f8f9fa', borderColor: '#e4e4e7', color: '#18181b' } : undefined}
+                >
                   <div className={styles.userInfo}>
                     {u.avatarUrl && !imgErrors[u.id] ? (
                       <img
@@ -142,7 +150,12 @@ export function ManageTeamModal({
                     )}
                     <div className={styles.userDetails}>
                       <div className={styles.userNameRow}>
-                        <span className={styles.userName}>{u.name || 'Photographer'}</span>
+                        <span
+                          className={styles.userName}
+                          style={isLight ? { color: '#18181b', fontWeight: 700 } : undefined}
+                        >
+                          {u.name || 'Photographer'}
+                        </span>
                         {u.studioName && (
                           <span className={styles.userNickname}>{u.studioName}</span>
                         )}
@@ -158,6 +171,7 @@ export function ManageTeamModal({
                       <select
                         value={u.role}
                         disabled={updatingId === u.id}
+                        style={isLight ? { background: '#ffffff', color: '#18181b', borderColor: '#d4d4d8' } : undefined}
                         onChange={e => handleRoleChange(u.id, e.target.value as 'ADMIN' | 'PHOTOGRAPHER')}
                         className={styles.roleSelect}
                       >
