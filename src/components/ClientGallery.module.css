@@ -466,3 +466,131 @@
   height: 420px !important;
 }
 
+/* Banner meta inline buttons */
+.bannerMetaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.14));
+  background-color: var(--bg-subtle, rgba(255, 255, 255, 0.05));
+  color: var(--text-muted, #a1a1aa);
+}
+
+.bannerMetaBtn:hover {
+  background-color: var(--accent, #3b82f6);
+  color: var(--text-on-accent, #ffffff);
+  border-color: var(--accent, #3b82f6);
+  transform: translateY(-1px);
+}
+
+/* Contact modal list */
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background-color: var(--bg-subtle, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.15s ease;
+}
+
+.contactItem:hover {
+  background-color: var(--bg-subtle-hover, rgba(255, 255, 255, 0.1));
+  border-color: var(--accent, #3b82f6);
+}
+
+.contactIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: var(--accent-subtle, rgba(59, 130, 246, 0.15));
+  color: var(--accent, #3b82f6);
+  flex-shrink: 0;
+}
+
+.contactDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contactLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted, #a1a1aa);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.contactValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main, #ffffff);
+}
+
+/* Payment modal */
+.paymentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.paymentRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background-color: var(--bg-subtle, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.paymentLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted, #a1a1aa);
+}
+
+.paymentValue {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main, #ffffff);
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.02em;
+}
+
+.qrCodeContainer {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.qrCodeImage {
+  max-width: 240px;
+  max-height: 240px;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+

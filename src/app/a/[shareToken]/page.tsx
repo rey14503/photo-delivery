@@ -18,7 +18,7 @@ export default async function SharePage({
   const album = await prisma.album.findUnique({
     where: { shareToken },
     include: {
-      owner: { select: { name: true } },
+      owner: { select: { name: true, phone: true, facebookUrl: true, bankName: true, bankAccountNumber: true, bankAccountName: true, qrCodeUrl: true } },
       photos: {
         orderBy: { displayOrder: 'asc' },
         include: {
@@ -77,6 +77,12 @@ export default async function SharePage({
     photographerName: album.owner.name ?? undefined,
     location: 'Studio',
     date: new Date(album.createdAt).toLocaleDateString('vi-VN'),
+    phone: album.owner.phone ?? undefined,
+    facebookUrl: album.owner.facebookUrl ?? undefined,
+    bankName: album.owner.bankName ?? undefined,
+    bankAccountNumber: album.owner.bankAccountNumber ?? undefined,
+    bankAccountName: album.owner.bankAccountName ?? undefined,
+    qrCodeUrl: album.owner.qrCodeUrl ?? undefined,
   }
 
   return (
