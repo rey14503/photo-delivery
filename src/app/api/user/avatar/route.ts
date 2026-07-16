@@ -33,6 +33,9 @@ export async function POST(req: Request) {
     const blobPath = `avatars/${session.user.id}/avatar-${Date.now()}.jpg`
 
     const avatarUrl = await uploadToBlob(blobPath, buffer, fileType)
+    if (!avatarUrl) {
+      return NextResponse.json({ error: 'Image storage is temporarily unavailable. Please try again later.' }, { status: 503 })
+    }
 
     const updated = await prisma.user.update({
       where: { id: session.user.id },

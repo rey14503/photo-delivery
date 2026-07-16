@@ -44,7 +44,7 @@ export async function POST(
     const { thumbnail, preview } = await processImage(buffer)
 
     const newVersion = photo.version + 1
-    const [thumbnailUrl, previewUrl] = await Promise.all([
+    const [blobThumb, blobPreview] = await Promise.all([
       uploadToBlob(`drive-files/${photo.driveFileId}/v${newVersion}/thumb.jpg`, thumbnail, 'image/jpeg'),
       uploadToBlob(`drive-files/${photo.driveFileId}/v${newVersion}/preview.jpg`, preview, 'image/jpeg'),
     ])
@@ -53,8 +53,8 @@ export async function POST(
       where: { id: photoId },
       data: {
         version: newVersion,
-        thumbnailUrl,
-        previewUrl,
+        thumbnailUrl: blobThumb ?? `/api/photos/${photo.driveFileId}/proxy?type=thumb`,
+        previewUrl: blobPreview ?? `/api/photos/${photo.driveFileId}/proxy?type=preview`,
         originalName: file.name ? file.name : photo.originalName,
       },
     })

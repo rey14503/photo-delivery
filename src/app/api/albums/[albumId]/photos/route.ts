@@ -50,19 +50,20 @@ export async function POST(
     const { thumbnail, preview } = await processImage(buffer)
 
     const displayOrder = await prisma.photo.count({ where: { albumId } })
-    const [thumbnailUrl, previewUrl] = await Promise.all([
+    const [blobThumb, blobPreview] = await Promise.all([
       uploadToBlob(`drive-files/${driveFileId}/v1/thumb.jpg`, thumbnail, 'image/jpeg'),
       uploadToBlob(`drive-files/${driveFileId}/v1/preview.jpg`, preview, 'image/jpeg'),
     ])
 
+    // Use proxy URLs as fallback when Blob is unavailable
     const photo = await prisma.photo.create({
       data: {
         albumId,
         driveFileId,
         originalName: file.name ?? null,
         displayOrder,
-        thumbnailUrl,
-        previewUrl,
+        thumbnailUrl: blobThumb ?? `/api/photos/${driveFileId}/proxy?albumId=${albumId}&type=thumb`,
+        previewUrl: blobPreview ?? `/api/photos/${driveFileId}/proxy?albumId=${albumId}&type=preview`,
       },
     })
 
