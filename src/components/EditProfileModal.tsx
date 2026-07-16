@@ -35,11 +35,14 @@ export function EditProfileModal({
   const [imgError, setImgError] = useState(false)
   const [loading, setLoading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [uploadingQr, setUploadingQr] = useState(false)
+  const [qrImgError, setQrImgError] = useState(false)
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null)
   const [cropperOpen, setCropperOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [backdropMouseDown, setBackdropMouseDown] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const qrFileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -105,6 +108,35 @@ export function EditProfileModal({
       if (cropImageSrc) URL.revokeObjectURL(cropImageSrc)
       setCropImageSrc(null)
       setCropperOpen(false)
+    }
+  }
+
+  const handleQrFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (qrFileInputRef.current) qrFileInputRef.current.value = ''
+
+    setUploadingQr(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/user/qrcode', {
+        method: 'POST',
+        body: formData,
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.qrCodeUrl) {
+          setQrCodeUrl(data.qrCodeUrl)
+          setQrImgError(false)
+        }
+      } else {
+        console.error('QR upload failed:', await res.text())
+      }
+    } catch (err) {
+      console.error('QR upload failed:', err)
+    } finally {
+      setUploadingQr(false)
     }
   }
 
@@ -329,24 +361,67 @@ export function EditProfileModal({
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="edit-qr-code" className={styles.label}>
-              QR Code Image URL
+            <label className={styles.label}>
+              Mã QR Thanh toán
             </label>
-            <input
-              id="edit-qr-code"
-              type="url"
-              value={qrCodeUrl}
-              onChange={e => setQrCodeUrl(e.target.value)}
-              className={styles.input}
-              placeholder="Paste VietQR image URL..."
-            />
+            <div className={styles.qrUploadArea}>
+              {qrCodeUrl && !qrImgError ? (
+                <div className={styles.qrPreviewWrapper}>
+                  <img
+                    src={qrCodeUrl}
+                    alt="QR Code"
+                    className={styles.qrPreview}
+                    onError={() => setQrImgError(true)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.qrRemoveBtn}
+                    onClick={() => { setQrCodeUrl(''); setQrImgError(false) }}
+                    title="Xóa ảnh QR"
+                  >×</button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.qrUploadBtn}
+                  onClick={() => qrFileInputRef.current?.click()}
+                  disabled={uploadingQr}
+                >
+                  {uploadingQr ? (
+                    <span>Đang tải lên...</span>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                      <span>Tải ảnh QR lên</span>
+                    </>
+                  )}
+                </button>
+              )}
+              <input
+                ref={qrFileInputRef}
+                type="file"
+                accept="image/*"
+                className={styles.fileInput}
+                onChange={handleQrFileChange}
+              />
+              {qrCodeUrl && !qrImgError && (
+                <button
+                  type="button"
+                  className={styles.qrChangeBtn}
+                  onClick={() => qrFileInputRef.current?.click()}
+                  disabled={uploadingQr}
+                >
+                  {uploadingQr ? 'Đang tải...' : 'Đổi ảnh QR'}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className={styles.actions}>
             <button type="button" onClick={onClose} className={styles.cancelBtn}>
               Cancel
             </button>
-            <button type="submit" disabled={loading || uploadingAvatar} className={styles.saveBtn}>
+            <button type="submit" disabled={loading || uploadingAvatar || uploadingQr} className={styles.saveBtn}>
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
