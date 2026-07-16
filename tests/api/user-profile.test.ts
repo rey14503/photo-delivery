@@ -74,14 +74,14 @@ describe('PUT /api/user/profile', () => {
   })
 
   describe('GET /api/user/profile', () => {
-    it('returns 200 and live profile with OWNER role for root account', async () => {
+    it('returns 200 and live profile with ADMIN role for admin user', async () => {
       vi.mocked(getServerSession).mockResolvedValue({
         user: { id: 'user_1' },
       } as any)
       vi.mocked(prisma.user.findUnique).mockResolvedValue({
         name: 'Khoa Nguyễn',
         studioName: 'Rey',
-        role: 'OWNER',
+        role: 'ADMIN',
         avatarUrl: 'https://example.com/avatar.jpg',
         email: 'khoanguyenfotk5@gmail.com',
       } as any)

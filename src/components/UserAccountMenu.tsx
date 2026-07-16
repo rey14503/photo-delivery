@@ -30,6 +30,7 @@ export function UserAccountMenu({
   const [studioName, setStudioName] = useState(initialStudioName || '')
   const [role, setRole] = useState<'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl || null)
+  const [imgError, setImgError] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -78,6 +79,7 @@ export function UserAccountMenu({
     setStudioName(updated.studioName)
     setRole(updated.role)
     setAvatarUrl(updated.avatarUrl)
+    setImgError(false)
   }
 
   return (
@@ -89,8 +91,8 @@ export function UserAccountMenu({
         aria-label="open user menu"
       >
         <div className={styles.triggerAvatar}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" className={styles.triggerAvatarImg} />
+          {avatarUrl && !imgError ? (
+            <img src={avatarUrl} alt="" className={styles.triggerAvatarImg} onError={() => setImgError(true)} />
           ) : (
             <span>{initials}</span>
           )}
@@ -111,8 +113,8 @@ export function UserAccountMenu({
                 }}
                 title="Update profile picture"
               >
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className={styles.popoverAvatarImg} />
+                {avatarUrl && !imgError ? (
+                  <img src={avatarUrl} alt="" className={styles.popoverAvatarImg} onError={() => setImgError(true)} />
                 ) : (
                   <span>{initials}</span>
                 )}
@@ -160,7 +162,7 @@ export function UserAccountMenu({
               <GearOutlineIcon size={18} className={styles.menuIconSvg} />
               <span>Edit Profile / Studio</span>
             </button>
-            {role === 'OWNER' && (
+            {(role === 'OWNER' || role === 'ADMIN') && (
               <button
                 type="button"
                 className={styles.menuItem}

@@ -51,11 +51,10 @@ export function AvatarCropper({
     setProcessing(true)
     try {
       const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, 0)
-      await onCropComplete(croppedBlob)
       onClose()
+      await onCropComplete(croppedBlob)
     } catch (err) {
       console.error('Failed to crop image:', err)
-    } finally {
       setProcessing(false)
     }
   }

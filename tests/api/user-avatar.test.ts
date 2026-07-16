@@ -75,4 +75,25 @@ describe('POST /api/user/avatar', () => {
       select: { avatarUrl: true },
     })
   })
+
+  it('falls back cleanly when uploadToBlob returns null (e.g., storage suspended)', async () => {
+    vi.mocked(getServerSession).mockResolvedValue({
+      user: { id: 'user_1', email: 'test@example.com' },
+    } as any)
+    vi.mocked(uploadToBlob).mockResolvedValue(null)
+    vi.mocked(prisma.user.update).mockImplementation(async ({ data }: any) => ({
+      id: 'user_1',
+      avatarUrl: data.avatarUrl,
+    }))
+
+    const formData = new FormData()
+    formData.append('file', new Blob(['test image buffer'], { type: 'image/jpeg' }), 'avatar.jpg')
+    const req = new Request('http://localhost/api/user/avatar', { method: 'POST', body: formData })
+    const res = await POST(req)
+    const data = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(data.avatarUrl).toBeDefined()
+    expect(prisma.user.update).toHaveBeenCalled()
+  })
 })

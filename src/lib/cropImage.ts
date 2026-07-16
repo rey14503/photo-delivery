@@ -70,8 +70,18 @@ export async function getCroppedImg(
 
   ctx.putImageData(data, 0, 0)
 
+  const targetSize = Math.min(300, pixelCrop.width)
+  const outputCanvas = document.createElement('canvas')
+  outputCanvas.width = targetSize
+  outputCanvas.height = targetSize
+  const outputCtx = outputCanvas.getContext('2d')
+  if (outputCtx) {
+    outputCtx.drawImage(canvas, 0, 0, targetSize, targetSize)
+  }
+  const finalCanvas = outputCtx ? outputCanvas : canvas
+
   return new Promise((resolve, reject) => {
-    canvas.toBlob(
+    finalCanvas.toBlob(
       (blob) => {
         if (!blob) {
           reject(new Error('Canvas is empty'))
@@ -80,7 +90,7 @@ export async function getCroppedImg(
         resolve(blob)
       },
       'image/jpeg',
-      0.92
+      0.85
     )
   })
 }

@@ -206,6 +206,8 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .cancelBtn:hover {
@@ -221,6 +223,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .saveBtn:hover:not(:disabled) {
@@ -230,4 +234,9 @@
 .saveBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.avatarContainer[data-uploading="true"] .avatarOverlay {
+  opacity: 1 !important;
+  background: rgba(0, 0, 0, 0.8) !important;
 }

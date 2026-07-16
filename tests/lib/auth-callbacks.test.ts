@@ -44,19 +44,19 @@ describe('upsertUserFromGoogleAccount', () => {
     expect(createArgs.data.encryptedRefreshToken).not.toBe('raw-refresh-token')
   })
 
-  it('assigns ADMIN role when the email matches ADMIN_EMAIL', async () => {
+  it('assigns OWNER role when the email matches ADMIN_EMAIL', async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue(null)
     vi.mocked(prisma.user.create).mockResolvedValue({
       id: 'user_2',
       email: 'admin@example.com',
-      role: 'ADMIN',
+      role: 'OWNER',
     } as never)
 
     const result = await upsertUserFromGoogleAccount('admin@example.com', 'Admin', {
       refresh_token: 'raw-token',
     })
 
-    expect(result.role).toBe('ADMIN')
+    expect(result.role).toBe('OWNER')
   })
 
   it('keeps the existing refresh token when the account has none (repeat login)', async () => {

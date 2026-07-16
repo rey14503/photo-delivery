@@ -27,6 +27,7 @@ export function ManageTeamModal({
   const [users, setUsers] = useState<TeamUser[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
   const [mounted, setMounted] = useState(false)
   const [backdropMouseDown, setBackdropMouseDown] = useState(false)
 
@@ -124,13 +125,18 @@ export function ManageTeamModal({
               const initials = u.name
                 ? u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
                 : 'BK'
-              const isOwner = u.role === 'OWNER'
+              const isOwner = u.role === 'OWNER' || u.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL || u.email === 'khoanguyenfotk5@gmail.com'
 
               return (
                 <div key={u.id} className={styles.userCard}>
                   <div className={styles.userInfo}>
-                    {u.avatarUrl ? (
-                      <img src={u.avatarUrl} alt={u.name || 'User'} className={styles.avatar} />
+                    {u.avatarUrl && !imgErrors[u.id] ? (
+                      <img
+                        src={u.avatarUrl}
+                        alt=""
+                        className={styles.avatar}
+                        onError={() => setImgErrors(prev => ({ ...prev, [u.id]: true }))}
+                      />
                     ) : (
                       <div className={styles.avatar}>{initials}</div>
                     )}

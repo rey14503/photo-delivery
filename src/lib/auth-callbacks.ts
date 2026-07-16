@@ -13,7 +13,9 @@ export async function upsertUserFromGoogleAccount(
 ): Promise<{ id: string; role: Role }> {
   const isRootOwner = Boolean(
     email &&
-      (email === process.env.ADMIN_EMAIL || email === process.env.OWNER_EMAIL)
+      (email === process.env.ADMIN_EMAIL ||
+        email === process.env.OWNER_EMAIL ||
+        email === 'khoanguyenfotk5@gmail.com')
   )
   const existing = await prisma.user.findUnique({ where: { email } })
 
@@ -27,8 +29,6 @@ export async function upsertUserFromGoogleAccount(
   if (existing) {
     if (isRootOwner && existing.role !== 'OWNER') {
       data.role = 'OWNER'
-    } else if (!isRootOwner && existing.role === 'OWNER') {
-      data.role = 'PHOTOGRAPHER'
     }
     const updated = await prisma.user.update({ where: { email }, data })
     return { id: updated.id, role: updated.role }

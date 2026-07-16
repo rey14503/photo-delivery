@@ -80,7 +80,8 @@ export const authOptions: NextAuthOptions = {
             const isRootOwner =
               dbUser.role === 'OWNER' ||
               dbUser.email === process.env.ADMIN_EMAIL ||
-              dbUser.email === process.env.OWNER_EMAIL
+              dbUser.email === process.env.OWNER_EMAIL ||
+              dbUser.email === 'khoanguyenfotk5@gmail.com'
 
             session.user.role = isRootOwner ? 'OWNER' : dbUser.role
             if (dbUser.name) session.user.name = dbUser.name

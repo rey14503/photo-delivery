@@ -153,6 +153,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .cancelBtn:hover:not(:disabled) {
@@ -163,7 +165,7 @@
   background: #0866ff;
   border: none;
   color: #ffffff;
-  padding: 8px 28px;
+  padding: 8px 24px;
   border-radius: 6px;
   font-size: 0.92rem;
   font-weight: 600;
@@ -171,7 +173,11 @@
   transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-width: 104px;
 }
 
 .applyBtn:hover:not(:disabled) {

@@ -22,7 +22,8 @@ export async function GET() {
     const isRootOwner =
       user.role === 'OWNER' ||
       user.email === process.env.ADMIN_EMAIL ||
-      user.email === process.env.OWNER_EMAIL
+      user.email === process.env.OWNER_EMAIL ||
+      user.email === 'khoanguyenfotk5@gmail.com'
 
     return NextResponse.json({
       name: user.name,
@@ -75,7 +76,8 @@ export async function PUT(req: Request) {
     const isRootOwner =
       updated.role === 'OWNER' ||
       updated.email === process.env.ADMIN_EMAIL ||
-      updated.email === process.env.OWNER_EMAIL
+      updated.email === process.env.OWNER_EMAIL ||
+      updated.email === 'khoanguyenfotk5@gmail.com'
 
     return NextResponse.json({
       name: updated.name,

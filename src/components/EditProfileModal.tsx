@@ -26,6 +26,7 @@ export function EditProfileModal({
   const [studioName, setStudioName] = useState(initialStudioName || '')
   const [role, setRole] = useState<'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'>(initialRole || 'PHOTOGRAPHER')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl || null)
+  const [imgError, setImgError] = useState(false)
   const [loading, setLoading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null)
@@ -76,6 +77,7 @@ export function EditProfileModal({
         const data = await res.json()
         if (data.avatarUrl) {
           setAvatarUrl(data.avatarUrl)
+          setImgError(false)
           onSaveSuccess({
             name,
             studioName,
@@ -149,11 +151,17 @@ export function EditProfileModal({
             <div className={styles.avatarWrapper}>
               <div
                 className={styles.avatarContainer}
+                data-uploading={uploadingAvatar ? 'true' : 'false'}
                 onClick={() => fileInputRef.current?.click()}
                 title="Update profile picture"
               >
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className={styles.avatarImage} />
+                {avatarUrl && !imgError ? (
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    className={styles.avatarImage}
+                    onError={() => setImgError(true)}
+                  />
                 ) : (
                   <span className={styles.avatarInitials}>{initials}</span>
                 )}

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--disable-warning=DEP0108' next dev --turbo",
+    "dev": "rm -rf .next && NODE_OPTIONS='--disable-warning=DEP0108' next dev --turbo",
     "build": "NODE_OPTIONS='--disable-warning=DEP0108' next build",
     "start": "NODE_OPTIONS='--disable-warning=DEP0108' next start",
     "lint": "eslint .",

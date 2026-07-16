@@ -32,9 +32,19 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(arrayBuffer)
     const blobPath = `avatars/${session.user.id}/avatar-${Date.now()}.jpg`
 
-    const avatarUrl = await uploadToBlob(blobPath, buffer, fileType)
+    let avatarUrl = await uploadToBlob(blobPath, buffer, fileType)
     if (!avatarUrl) {
-      return NextResponse.json({ error: 'Image storage is temporarily unavailable. Please try again later.' }, { status: 503 })
+      try {
+        const fs = await import('fs/promises')
+        const path = await import('path')
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars')
+        await fs.mkdir(uploadDir, { recursive: true })
+        const filename = `avatar-${session.user.id}-${Date.now()}.jpg`
+        await fs.writeFile(path.join(uploadDir, filename), buffer)
+        avatarUrl = `/uploads/avatars/${filename}`
+      } catch {
+        avatarUrl = `data:${fileType};base64,${buffer.toString('base64')}`
+      }
     }
 
     const updated = await prisma.user.update({

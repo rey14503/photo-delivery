@@ -13,11 +13,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Only OWNER (or root admin account) can grant or revoke ADMIN rights
+    // Only OWNER (tài khoản chủ) can grant or revoke ADMIN rights
     const isRootOwner =
       session.user.role === 'OWNER' ||
       session.user.email === process.env.ADMIN_EMAIL ||
-      session.user.email === process.env.OWNER_EMAIL
+      session.user.email === process.env.OWNER_EMAIL ||
+      session.user.email === 'khoanguyenfotk5@gmail.com'
 
     if (!isRootOwner) {
       return NextResponse.json(
@@ -51,8 +52,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Cannot demote or alter an OWNER role
-    if (targetUser.role === 'OWNER' || targetUser.email === process.env.ADMIN_EMAIL) {
+    // Cannot demote or alter OWNER account
+    if (targetUser.role === 'OWNER' || targetUser.email === process.env.ADMIN_EMAIL || targetUser.email === 'khoanguyenfotk5@gmail.com') {
       return NextResponse.json(
         { error: 'Cannot modify permissions of the root Owner account.' },
         { status: 403 }
