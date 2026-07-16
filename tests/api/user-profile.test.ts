@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { PUT } from '@/app/api/user/profile/route'
+import { GET, PUT } from '@/app/api/user/profile/route'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 
@@ -14,6 +14,7 @@ vi.mock('next-auth/next', () => ({
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     user: {
+      findUnique: vi.fn(),
       update: vi.fn(),
     },
   },
@@ -68,7 +69,29 @@ describe('PUT /api/user/profile', () => {
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: 'user_1' },
       data: { name: 'Khoa Nguyễn', studioName: 'Khoa Studio PRO' },
-      select: { name: true, studioName: true, role: true, avatarUrl: true },
+      select: { name: true, studioName: true, role: true, avatarUrl: true, email: true },
+    })
+  })
+
+  describe('GET /api/user/profile', () => {
+    it('returns 200 and live profile with OWNER role for root account', async () => {
+      vi.mocked(getServerSession).mockResolvedValue({
+        user: { id: 'user_1' },
+      } as any)
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({
+        name: 'Khoa Nguyễn',
+        studioName: 'Rey',
+        role: 'OWNER',
+        avatarUrl: 'https://example.com/avatar.jpg',
+        email: 'khoanguyenfotk5@gmail.com',
+      } as any)
+
+      const res = await GET()
+      const data = await res.json()
+
+      expect(res.status).toBe(200)
+      expect(data.role).toBe('OWNER')
+      expect(data.studioName).toBe('Rey')
     })
   })
 })

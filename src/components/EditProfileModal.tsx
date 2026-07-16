@@ -36,6 +36,17 @@ export function EditProfileModal({
 
   useEffect(() => {
     setMounted(true)
+    fetch('/api/user/profile')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          if (data.name) setName(data.name)
+          if (data.studioName !== undefined) setStudioName(data.studioName)
+          if (data.role) setRole(data.role)
+          if (data.avatarUrl !== undefined) setAvatarUrl(data.avatarUrl)
+        }
+      })
+      .catch(err => console.error('Failed to fetch latest profile:', err))
   }, [])
 
   if (!mounted || typeof document === 'undefined') return null

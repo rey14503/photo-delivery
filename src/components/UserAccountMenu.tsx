@@ -36,20 +36,23 @@ export function UserAccountMenu({
 
   useEffect(() => {
     setMounted(true)
-    setName(initialUserName || '')
-  }, [initialUserName])
-
-  useEffect(() => {
-    setStudioName(initialStudioName || '')
-  }, [initialStudioName])
-
-  useEffect(() => {
-    setAvatarUrl(initialAvatarUrl || null)
-  }, [initialAvatarUrl])
-
-  useEffect(() => {
+    if (initialUserName) setName(initialUserName)
+    if (initialStudioName) setStudioName(initialStudioName)
+    if (initialAvatarUrl) setAvatarUrl(initialAvatarUrl)
     if (initialRole) setRole(initialRole)
-  }, [initialRole])
+
+    fetch('/api/user/profile')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          if (data.name) setName(data.name)
+          if (data.studioName !== undefined) setStudioName(data.studioName)
+          if (data.role) setRole(data.role)
+          if (data.avatarUrl !== undefined) setAvatarUrl(data.avatarUrl)
+        }
+      })
+      .catch(err => console.error('Failed to fetch latest profile in UserAccountMenu:', err))
+  }, [initialUserName, initialStudioName, initialAvatarUrl, initialRole])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

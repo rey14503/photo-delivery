@@ -64,12 +64,32 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user && token.id) {
         session.user.id = token.id as string
-        session.user.role = token.role as 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'
         session.user.name = token.name as string | null | undefined
         session.user.avatarUrl = token.avatarUrl as string | null | undefined
         session.user.studioName = token.studioName as string | null | undefined
+        session.user.role = token.role as 'OWNER' | 'ADMIN' | 'PHOTOGRAPHER'
+
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true, name: true, studioName: true, avatarUrl: true, email: true },
+          })
+          if (dbUser) {
+            const isRootOwner =
+              dbUser.role === 'OWNER' ||
+              dbUser.email === process.env.ADMIN_EMAIL ||
+              dbUser.email === process.env.OWNER_EMAIL
+
+            session.user.role = isRootOwner ? 'OWNER' : dbUser.role
+            if (dbUser.name) session.user.name = dbUser.name
+            session.user.studioName = dbUser.studioName
+            session.user.avatarUrl = dbUser.avatarUrl
+          }
+        } catch {
+          // Fallback to token fields if DB check fails
+        }
       }
       return session
     },
