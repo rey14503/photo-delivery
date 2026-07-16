@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         await fs.mkdir(uploadDir, { recursive: true })
         const filename = `qr-${session.user.id}-${Date.now()}.${ext}`
         await fs.writeFile(path.join(uploadDir, filename), buffer)
-        qrCodeUrl = `/uploads/qrcodes/${filename}`
+        qrCodeUrl = `/api/uploads/qrcodes/${filename}`
       } catch {
         qrCodeUrl = `data:${fileType};base64,${buffer.toString('base64')}`
       }

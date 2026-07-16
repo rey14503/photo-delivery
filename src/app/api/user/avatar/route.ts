@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         await fs.mkdir(uploadDir, { recursive: true })
         const filename = `avatar-${session.user.id}-${Date.now()}.jpg`
         await fs.writeFile(path.join(uploadDir, filename), buffer)
-        avatarUrl = `/uploads/avatars/${filename}`
+        avatarUrl = `/api/uploads/avatars/${filename}`
       } catch {
         avatarUrl = `data:${fileType};base64,${buffer.toString('base64')}`
       }
