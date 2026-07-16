@@ -3,6 +3,29 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+const profileSelect = {
+  name: true,
+  studioName: true,
+  role: true,
+  avatarUrl: true,
+  email: true,
+  phone: true,
+  facebookUrl: true,
+  bankName: true,
+  bankAccountNumber: true,
+  bankAccountName: true,
+  qrCodeUrl: true,
+} as const
+
+const optionalStringFields = [
+  'phone',
+  'facebookUrl',
+  'bankName',
+  'bankAccountNumber',
+  'bankAccountName',
+  'qrCodeUrl',
+] as const
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -12,7 +35,7 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { name: true, studioName: true, role: true, avatarUrl: true, email: true },
+      select: profileSelect,
     })
 
     if (!user) {
@@ -31,6 +54,12 @@ export async function GET() {
       role: isRootOwner ? 'OWNER' : user.role,
       avatarUrl: user.avatarUrl,
       email: user.email,
+      phone: user.phone,
+      facebookUrl: user.facebookUrl,
+      bankName: user.bankName,
+      bankAccountNumber: user.bankAccountNumber,
+      bankAccountName: user.bankAccountName,
+      qrCodeUrl: user.qrCodeUrl,
     })
   } catch (err) {
     console.error('GET /api/user/profile error:', err)
@@ -64,13 +93,21 @@ export async function PUT(req: Request) {
       )
     }
 
-    const name = (body as Record<string, string>).name.trim()
-    const studioName = (body as Record<string, string>).studioName.trim()
+    const b = body as Record<string, unknown>
+    const name = (b.name as string).trim()
+    const studioName = (b.studioName as string).trim()
+
+    const data: Record<string, string> = { name, studioName }
+    for (const field of optionalStringFields) {
+      if (typeof b[field] === 'string') {
+        data[field] = (b[field] as string).trim()
+      }
+    }
 
     const updated = await prisma.user.update({
       where: { id: session.user.id },
-      data: { name, studioName },
-      select: { name: true, studioName: true, role: true, avatarUrl: true, email: true },
+      data,
+      select: profileSelect,
     })
 
     const isRootOwner =
@@ -84,6 +121,12 @@ export async function PUT(req: Request) {
       studioName: updated.studioName,
       role: isRootOwner ? 'OWNER' : updated.role,
       avatarUrl: updated.avatarUrl,
+      phone: updated.phone,
+      facebookUrl: updated.facebookUrl,
+      bankName: updated.bankName,
+      bankAccountNumber: updated.bankAccountNumber,
+      bankAccountName: updated.bankAccountName,
+      qrCodeUrl: updated.qrCodeUrl,
     })
   } catch (err) {
     console.error('PUT /api/user/profile error:', err)

@@ -20,6 +20,12 @@ model User {
   role                  Role     @default(PHOTOGRAPHER)
   avatarUrl             String?
   studioName            String?
+  phone                 String?
+  facebookUrl           String?
+  bankName              String?
+  bankAccountNumber     String?
+  bankAccountName       String?
+  qrCodeUrl             String?
   encryptedRefreshToken String?
   driveRootFolderId     String?
   createdAt             DateTime @default(now())
