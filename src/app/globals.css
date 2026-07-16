@@ -55,9 +55,9 @@
   font-family: var(--font-sans);
 }
 
-.light {
+:root.light, html.light, body.light, .light, [data-theme="light"] {
   --bg-base: #f7f7f8;
-    --bg-surface: #ffffff;
+  --bg-surface: #ffffff;
     --bg-surface-hover: #f0f0f2;
     --card-bg: #ffffff;
     --border-color: #e4e4e7;

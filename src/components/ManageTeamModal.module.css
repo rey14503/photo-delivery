@@ -204,3 +204,29 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+:global(.light) .modal,
+:global([data-theme="light"]) .modal {
+  background: #ffffff !important;
+  border-color: #e4e4e7 !important;
+}
+
+:global(.light) .userCard,
+:global([data-theme="light"]) .userCard {
+  background: #f8f9fa !important;
+  border-color: #e4e4e7 !important;
+}
+
+:global(.light) .userName,
+:global([data-theme="light"]) .userName,
+:global(.light) .title,
+:global([data-theme="light"]) .title {
+  color: #18181b !important;
+}
+
+:global(.light) .roleSelect,
+:global([data-theme="light"]) .roleSelect {
+  background: #ffffff !important;
+  color: #18181b !important;
+  border-color: #d4d4d8 !important;
+}

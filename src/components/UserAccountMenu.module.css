@@ -319,3 +319,22 @@
 .themeToggleBtnActive:hover {
   background: var(--accent-hover, #e64a19);
 }
+
+:global(.light) .popover,
+:global([data-theme="light"]) .popover {
+  background: #ffffff !important;
+  border-color: #e4e4e7 !important;
+}
+
+:global(.light) .headerBox,
+:global([data-theme="light"]) .headerBox {
+  background: #f8f9fa !important;
+  border-color: #e4e4e7 !important;
+}
+
+:global(.light) .userName,
+:global([data-theme="light"]) .userName,
+:global(.light) .menuItem,
+:global([data-theme="light"]) .menuItem {
+  color: #18181b !important;
+}

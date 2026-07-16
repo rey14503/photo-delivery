@@ -240,3 +240,23 @@
   opacity: 1 !important;
   background: rgba(0, 0, 0, 0.8) !important;
 }
+
+:global(.light) .modal,
+:global([data-theme="light"]) .modal {
+  background: #ffffff !important;
+  border-color: #e4e4e7 !important;
+}
+
+:global(.light) .title,
+:global([data-theme="light"]) .title,
+:global(.light) .label,
+:global([data-theme="light"]) .label {
+  color: #18181b !important;
+}
+
+:global(.light) .input,
+:global([data-theme="light"]) .input {
+  background: #f8f9fa !important;
+  color: #18181b !important;
+  border-color: #d4d4d8 !important;
+}
